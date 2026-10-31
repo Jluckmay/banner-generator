@@ -43,6 +43,8 @@ def chat(provider: str, api_key: str, model: str | None, system: str, user: str)
     if not cfg:
         raise LLMError("Provedor desconhecido.")
     model = model or cfg["default_model"]
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,79}", model) or ".." in model or model.startswith("/") or (provider == "google" and "/" in model):
+        raise LLMError("Nome de modelo inválido.")
     try:
         if provider == "google":
             r = requests.post(

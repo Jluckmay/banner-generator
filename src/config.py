@@ -14,21 +14,13 @@ MAX_IMAGES_TOTAL = 40
 MAX_DOC_CHARS = 120_000
 LATEX_TIMEOUT_S = 150
 
-# Tamanho do papel -> (opção tikzposter, tamanho da fonte base)
-PAPER_SIZES: Dict[str, Dict[str, str]] = {
-    "a0": {"paper": "a0paper", "font": "25pt"},
-    "a1": {"paper": "a1paper", "font": "20pt"},
-    "a2": {"paper": "a2paper", "font": "17pt"},
-    "a3": {"paper": "a3paper", "font": "12pt"},
-}
-
-# Dimensões (largura, altura) em cm, retrato. Usado pelos templates baseados em `article`.
-PAPER_DIMS_CM: Dict[str, tuple] = {
-    "60x90": (60.0, 90.0),
-    "a0": (84.1, 118.9),
-    "a1": (59.4, 84.1),
-    "a2": (42.0, 59.4),
-    "a3": (29.7, 42.0),
+# 5 dimensões mais usadas (largura x altura em cm, retrato) e fonte base do tikzposter.
+POSTER_SIZES: Dict[str, Dict[str, Any]] = {
+    "60x90": {"cm": (60.0, 90.0), "font": "20pt"},
+    "90x120": {"cm": (90.0, 120.0), "font": "25pt"},
+    "a0": {"cm": (84.1, 118.9), "font": "25pt"},
+    "a1": {"cm": (59.4, 84.1), "font": "20pt"},
+    "a2": {"cm": (42.0, 59.4), "font": "17pt"},
 }
 
 # Limites de logotipos por região

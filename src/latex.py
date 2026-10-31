@@ -8,11 +8,12 @@ import re
 import shutil
 import subprocess
 import tempfile
+import time
 import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from .config import LATEX_TIMEOUT_S, PAPER_SIZES
+from .config import LATEX_TIMEOUT_S, POSTER_SIZES
 from .i18n import labels_for
 from .templates import TEMPLATES
 
@@ -53,7 +54,7 @@ _MATH_OK = re.compile(r"^[A-Za-z0-9\s+\-*/=<>()\[\]{}^_.,;:|'!\\]*$")
 
 
 def _safe_math(expr: str) -> bool:
-    if not expr or len(expr) > 300 or not _MATH_OK.match(expr):
+    if not expr or len(expr) > 300 or not _MATH_OK.match(expr) or "^^" in expr:
         return False
     return all(c in _MATH_CMDS for c in re.findall(r"\\([A-Za-z]+)", expr)) and "\\\\" not in expr
 
@@ -197,7 +198,10 @@ def build_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
         return build_article_tex(poster, images)
     labels = labels_for(poster["language"])
     tpl = TEMPLATES[poster["template"]]
-    paper = PAPER_SIZES[poster["paper"]]
+    paper = POSTER_SIZES[poster["paper"]]
+    pw, ph = paper["cm"]
+    if poster["orientation"] == "landscape":
+        pw, ph = ph, pw
     c1, c2, c3 = tpl["colors"]
     if poster.get("accent"):
         c1 = c2 = poster["accent"]
@@ -249,7 +253,8 @@ def build_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
     authors = escape_latex(poster["authors"]).replace("\n", ", ")
     institute = "\\\\".join(escape_latex(ln.strip()) for ln in poster["affiliations"].split("\n") if ln.strip())
 
-    return f"""\\documentclass[{poster.get('_font') or paper['font']},{paper['paper']},{poster['orientation']},margin=20mm,innermargin=12mm,blockverticalspace=12mm,colspace=12mm,subcolspace=8mm]{{tikzposter}}
+    return f"""\\documentclass[{poster.get('_font') or paper['font']},a0paper,margin=20mm,innermargin=12mm,blockverticalspace=12mm,colspace=12mm,subcolspace=8mm]{{tikzposter}}
+\\geometry{{paperwidth={pw * 10:.0f}mm,paperheight={ph * 10:.0f}mm,margin=20mm}}
 \\usepackage[T1]{{fontenc}}
 \\usepackage[utf8]{{inputenc}}
 \\usepackage[{labels['babel']}]{{babel}}
@@ -315,6 +320,7 @@ def compile_tex(tex: str, build_dir: Path) -> Tuple[bytes, str]:
     (build_dir / "poster.pdf").unlink(missing_ok=True)
     log = ""
     env = {k: v for k, v in os.environ.items() if not k.lower().endswith(("_key", "_token", "_secret"))}
+    env.update({"openin_any": "p", "openout_any": "p", "shell_escape": "f"})  # defesa em profundidade
     for _ in range(2):
         proc = subprocess.run(
             [exe, "-interaction=nonstopmode", "-no-shell-escape", "poster.tex"],
@@ -331,6 +337,7 @@ def compile_tex(tex: str, build_dir: Path) -> Tuple[bytes, str]:
 
 
 FONT_STEPS = ["12pt", "14pt", "17pt", "20pt", "25pt"]
+FIT_DEADLINE_S = 120  # tempo total máximo de tentativas de ajuste
 
 
 def content_overflows(pdf: bytes) -> bool:
@@ -355,21 +362,22 @@ def fit_compile(poster: Dict[str, Any], images: Dict[str, str], build_dir: Path)
     """Compila reduzindo a fonte base até o conteúdo caber. Retorna (pdf, tex, overflow)."""
     from pypdf import PdfReader
 
+    t0 = time.monotonic()
     pdf, tex, over = b"", "", True
     if TEMPLATES[poster["template"]].get("engine") == "article":
         for fit in ARTICLE_FIT_STEPS:  # transbordo = conteúdo vai para 2ª página
             tex = build_tex({**poster, "_fit": fit}, images)
             pdf, _ = compile_tex(tex, build_dir)
             over = len(PdfReader(io.BytesIO(pdf)).pages) > 1
-            if not over:
+            if not over or time.monotonic() - t0 > FIT_DEADLINE_S:
                 break
         return pdf, tex, over
-    start = FONT_STEPS.index(PAPER_SIZES[poster["paper"]]["font"])
+    start = FONT_STEPS.index(POSTER_SIZES[poster["paper"]]["font"])
     for font in FONT_STEPS[start::-1]:
         tex = build_tex({**poster, "_font": font}, images)
         pdf, _ = compile_tex(tex, build_dir)
         over = content_overflows(pdf)
-        if not over:
+        if not over or time.monotonic() - t0 > FIT_DEADLINE_S:
             break
     return pdf, tex, over
 

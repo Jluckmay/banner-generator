@@ -261,7 +261,7 @@ function thumbHTML(img, withCaption, kind, idx){
 const slots = () => CFG.templates[state.template].logos;
 function applyTemplateOptions(reset){
   const tp = CFG.templates[state.template], prev = $("#paper").value;
-  $("#paper").innerHTML = tp.papers.map(p => `<option value="${p}">${p.includes("x") ? p.replace("x"," × ")+" cm" : p.toUpperCase()}</option>`).join("");
+  $("#paper").innerHTML = tp.papers.map(p => `<option value="${p}">${(([w,h]) => p.startsWith("a") ? p.toUpperCase()+` (${w} × ${h} cm)` : `${w} × ${h} cm`)(CFG.sizes[p])}</option>`).join("");
   $("#paper").value = (!reset && tp.papers.includes(prev)) ? prev : tp.default_paper;
   if(reset) $("#columns").value = state.template==="dcc" ? "2" : $("#columns").value;
   logosH.length = Math.min(logosH.length, slots().header);

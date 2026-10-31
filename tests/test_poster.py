@@ -1,4 +1,4 @@
-﻿"""Testes do gerador de pôsteres."""
+"""Testes do gerador de pôsteres."""
 
 import io
 import json
@@ -162,7 +162,7 @@ def test_build_tex_has_babel_and_columns():
 
 @pytest.mark.skipif(not shutil.which("pdflatex"), reason="pdflatex ausente")
 def test_fit_reduces_font_and_flags_overflow(client):
-    big = {"title": "T", "paper": "a3", "columns": 1, "sections": [{"id": f"c{i}", "title": "S", "content": "palavra " * 2500} for i in range(6)]}
+    big = {"title": "T", "paper": "a2", "columns": 1, "sections": [{"id": f"c{i}", "title": "S", "content": "palavra " * 2500} for i in range(18)]}
     r = client.post("/api/generate", data={"data": json.dumps(big)})
     assert r.status_code == 200 and r.headers.get("X-Poster-Overflow") == "1"
     mid = {"title": "T", "paper": "a2", "columns": 2, "sections": [{"id": "abstract", "content": ("palavra " * 120 + "\n\n") * 6}]}
@@ -173,7 +173,7 @@ def test_fit_reduces_font_and_flags_overflow(client):
 def test_logo_limits_per_template():
     p = normalize_poster({"template": "dcc", "logos_header": list("abc"), "logos_footer": list("abcdefg"), "sections": []})
     assert len(p["logos_header"]) == 2 and len(p["logos_footer"]) == 5 and p["paper"] == "60x90"
-    c = normalize_poster({"template": "classic", "logos_header": list("abc"), "logos_footer": ["x"], "paper": "60x90", "sections": []})
+    c = normalize_poster({"template": "classic", "logos_header": list("abc"), "logos_footer": ["x"], "paper": "a3", "sections": []})
     assert len(c["logos_header"]) == 2 and c["logos_footer"] == [] and c["paper"] == "a0"
 
 
@@ -198,3 +198,94 @@ def test_dcc_template_with_header_and_footer_logos(client, paper):
     import zipfile
     with zipfile.ZipFile(io.BytesIO(z.data)) as zf:
         assert "poster.tex" in zf.namelist() and sum(n.endswith((".png", ".jpg")) for n in zf.namelist()) == 8
+
+
+SIZES_CM = {"60x90": (60, 90), "90x120": (90, 120), "a0": (84.1, 118.9), "a1": (59.4, 84.1), "a2": (42, 59.4)}
+
+
+def test_five_sizes_exposed(client):
+    j = client.get("/api/config").get_json()
+    assert j["papers"] == list(SIZES_CM) and len(j["papers"]) == 5
+    for t in j["templates"].values():
+        assert t["papers"] == list(SIZES_CM)
+
+
+@pytest.mark.skipif(not shutil.which("pdflatex"), reason="pdflatex ausente")
+@pytest.mark.parametrize("tpl", ["classic", "dcc"])
+@pytest.mark.parametrize("paper", list(SIZES_CM))
+@pytest.mark.parametrize("orient", ["portrait", "landscape"])
+def test_all_sizes_have_right_page_dimensions(client, tpl, paper, orient):
+    from pypdf import PdfReader
+    d = {"title": "T", "template": tpl, "paper": paper, "orientation": orient, "columns": 2,
+         "sections": [{"id": "abstract", "content": "texto " * 60}]}
+    r = client.post("/api/generate", data={"data": json.dumps(d)})
+    assert r.status_code == 200 and not r.headers.get("X-Poster-Overflow")
+    page = PdfReader(io.BytesIO(r.data)).pages[0]
+    w_cm, h_cm = float(page.mediabox.width) / 72 * 2.54, float(page.mediabox.height) / 72 * 2.54
+    ew, eh = SIZES_CM[paper]
+    if orient == "landscape":
+        ew, eh = eh, ew
+    assert abs(w_cm - ew) < 0.6 and abs(h_cm - eh) < 0.6
+
+
+# ---------------- segurança ----------------
+def test_math_rejects_caret_notation_and_dangerous_cmds():
+    assert "textasciicircum" in text_to_latex(r"$^^5cinput{x}$") and "$^^" not in text_to_latex(r"$^^5cinput{x}$")
+    assert "$\\write" not in text_to_latex(r"$\write18{id}$")
+    assert "\\text{" not in text_to_latex(r"$\text{\input{x}}$")
+
+
+@pytest.mark.skipif(not shutil.which("pdflatex"), reason="pdflatex ausente")
+def test_latex_injection_does_not_read_files(client, tmp_path, monkeypatch):
+    secret = tmp_path / "secret.txt"
+    secret.write_text("TOPSECRETVALUE")
+    payload = rf"\input{{{secret.as_posix()}}} \immediate\write18{{echo pwn}} $^^5cinput{{{secret.as_posix()}}}$ ^^5cinput"
+    d = {"title": payload, "authors": payload, "affiliations": payload, "email": payload, "url": payload,
+         "sections": [{"id": "abstract", "title": payload, "content": payload,
+                       "images": []}, {"id": "references", "content": payload}]}
+    for tpl in ("classic", "dcc"):
+        r = client.post("/api/generate", data={"data": json.dumps({**d, "template": tpl})})
+        assert r.status_code == 200
+        from pypdf import PdfReader
+        text = "".join(p.extract_text() for p in PdfReader(io.BytesIO(r.data)).pages)
+        assert "TOPSECRETVALUE" not in text  # o payload aparece apenas como texto literal
+
+
+def test_security_headers(client):
+    r = client.get("/")
+    assert "default-src 'self'" in r.headers["Content-Security-Policy"]
+    assert r.headers["X-Frame-Options"] == "DENY" and r.headers["X-Content-Type-Options"] == "nosniff"
+
+
+def test_oversized_upload_rejected(client):
+    old = app.config["MAX_CONTENT_LENGTH"]
+    app.config["MAX_CONTENT_LENGTH"] = 1000
+    try:
+        r = client.post("/api/extract", data={"file": (io.BytesIO(b"x" * 5000), "a.txt")})
+        assert r.status_code == 413
+    finally:
+        app.config["MAX_CONTENT_LENGTH"] = old
+
+
+def test_decompression_bomb_and_fake_image_rejected(client):
+    buf = io.BytesIO()
+    Image.new("1", (9000, 9000)).save(buf, "PNG")  # 81M pixels, ~pequeno em disco
+    d = {"title": "T", "sections": [{"id": "abstract", "content": "x", "images": [{"path": "i0"}]}]}
+    r = client.post("/api/generate?format=tex", data={"data": json.dumps(d), "i0": (io.BytesIO(buf.getvalue()), "b.png")})
+    assert r.status_code == 400
+    r = client.post("/api/generate?format=tex", data={"data": json.dumps(d), "i0": (io.BytesIO(b"<svg onload=alert(1)>"), "x.svg")})
+    assert r.status_code == 400
+
+
+def test_invalid_model_name_rejected():
+    from src.llm import LLMError, chat
+    for bad in ("../../v1/x", "a b", "x?key=1", "/abs"):
+        with pytest.raises(LLMError):
+            chat("google", "k", bad, "s", "u")
+
+
+def test_docx_zip_bomb_and_garbage_handled(client):
+    r = client.post("/api/extract", data={"mode": "basic", "file": (io.BytesIO(b"PK\x03\x04garbage"), "a.docx")})
+    assert r.status_code == 400
+    r = client.post("/api/extract", data={"mode": "basic", "file": (io.BytesIO(b"%PDF-1.4 broken"), "a.pdf")})
+    assert r.status_code == 400

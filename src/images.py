@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import io
+import warnings
 from pathlib import Path
 
 from PIL import Image
 
 from .config import MAX_IMAGE_BYTES
 
-Image.MAX_IMAGE_PIXELS = 80_000_000
+Image.MAX_IMAGE_PIXELS = 40_000_000
+warnings.simplefilter("error", Image.DecompressionBombWarning)
 MAX_DIM = 3600
 ALLOWED = {"PNG", "JPEG", "GIF", "BMP", "WEBP", "TIFF"}
 

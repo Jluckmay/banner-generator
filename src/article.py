@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from .config import PAPER_DIMS_CM
+from .config import POSTER_SIZES
 from .i18n import labels_for
 from .templates import TEMPLATES
 
@@ -41,7 +41,7 @@ def _logo_row(files: List[str], height_cm: float, header: bool) -> str:
 
 
 def article_dims(poster: Dict[str, Any]) -> tuple[float, float]:
-    w, h = PAPER_DIMS_CM[poster["paper"]]
+    w, h = POSTER_SIZES[poster["paper"]]["cm"]
     return (h, w) if poster["orientation"] == "landscape" else (w, h)
 
 

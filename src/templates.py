@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from .config import MAX_LOGOS_FOOTER, MAX_LOGOS_HEADER
+from .config import MAX_LOGOS_FOOTER, MAX_LOGOS_HEADER, POSTER_SIZES
 
 DEFAULT_TEMPLATE = "classic"
 
-TIKZ_PAPERS = ["a0", "a1", "a2", "a3"]
+TIKZ_PAPERS = list(POSTER_SIZES)
 
 # colors: colorOne (moldura/destaque), colorTwo, colorThree
 # bg: fundo do pôster (HTML hex sem '#')
@@ -53,15 +53,15 @@ TEMPLATES: Dict[str, Dict[str, Any]] = {
         "name": {"pt-BR": "DCC/UFMG (vermelho)", "en-US": "DCC/UFMG (red)"},
         "engine": "article",
         "colors": ("CC0000", "444444", "1A1A1A"), "bg": "FFFFFF", "sans": True,
-        "papers": ["60x90", "a0", "a1", "a2", "a3"], "default_paper": "60x90",
         "default_columns": 2,
+        "papers": None, "default_paper": "60x90",
         "logos": {"header": MAX_LOGOS_HEADER, "footer": MAX_LOGOS_FOOTER},
     },
 }
 
 
 def papers_for(tid: str) -> list:
-    return TEMPLATES[tid].get("papers", TIKZ_PAPERS)
+    return TEMPLATES[tid].get("papers") or TIKZ_PAPERS
 
 
 def default_paper_for(tid: str) -> str:

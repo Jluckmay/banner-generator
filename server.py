@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import threading
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
@@ -22,6 +23,7 @@ from src.templates import public_templates
 ROOT = Path(__file__).parent.resolve()
 app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = config.MAX_UPLOAD_BYTES
+_BUILD_SLOTS = threading.BoundedSemaphore(int(os.environ.get("MAX_CONCURRENT_BUILDS", "2")))
 
 
 def _err(msg: str, code: int = 400) -> Tuple[Response, int]:
@@ -33,6 +35,12 @@ def _headers(resp: Response) -> Response:
     resp.headers["X-Content-Type-Options"] = "nosniff"
     resp.headers["Referrer-Policy"] = "no-referrer"
     resp.headers["Cache-Control"] = "no-store"
+    resp.headers["X-Frame-Options"] = "DENY"
+    resp.headers["Content-Security-Policy"] = (
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' blob: data:; frame-src blob:; object-src blob:; connect-src 'self'; "
+        "base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+    )
     return resp
 
 
@@ -56,7 +64,8 @@ def api_config() -> Response:
     return jsonify(
         {
             "languages": list(config.LANGUAGES),
-            "papers": list(config.PAPER_SIZES),
+            "papers": list(config.POSTER_SIZES),
+            "sizes": {k: v["cm"] for k, v in config.POSTER_SIZES.items()},
             "templates": public_templates(),
             "providers": config.public_provider_info(),
             "sections": DEFAULT_SECTION_IDS,
@@ -136,12 +145,16 @@ def api_generate() -> Tuple[Response, int] | Response:
         tex = build_tex(poster, images)
         if fmt == "tex":
             return Response(tex, mimetype="text/plain", headers={"Content-Disposition": 'attachment; filename="poster.tex"'})
+        if not _BUILD_SLOTS.acquire(timeout=20):
+            return _err("Servidor ocupado, tente novamente em instantes.", 503)
         try:
             pdf, tex, overflow = fit_compile(poster, images, build)
         except RuntimeError as exc:
             return _err(str(exc), 500)
         except Exception:
             return _err("Tempo esgotado ou erro ao compilar o pôster.", 500)
+        finally:
+            _BUILD_SLOTS.release()
         extra = {"X-Poster-Overflow": "1"} if overflow else {}
         if fmt == "zip":
             return Response(make_zip(tex, build), mimetype="application/zip", headers={"Content-Disposition": 'attachment; filename="poster-latex.zip"', **extra})
