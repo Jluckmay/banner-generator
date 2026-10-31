@@ -115,9 +115,15 @@ button.sm{padding:3px 9px;min-height:30px;font-size:13px}
       <div><label data-i18n="email"></label><input type="text" id="email"></div>
       <div><label data-i18n="url"></label><input type="url" id="url" placeholder="https://"></div>
     </div>
-    <label data-i18n="logos"></label>
-    <input type="file" id="logoInput" accept="image/*" multiple>
-    <div class="thumbs" id="logoThumbs"></div>
+    <label><span data-i18n="logos_header"></span> <b id="hdrCount"></b></label>
+    <input type="file" id="logoHInput" accept="image/*" multiple>
+    <div class="thumbs" id="logoHThumbs"></div>
+    <div id="footerLogos">
+      <label><span data-i18n="logos_footer"></span> <b id="ftrCount"></b></label>
+      <input type="file" id="logoFInput" accept="image/*" multiple>
+      <div class="thumbs" id="logoFThumbs"></div>
+    </div>
+    <div class="hint" id="logoMsg"></div>
   </section>
 
   <section class="card">
@@ -149,7 +155,7 @@ const T = {
   drop_work:"Clique ou arraste seu trabalho aqui (PDF, DOCX, TXT, MD, TEX)",use_ai:"Usar IA para resumir o trabalho em formato de banner",provider:"Provedor de IA",model:"Modelo (opcional)",
   api_key:"Chave de API",key_hint:"A chave é enviada só nesta requisição e nunca é armazenada. Sem chave, usa-se a extração básica.",extract:"Extrair conteúdo do trabalho",
   s_lang:"Idioma do banner",lang_hint:"Define os rótulos do banner e o idioma do texto gerado pela IA.",s_template:"Template e formato",paper:"Papel",orientation:"Orientação",portrait:"Retrato",landscape:"Paisagem",columns:"Colunas",accent:"Cor de destaque personalizada",
-  s_info:"Informações principais",title:"Título",authors:"Autores (separados por vírgula)",affiliations:"Afiliações (uma por linha)",email:"E-mail de contato",url:"Link (gera QR Code)",logos:"Logotipos (opcional)",
+  s_info:"Informações principais",title:"Título",authors:"Autores (separados por vírgula)",affiliations:"Afiliações (uma por linha)",email:"E-mail de contato",url:"Link (gera QR Code)",logos_header:"Logotipos do cabeçalho (opcional)",logos_footer:"Logotipos do rodapé (opcional)",logo_limit:"Limite do template atingido: alguns arquivos foram ignorados.",
   s_sections:"Seções, textos e imagens",add_section:"+ Adicionar seção",sec_title:"Título da seção",sec_text:"Texto (use '- ' para listas, **negrito**, *itálico*, $fórmula$)",add_img:"Adicionar imagens/gráficos",caption:"Legenda",
   remove:"Remover",s_generate:"Gerar banner",generate:"Gerar / atualizar pré-visualização",dl_pdf:"Baixar PDF",dl_zip:"Baixar LaTeX (.zip)",preview_empty:"A pré-visualização do banner aparecerá aqui.",
   working:"Processando…",extracted:"Conteúdo extraído! Revise e edite os campos abaixo.",no_file:"Selecione um arquivo.",overflow:"O conteúdo não cabe no papel nem com a menor fonte: reduza textos/imagens, aumente o papel ou as colunas.",custom:"Nova seção",ai_off:"IA indisponível"},
@@ -157,20 +163,20 @@ const T = {
   drop_work:"Click or drag your paper here (PDF, DOCX, TXT, MD, TEX)",use_ai:"Use AI to condense the paper into poster format",provider:"AI provider",model:"Model (optional)",
   api_key:"API key",key_hint:"The key is sent only with this request and is never stored. Without a key, basic extraction is used.",extract:"Extract content from paper",
   s_lang:"Poster language",lang_hint:"Sets the poster labels and the language of AI-generated text.",s_template:"Template and format",paper:"Paper",orientation:"Orientation",portrait:"Portrait",landscape:"Landscape",columns:"Columns",accent:"Custom accent color",
-  s_info:"Main information",title:"Title",authors:"Authors (comma-separated)",affiliations:"Affiliations (one per line)",email:"Contact e-mail",url:"Link (generates QR code)",logos:"Logos (optional)",
+  s_info:"Main information",title:"Title",authors:"Authors (comma-separated)",affiliations:"Affiliations (one per line)",email:"Contact e-mail",url:"Link (generates QR code)",logos_header:"Header logos (optional)",logos_footer:"Footer logos (optional)",logo_limit:"Template limit reached: some files were ignored.",
   s_sections:"Sections, text and images",add_section:"+ Add section",sec_title:"Section title",sec_text:"Text (use '- ' for lists, **bold**, *italic*, $formula$)",add_img:"Add images/charts",caption:"Caption",
   remove:"Remove",s_generate:"Generate poster",generate:"Generate / refresh preview",dl_pdf:"Download PDF",dl_zip:"Download LaTeX (.zip)",preview_empty:"The poster preview will appear here.",
   working:"Working…",extracted:"Content extracted! Review and edit the fields below.",no_file:"Select a file.",overflow:"The content does not fit the paper even at the smallest font: shorten text/images, use a larger paper or more columns.",custom:"New section",ai_off:"AI unavailable"}
 };
 const $ = s => document.querySelector(s);
-let CFG, lang = "pt-BR", sections = [], logos = [], uid = 0, pdfBlob = null, docFile = null;
+let CFG, lang = "pt-BR", sections = [], logosH = [], logosF = [], uid = 0, pdfBlob = null, docFile = null;
 const files = new Map();               // field id -> File
 const t = k => T[lang][k] || k;
 
 function applyI18n(){
   document.documentElement.lang = lang;
   document.querySelectorAll("[data-i18n]").forEach(e => e.textContent = t(e.dataset.i18n));
-  renderTemplates(); renderSections(); renderLogos();
+  renderTemplates(); renderSections(); renderLogos(); applyTemplateOptions(false);
 }
 function showMsg(el, text, cls){ el.innerHTML = text ? `<div class="msg ${cls}"></div>` : ""; if(text) el.firstChild.textContent = text; }
 function secLabel(id){ return (CFG.labels[lang] || {})[id] || ""; }
@@ -181,7 +187,6 @@ function secLabel(id){ return (CFG.labels[lang] || {})[id] || ""; }
   const nav = (navigator.language || "").toLowerCase().startsWith("en") ? "en-US" : "pt-BR";
   lang = nav; $("#uiLang").value = lang; document.querySelector(`input[name=lang][value="${lang}"]`).checked = true;
   if (matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.dataset.theme = "dark";
-  $("#paper").innerHTML = CFG.papers.map(p => `<option value="${p}">${p.toUpperCase()}</option>`).join("");
   $("#provider").innerHTML = Object.entries(CFG.providers).map(([k,v]) => `<option value="${k}">${v.name}${v.server_key ? " ✓" : ""}</option>`).join("");
   $("#provider").onchange = () => $("#model").placeholder = CFG.providers[$("#provider").value].default_model;
   $("#provider").onchange();
@@ -242,7 +247,7 @@ function renderTemplates(){
   $("#tpls").innerHTML = Object.entries(CFG.templates).map(([id,tp]) => `
     <div class="tpl ${state.template===id?"sel":""}" data-id="${id}" tabindex="0" role="button">
       <div class="sw" style="background:#${tp.bg}">${tp.colors.map(c=>`<i style="background:#${c}"></i>`).join("")}</div>${tp.name[lang]}</div>`).join("");
-  document.querySelectorAll(".tpl").forEach(el => { el.onclick = () => { state.template = el.dataset.id; renderTemplates(); }; el.onkeydown = e => { if(e.key==="Enter") el.click(); }; });
+  document.querySelectorAll(".tpl").forEach(el => { el.onclick = () => { state.template = el.dataset.id; renderTemplates(); applyTemplateOptions(true); }; el.onkeydown = e => { if(e.key==="Enter") el.click(); }; });
 }
 
 /* ---------- images ---------- */
@@ -253,11 +258,34 @@ function thumbHTML(img, withCaption, kind, idx){
   return `<div class="thumb"><img src="${img.url}" alt=""><button class="sm" data-rm="${kind}" data-idx="${idx}">✕</button>
    ${withCaption ? `<input type="text" data-cap="${kind}" data-idx="${idx}" value="${img.caption.replace(/"/g,"&quot;")}" placeholder="${t("caption")}">` : ""}</div>`;
 }
-function renderLogos(){
-  $("#logoThumbs").innerHTML = logos.map((l,i) => thumbHTML(l,false,"logo",i)).join("");
-  $("#logoThumbs").querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { logos.splice(+b.dataset.idx,1); renderLogos(); });
+const slots = () => CFG.templates[state.template].logos;
+function applyTemplateOptions(reset){
+  const tp = CFG.templates[state.template], prev = $("#paper").value;
+  $("#paper").innerHTML = tp.papers.map(p => `<option value="${p}">${p.includes("x") ? p.replace("x"," × ")+" cm" : p.toUpperCase()}</option>`).join("");
+  $("#paper").value = (!reset && tp.papers.includes(prev)) ? prev : tp.default_paper;
+  if(reset) $("#columns").value = state.template==="dcc" ? "2" : $("#columns").value;
+  logosH.length = Math.min(logosH.length, slots().header);
+  logosF.length = Math.min(logosF.length, slots().footer);
+  renderLogos();
 }
-$("#logoInput").onchange = e => { addFiles(e.target.files, logos); e.target.value=""; renderLogos(); };
+function renderLogos(){
+  const s = slots();
+  $("#footerLogos").classList.toggle("hidden", s.footer === 0);
+  $("#hdrCount").textContent = `(${logosH.length}/${s.header})`;
+  $("#ftrCount").textContent = `(${logosF.length}/${s.footer})`;
+  [["#logoHThumbs", logosH, "lh"], ["#logoFThumbs", logosF, "lf"]].forEach(([sel, arr, kind]) => {
+    $(sel).innerHTML = arr.map((l,i) => thumbHTML(l,false,kind,i)).join("");
+    $(sel).querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { arr.splice(+b.dataset.idx,1); renderLogos(); });
+  });
+}
+function addLogos(fileList, arr, limit){
+  const room = Math.max(0, limit - arr.length), list = [...fileList];
+  addFiles(list.slice(0, room), arr);
+  $("#logoMsg").textContent = list.length > room ? t("logo_limit") : "";
+  renderLogos();
+}
+$("#logoHInput").onchange = e => { addLogos(e.target.files, logosH, slots().header); e.target.value=""; };
+$("#logoFInput").onchange = e => { addLogos(e.target.files, logosF, slots().footer); e.target.value=""; };
 
 /* ---------- sections ---------- */
 function renderSections(){
@@ -295,12 +323,12 @@ function buildForm(){
     language: lang, template: state.template, paper: $("#paper").value, orientation: $("#orientation").value,
     columns: +$("#columns").value, accent: $("#useAccent").checked ? $("#accent").value : "",
     title: $("#title").value, authors: $("#authors").value, affiliations: $("#affiliations").value,
-    email: $("#email").value, url: $("#url").value, logos: logos.map(l => l.field),
+    email: $("#email").value, url: $("#url").value, logos_header: logosH.map(l => l.field), logos_footer: logosF.map(l => l.field),
     sections: sections.map(s => ({id: s.id, title: s.title || secLabel(s.id), content: s.content,
       images: s.images.map(im => ({path: im.field, caption: im.caption}))}))
   };
   fd.append("data", JSON.stringify(data));
-  const used = new Set([...data.logos, ...data.sections.flatMap(s => s.images.map(i => i.path))]);
+  const used = new Set([...data.logos_header, ...data.logos_footer, ...data.sections.flatMap(s => s.images.map(i => i.path))]);
   used.forEach(f => fd.append(f, files.get(f)));
   return fd;
 }

@@ -22,6 +22,19 @@ PAPER_SIZES: Dict[str, Dict[str, str]] = {
     "a3": {"paper": "a3paper", "font": "12pt"},
 }
 
+# Dimensões (largura, altura) em cm, retrato. Usado pelos templates baseados em `article`.
+PAPER_DIMS_CM: Dict[str, tuple] = {
+    "60x90": (60.0, 90.0),
+    "a0": (84.1, 118.9),
+    "a1": (59.4, 84.1),
+    "a2": (42.0, 59.4),
+    "a3": (29.7, 42.0),
+}
+
+# Limites de logotipos por região
+MAX_LOGOS_HEADER = 2
+MAX_LOGOS_FOOTER = 5
+
 # Provedores: chave via campo da requisição (nunca armazenada) ou variável de ambiente.
 PROVIDERS: Dict[str, Dict[str, Any]] = {
     "google": {

@@ -5,9 +5,9 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List
 
-from .config import LANGUAGES, PAPER_SIZES
+from .config import LANGUAGES
 from .i18n import labels_for
-from .templates import DEFAULT_TEMPLATE, TEMPLATES
+from .templates import DEFAULT_TEMPLATE, TEMPLATES, default_paper_for, papers_for
 
 MAX_SECTIONS = 20
 MAX_FIELD = 20_000
@@ -31,13 +31,23 @@ def normalize_poster(data: Dict[str, Any]) -> Dict[str, Any]:
     lang = data.get("language") if data.get("language") in LANGUAGES else "pt-BR"
     labels = labels_for(lang)
     template = data.get("template") if data.get("template") in TEMPLATES else DEFAULT_TEMPLATE
-    paper = data.get("paper") if data.get("paper") in PAPER_SIZES else "a0"
+    paper = data.get("paper") if data.get("paper") in papers_for(template) else default_paper_for(template)
     orientation = "landscape" if data.get("orientation") == "landscape" else "portrait"
+    default_cols = TEMPLATES[template].get("default_columns") or (3 if orientation == "landscape" else 2)
     try:
-        columns = int(data.get("columns") or (3 if orientation == "landscape" else 2))
+        columns = int(data.get("columns") or default_cols)
     except (TypeError, ValueError):
-        columns = 2
+        columns = default_cols
     columns = max(1, min(4, columns))
+    slots = TEMPLATES[template]["logos"]
+
+    def _logo_list(key: str, limit: int) -> List[str]:
+        raw = data.get(key) or []
+        return [str(p) for p in raw if p][:limit] if isinstance(raw, list) else []
+
+    # `logos` (legado) equivale ao cabeçalho
+    logos_header = _logo_list("logos_header" if "logos_header" in data else "logos", slots["header"])
+    logos_footer = _logo_list("logos_footer", slots["footer"])
 
     sections: List[Dict[str, Any]] = []
     raw_sections = data.get("sections")
@@ -71,6 +81,7 @@ def normalize_poster(data: Dict[str, Any]) -> Dict[str, Any]:
         "affiliations": _s(data.get("affiliations"), 2000),
         "email": _s(data.get("email"), 200),
         "url": _s(data.get("url"), 300),
-        "logos": [str(p) for p in data.get("logos") or []][:4],
+        "logos_header": logos_header,
+        "logos_footer": logos_footer,
         "sections": sections,
     }

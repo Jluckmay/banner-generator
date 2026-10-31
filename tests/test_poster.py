@@ -168,3 +168,33 @@ def test_fit_reduces_font_and_flags_overflow(client):
     mid = {"title": "T", "paper": "a2", "columns": 2, "sections": [{"id": "abstract", "content": ("palavra " * 120 + "\n\n") * 6}]}
     r = client.post("/api/generate", data={"data": json.dumps(mid)})
     assert r.status_code == 200 and not r.headers.get("X-Poster-Overflow")
+
+
+def test_logo_limits_per_template():
+    p = normalize_poster({"template": "dcc", "logos_header": list("abc"), "logos_footer": list("abcdefg"), "sections": []})
+    assert len(p["logos_header"]) == 2 and len(p["logos_footer"]) == 5 and p["paper"] == "60x90"
+    c = normalize_poster({"template": "classic", "logos_header": list("abc"), "logos_footer": ["x"], "paper": "60x90", "sections": []})
+    assert len(c["logos_header"]) == 2 and c["logos_footer"] == [] and c["paper"] == "a0"
+
+
+@pytest.mark.skipif(not shutil.which("pdflatex"), reason="pdflatex ausente")
+@pytest.mark.parametrize("paper", ["60x90", "a2"])
+def test_dcc_template_with_header_and_footer_logos(client, paper):
+    data = {
+        "title": "Otimização Avançada", "authors": "A, B", "affiliations": "DCC - UFMG", "email": "a@b.com",
+        "url": "https://exemplo.com/p", "template": "dcc", "paper": paper, "columns": 2,
+        "logos_header": ["h0", "h1", "h2"], "logos_footer": [f"f{i}" for i in range(6)],
+        "sections": [
+            {"id": "introduction", "content": "Texto $x^2$ com **negrito**." * 5},
+            {"id": "results", "content": "- a\n- b", "images": [{"path": "g0", "caption": "Gráfico"}]},
+            {"id": "references", "content": "[1] Ref A\n[2] Ref B"},
+        ],
+    }
+    names = ["h0", "h1", "h2", "g0"] + [f"f{i}" for i in range(6)]
+    files = {n: (io.BytesIO(_png()), n + ".png") for n in names}
+    r = client.post("/api/generate", data={"data": json.dumps(data), **files})
+    assert r.status_code == 200 and r.data.startswith(b"%PDF") and not r.headers.get("X-Poster-Overflow")
+    z = client.post("/api/generate?format=zip", data={"data": json.dumps(data), **{n: (io.BytesIO(_png()), n + ".png") for n in names}})
+    import zipfile
+    with zipfile.ZipFile(io.BytesIO(z.data)) as zf:
+        assert "poster.tex" in zf.namelist() and sum(n.endswith((".png", ".jpg")) for n in zf.namelist()) == 8

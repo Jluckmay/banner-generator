@@ -1,4 +1,4 @@
-# Gerador de Banners Acadêmicos / Academic Poster Generator
+﻿# Gerador de Banners Acadêmicos / Academic Poster Generator
 
 Gera pôsteres/banners acadêmicos em **LaTeX → PDF** (`tikzposter`), em **pt-BR** ou **en-US**.
 
@@ -7,7 +7,7 @@ Gera pôsteres/banners acadêmicos em **LaTeX → PDF** (`tikzposter`), em **pt-
    - Com IA (Gemini, OpenAI, Claude, DeepSeek, NVIDIA NIM): resume o trabalho em formato de banner, já no idioma escolhido.
    - Sem chave/IA: extração básica por cabeçalhos (Resumo, Introdução, Metodologia…).
 2. **Idioma** do banner (rótulos e texto da IA): `pt-BR` / `en-US`.
-3. **Templates**: Clássico, Moderno, Minimalista, Ousado, Esmeralda + cor de destaque personalizada; papel A0–A3, retrato/paisagem, 1–4 colunas.
+3. **Templates**: Clássico, Moderno, Minimalista, Ousado, Esmeralda e **DCC/UFMG** (60×90 cm, barras vermelhas, até 2 logos no cabeçalho e 5 no rodapé) + cor de destaque personalizada; papel A0–A3, retrato/paisagem, 1–4 colunas.
 4. **Imagens/gráficos por seção** (com legenda), logotipos e QR Code de um link.
 5. Seções editáveis: reordenar, remover, adicionar seções personalizadas.
 6. **Ajuste automático de fonte** para o conteúdo caber no papel (aviso se mesmo assim não couber).
@@ -41,3 +41,4 @@ Em *Referências*, uma referência por linha.
 Academic poster generator (LaTeX/`tikzposter` → PDF): manual entry or upload your paper (PDF/DOCX/TXT/MD/TEX, optional AI summarisation),
 pt-BR/en-US language, 5 templates, per-section image uploads with captions, logos, QR code, auto font-fit, PDF and LaTeX `.zip` export.
 Run with `python server.py` (requires `pdflatex`).
+

@@ -127,19 +127,20 @@ def text_to_latex(text: str) -> str:
     return "\n".join(out)
 
 
-def references_to_latex(text: str) -> str:
+def references_to_latex(text: str, small: bool = True) -> str:
     items = [ln.strip() for ln in text.split("\n") if ln.strip()]
     items = [re.sub(r"^\s*(?:\[\d+\]|\d+[.)]|[-*•])\s*", "", it) for it in items]
     if not items:
         return ""
     return (
-        "{\\small\\begin{enumerate}\n"
+        ("{\\small" if small else "{")
+        + "\\begin{enumerate}\n"
         + "\n".join(f"\\item {_inline(it)}" for it in items)
         + "\n\\end{enumerate}}"
     )
 
 
-def _images_to_latex(images: List[Dict[str, str]], fig_label: str, counter: List[int]) -> str:
+def _images_to_latex(images: List[Dict[str, str]], fig_label: str, counter: List[int], cap_cmd: str = "\\small") -> str:
     out: List[str] = []
     for start in range(0, len(images), 2):
         row = images[start : start + 2]
@@ -149,7 +150,7 @@ def _images_to_latex(images: List[Dict[str, str]], fig_label: str, counter: List
             counter[0] += 1
             cap = img.get("caption", "")
             caption = (
-                f"\\\\[2pt]{{\\small\\itshape {fig_label} {counter[0]}: {_inline(cap)}}}" if cap else ""
+                f"\\\\[2pt]{{{cap_cmd}\\itshape {fig_label} {counter[0]}: {_inline(cap)}}}" if cap else ""
             )
             cells.append(
                 f"\\begin{{minipage}}[t]{{{w}\\linewidth}}\\centering"
@@ -190,6 +191,10 @@ def _hex_to_latex(name: str, value: str) -> str:
 
 def build_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
     """Gera o fonte LaTeX. `images` mapeia caminhos de upload -> nome de arquivo no build."""
+    if TEMPLATES[poster["template"]].get("engine") == "article":
+        from .article import build_article_tex
+
+        return build_article_tex(poster, images)
     labels = labels_for(poster["language"])
     tpl = TEMPLATES[poster["template"]]
     paper = PAPER_SIZES[poster["paper"]]
@@ -238,7 +243,7 @@ def build_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
         col_tex = [f"\\column{{1}}\n\\block{{{contact_block['title']}}}{{\n{contact_block['latex']}\n}}"]
 
     logos = "".join(
-        f"\\includegraphics[height=6cm]{{{images[p]}}}\\hspace{{2cm}}" for p in poster["logos"] if p in images
+        f"\\includegraphics[height=6cm]{{{images[p]}}}\\hspace{{2cm}}" for p in poster["logos_header"] if p in images
     )
     title = _inline(poster["title"]) or "~"
     authors = escape_latex(poster["authors"]).replace("\n", ", ")
@@ -343,10 +348,23 @@ def content_overflows(pdf: bytes) -> bool:
     return bool(ys) and min(ys) < 0
 
 
+ARTICLE_FIT_STEPS = [1.0, 0.92, 0.85, 0.78, 0.72, 0.66, 0.6, 0.55, 0.5, 0.45]
+
+
 def fit_compile(poster: Dict[str, Any], images: Dict[str, str], build_dir: Path) -> Tuple[bytes, str, bool]:
     """Compila reduzindo a fonte base até o conteúdo caber. Retorna (pdf, tex, overflow)."""
-    start = FONT_STEPS.index(PAPER_SIZES[poster["paper"]]["font"])
+    from pypdf import PdfReader
+
     pdf, tex, over = b"", "", True
+    if TEMPLATES[poster["template"]].get("engine") == "article":
+        for fit in ARTICLE_FIT_STEPS:  # transbordo = conteúdo vai para 2ª página
+            tex = build_tex({**poster, "_fit": fit}, images)
+            pdf, _ = compile_tex(tex, build_dir)
+            over = len(PdfReader(io.BytesIO(pdf)).pages) > 1
+            if not over:
+                break
+        return pdf, tex, over
+    start = FONT_STEPS.index(PAPER_SIZES[poster["paper"]]["font"])
     for font in FONT_STEPS[start::-1]:
         tex = build_tex({**poster, "_font": font}, images)
         pdf, _ = compile_tex(tex, build_dir)

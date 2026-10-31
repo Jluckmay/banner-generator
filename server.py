@@ -118,7 +118,7 @@ def api_generate() -> Tuple[Response, int] | Response:
     if not poster["sections"]:
         return _err("Adicione conteúdo em pelo menos uma seção.")
 
-    wanted = [i["path"] for s in poster["sections"] for i in s["images"]] + poster["logos"]
+    wanted = [i["path"] for s in poster["sections"] for i in s["images"]] + poster["logos_header"] + poster["logos_footer"]
     if len(wanted) > config.MAX_IMAGES_TOTAL:
         return _err("Imagens demais.")
 
