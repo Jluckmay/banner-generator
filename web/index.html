@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gerador de Banners Acadêmicos</title>
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--fg:#1b2333;--muted:#66708a;--line:#dbe1ee;--pri:#2e5c8a;--pri-fg:#fff;--danger:#b42318;--ok:#067647}
+:root[data-theme=dark]{--bg:#10151f;--card:#18202e;--fg:#e8ecf5;--muted:#9aa6bf;--line:#2a3550;--pri:#6aa6e0;--pri-fg:#0b1220;--danger:#ff8a7a;--ok:#5fd39a}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--fg)}
+header{display:flex;gap:12px;align-items:center;padding:10px 20px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+header img{width:32px;height:32px}header h1{font-size:18px;margin:0;flex:1}
+main{display:grid;grid-template-columns:minmax(340px,520px) 1fr;gap:16px;padding:16px;max-width:1700px;margin:auto}
+@media(max-width:980px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 12px;display:flex;gap:8px;align-items:center}
+.card h2 span.n{background:var(--pri);color:var(--pri-fg);border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input[type=text],input[type=password],input[type=email],input[type=url],textarea,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);font:inherit}
+textarea{min-height:110px;resize:vertical}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--fg);padding:8px 14px;border-radius:8px;min-height:40px}
+button.pri{background:var(--pri);color:var(--pri-fg);border-color:var(--pri);font-weight:600}
+button:disabled{opacity:.55;cursor:wait}
+button.sm{padding:3px 9px;min-height:30px;font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:130px}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg label{flex:1;margin:0;padding:10px;text-align:center;cursor:pointer;color:var(--fg)}
+.seg input{display:none}.seg input:checked+span{font-weight:700}
+.seg label:has(input:checked){background:var(--pri);color:var(--pri-fg)}
+.drop{border:2px dashed var(--line);border-radius:10px;padding:18px;text-align:center;color:var(--muted);cursor:pointer}
+.drop.over{border-color:var(--pri);color:var(--pri)}
+.tpls{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.tpl{border:2px solid var(--line);border-radius:10px;padding:8px;cursor:pointer;text-align:center;font-size:13px}
+.tpl.sel{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri) inset}
+.tpl .sw{height:46px;border-radius:6px;margin-bottom:6px;display:flex;overflow:hidden;border:1px solid var(--line)}
+.tpl .sw i{flex:1}
+.sec{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px}
+.sec header{all:unset;display:flex;gap:6px;align-items:center}
+.sec header input{flex:1;font-weight:600}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.thumb{width:130px;border:1px solid var(--line);border-radius:8px;padding:5px;font-size:12px}
+.thumb img{width:100%;height:80px;object-fit:contain;background:var(--bg);border-radius:4px}
+.thumb input{padding:4px 6px;font-size:12px;margin-top:4px}
+.msg{padding:9px 12px;border-radius:8px;margin-top:10px;font-size:14px}
+.msg.err{background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger)}
+.msg.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+#preview{position:sticky;top:64px;height:calc(100vh - 80px)}
+#preview iframe{width:100%;height:100%;border:1px solid var(--line);border-radius:12px;background:#fff}
+.empty{height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);border:2px dashed var(--line);border-radius:12px;text-align:center;padding:20px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <img src="/assets/icons/favicon.svg" alt="">
+  <h1 data-i18n="app_title"></h1>
+  <select id="uiLang" style="width:auto" aria-label="Language"><option value="pt-BR">Português (BR)</option><option value="en-US">English (US)</option></select>
+  <button id="themeBtn" class="sm" aria-label="Theme">◐</button>
+</header>
+<main>
+<div id="form">
+
+  <section class="card">
+    <h2><span class="n">1</span><span data-i18n="s_mode"></span></h2>
+    <div class="seg" role="radiogroup">
+      <label><input type="radio" name="mode" value="manual" checked><span data-i18n="mode_manual"></span></label>
+      <label><input type="radio" name="mode" value="upload"><span data-i18n="mode_upload"></span></label>
+    </div>
+    <div id="uploadBox" class="hidden">
+      <div class="drop" id="drop" tabindex="0"><span data-i18n="drop_work"></span><div class="hint" id="docName"></div></div>
+      <input id="docFile" type="file" accept=".pdf,.docx,.txt,.md,.tex" class="hidden">
+      <label><input type="checkbox" id="useAI" checked> <span data-i18n="use_ai"></span></label>
+      <div id="aiBox">
+        <div class="row">
+          <div><label data-i18n="provider"></label><select id="provider"></select></div>
+          <div><label data-i18n="model"></label><input type="text" id="model" autocomplete="off"></div>
+        </div>
+        <label data-i18n="api_key"></label><input type="password" id="apiKey" autocomplete="off">
+        <div class="hint" data-i18n="key_hint"></div>
+      </div>
+      <p><button class="pri" id="extractBtn" data-i18n="extract"></button></p>
+      <div id="extractMsg"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">2</span><span data-i18n="s_lang"></span></h2>
+    <div class="seg" role="radiogroup">
+      <label><input type="radio" name="lang" value="pt-BR" checked><span>Português (BR)</span></label>
+      <label><input type="radio" name="lang" value="en-US"><span>English (US)</span></label>
+    </div>
+    <div class="hint" data-i18n="lang_hint"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">3</span><span data-i18n="s_template"></span></h2>
+    <div class="tpls" id="tpls"></div>
+    <div class="row">
+      <div><label data-i18n="paper"></label><select id="paper"></select></div>
+      <div><label data-i18n="orientation"></label><select id="orientation"><option value="portrait" data-i18n="portrait"></option><option value="landscape" data-i18n="landscape"></option></select></div>
+      <div><label data-i18n="columns"></label><select id="columns"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
+    </div>
+    <label><input type="checkbox" id="useAccent"> <span data-i18n="accent"></span> <input type="color" id="accent" value="#2e5c8a"></label>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">4</span><span data-i18n="s_info"></span></h2>
+    <label data-i18n="title"></label><input type="text" id="title" maxlength="500">
+    <label data-i18n="authors"></label><input type="text" id="authors" maxlength="1500">
+    <label data-i18n="affiliations"></label><textarea id="affiliations" style="min-height:70px"></textarea>
+    <div class="row">
+      <div><label data-i18n="email"></label><input type="text" id="email"></div>
+      <div><label data-i18n="url"></label><input type="url" id="url" placeholder="https://"></div>
+    </div>
+    <label data-i18n="logos"></label>
+    <input type="file" id="logoInput" accept="image/*" multiple>
+    <div class="thumbs" id="logoThumbs"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">5</span><span data-i18n="s_sections"></span></h2>
+    <div id="sections"></div>
+    <button id="addSec" data-i18n="add_section"></button>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">6</span><span data-i18n="s_generate"></span></h2>
+    <div class="row">
+      <button class="pri" id="genBtn" data-i18n="generate"></button>
+      <button id="dlPdf" disabled data-i18n="dl_pdf"></button>
+      <button id="dlZip" data-i18n="dl_zip"></button>
+    </div>
+    <div id="genMsg"></div>
+  </section>
+</div>
+
+<aside id="preview">
+  <div class="empty" id="emptyPrev" data-i18n="preview_empty"></div>
+  <iframe id="frame" class="hidden" title="preview"></iframe>
+</aside>
+</main>
+
+<script>
+const T = {
+ "pt-BR":{app_title:"Gerador de Banners Acadêmicos",s_mode:"Como deseja preencher?",mode_manual:"Preencher manualmente",mode_upload:"Enviar meu trabalho",
+  drop_work:"Clique ou arraste seu trabalho aqui (PDF, DOCX, TXT, MD, TEX)",use_ai:"Usar IA para resumir o trabalho em formato de banner",provider:"Provedor de IA",model:"Modelo (opcional)",
+  api_key:"Chave de API",key_hint:"A chave é enviada só nesta requisição e nunca é armazenada. Sem chave, usa-se a extração básica.",extract:"Extrair conteúdo do trabalho",
+  s_lang:"Idioma do banner",lang_hint:"Define os rótulos do banner e o idioma do texto gerado pela IA.",s_template:"Template e formato",paper:"Papel",orientation:"Orientação",portrait:"Retrato",landscape:"Paisagem",columns:"Colunas",accent:"Cor de destaque personalizada",
+  s_info:"Informações principais",title:"Título",authors:"Autores (separados por vírgula)",affiliations:"Afiliações (uma por linha)",email:"E-mail de contato",url:"Link (gera QR Code)",logos:"Logotipos (opcional)",
+  s_sections:"Seções, textos e imagens",add_section:"+ Adicionar seção",sec_title:"Título da seção",sec_text:"Texto (use '- ' para listas, **negrito**, *itálico*, $fórmula$)",add_img:"Adicionar imagens/gráficos",caption:"Legenda",
+  remove:"Remover",s_generate:"Gerar banner",generate:"Gerar / atualizar pré-visualização",dl_pdf:"Baixar PDF",dl_zip:"Baixar LaTeX (.zip)",preview_empty:"A pré-visualização do banner aparecerá aqui.",
+  working:"Processando…",extracted:"Conteúdo extraído! Revise e edite os campos abaixo.",no_file:"Selecione um arquivo.",overflow:"O conteúdo não cabe no papel nem com a menor fonte: reduza textos/imagens, aumente o papel ou as colunas.",custom:"Nova seção",ai_off:"IA indisponível"},
+ "en-US":{app_title:"Academic Poster Generator",s_mode:"How do you want to fill it in?",mode_manual:"Fill in manually",mode_upload:"Upload my work",
+  drop_work:"Click or drag your paper here (PDF, DOCX, TXT, MD, TEX)",use_ai:"Use AI to condense the paper into poster format",provider:"AI provider",model:"Model (optional)",
+  api_key:"API key",key_hint:"The key is sent only with this request and is never stored. Without a key, basic extraction is used.",extract:"Extract content from paper",
+  s_lang:"Poster language",lang_hint:"Sets the poster labels and the language of AI-generated text.",s_template:"Template and format",paper:"Paper",orientation:"Orientation",portrait:"Portrait",landscape:"Landscape",columns:"Columns",accent:"Custom accent color",
+  s_info:"Main information",title:"Title",authors:"Authors (comma-separated)",affiliations:"Affiliations (one per line)",email:"Contact e-mail",url:"Link (generates QR code)",logos:"Logos (optional)",
+  s_sections:"Sections, text and images",add_section:"+ Add section",sec_title:"Section title",sec_text:"Text (use '- ' for lists, **bold**, *italic*, $formula$)",add_img:"Add images/charts",caption:"Caption",
+  remove:"Remove",s_generate:"Generate poster",generate:"Generate / refresh preview",dl_pdf:"Download PDF",dl_zip:"Download LaTeX (.zip)",preview_empty:"The poster preview will appear here.",
+  working:"Working…",extracted:"Content extracted! Review and edit the fields below.",no_file:"Select a file.",overflow:"The content does not fit the paper even at the smallest font: shorten text/images, use a larger paper or more columns.",custom:"New section",ai_off:"AI unavailable"}
+};
+const $ = s => document.querySelector(s);
+let CFG, lang = "pt-BR", sections = [], logos = [], uid = 0, pdfBlob = null, docFile = null;
+const files = new Map();               // field id -> File
+const t = k => T[lang][k] || k;
+
+function applyI18n(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(e => e.textContent = t(e.dataset.i18n));
+  renderTemplates(); renderSections(); renderLogos();
+}
+function showMsg(el, text, cls){ el.innerHTML = text ? `<div class="msg ${cls}"></div>` : ""; if(text) el.firstChild.textContent = text; }
+function secLabel(id){ return (CFG.labels[lang] || {})[id] || ""; }
+
+/* ---------- init ---------- */
+(async function(){
+  CFG = await (await fetch("/api/config")).json();
+  const nav = (navigator.language || "").toLowerCase().startsWith("en") ? "en-US" : "pt-BR";
+  lang = nav; $("#uiLang").value = lang; document.querySelector(`input[name=lang][value="${lang}"]`).checked = true;
+  if (matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.dataset.theme = "dark";
+  $("#paper").innerHTML = CFG.papers.map(p => `<option value="${p}">${p.toUpperCase()}</option>`).join("");
+  $("#provider").innerHTML = Object.entries(CFG.providers).map(([k,v]) => `<option value="${k}">${v.name}${v.server_key ? " ✓" : ""}</option>`).join("");
+  $("#provider").onchange = () => $("#model").placeholder = CFG.providers[$("#provider").value].default_model;
+  $("#provider").onchange();
+  CFG.sections.forEach(id => { if(["abstract","introduction","objectives","methods","results","conclusions","references"].includes(id)) sections.push(newSec(id)); });
+  state.template = "classic";
+  applyI18n();
+})();
+const state = {template:"classic"};
+function newSec(id){ return {key:"s"+(++uid), id: id||"custom"+uid, title:"", content:"", images:[]}; }
+
+/* ---------- mode / language / UI ---------- */
+document.querySelectorAll("input[name=mode]").forEach(r => r.onchange = () => $("#uploadBox").classList.toggle("hidden", r.value!=="upload" || !r.checked));
+document.querySelectorAll("input[name=lang]").forEach(r => r.onchange = () => { if(r.checked){ lang = r.value; $("#uiLang").value = lang; applyI18n(); }});
+$("#uiLang").onchange = e => { lang = e.target.value; document.querySelector(`input[name=lang][value="${lang}"]`).checked = true; applyI18n(); };
+$("#themeBtn").onclick = () => { const d = document.documentElement; d.dataset.theme = d.dataset.theme==="dark" ? "light" : "dark"; };
+$("#useAI").onchange = e => $("#aiBox").classList.toggle("hidden", !e.target.checked);
+
+/* ---------- upload of the work ---------- */
+const drop = $("#drop");
+drop.onclick = () => $("#docFile").click();
+drop.onkeydown = e => { if(e.key==="Enter"||e.key===" ") $("#docFile").click(); };
+["dragover","dragenter"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => setDoc(e.dataTransfer.files[0]));
+$("#docFile").onchange = e => setDoc(e.target.files[0]);
+function setDoc(f){ if(!f) return; docFile = f; $("#docName").textContent = f.name; }
+
+$("#extractBtn").onclick = async () => {
+  const msg = $("#extractMsg");
+  if(!docFile) return showMsg(msg, t("no_file"), "err");
+  const fd = new FormData();
+  fd.append("file", docFile); fd.append("language", lang);
+  fd.append("mode", $("#useAI").checked ? "ai" : "basic");
+  fd.append("provider", $("#provider").value); fd.append("model", $("#model").value); fd.append("api_key", $("#apiKey").value);
+  $("#extractBtn").disabled = true; showMsg(msg, t("working"), "ok");
+  try{
+    const r = await fetch("/api/extract", {method:"POST", body:fd});
+    const j = await r.json();
+    if(!r.ok) return showMsg(msg, j.error, "err");
+    fillFromExtract(j.poster);
+    showMsg(msg, t("extracted") + (j.warning ? " ("+j.warning+")" : ""), j.warning ? "err" : "ok");
+  }catch(e){ showMsg(msg, String(e), "err"); }
+  finally{ $("#extractBtn").disabled = false; }
+};
+function fillFromExtract(p){
+  ["title","authors","affiliations","email"].forEach(k => { if(p[k]) $("#"+k).value = p[k]; });
+  const kept = sections.filter(s => s.images.length);
+  const byId = Object.fromEntries(sections.map(s => [s.id, s]));
+  const out = [];
+  (p.sections||[]).forEach(s => { const old = byId[s.id]; const n = old || newSec(s.id); n.content = s.content; out.push(n); });
+  kept.forEach(s => { if(!out.includes(s)) out.push(s); });
+  sections = out.length ? out : sections;
+  renderSections();
+}
+
+/* ---------- templates ---------- */
+function renderTemplates(){
+  $("#tpls").innerHTML = Object.entries(CFG.templates).map(([id,tp]) => `
+    <div class="tpl ${state.template===id?"sel":""}" data-id="${id}" tabindex="0" role="button">
+      <div class="sw" style="background:#${tp.bg}">${tp.colors.map(c=>`<i style="background:#${c}"></i>`).join("")}</div>${tp.name[lang]}</div>`).join("");
+  document.querySelectorAll(".tpl").forEach(el => { el.onclick = () => { state.template = el.dataset.id; renderTemplates(); }; el.onkeydown = e => { if(e.key==="Enter") el.click(); }; });
+}
+
+/* ---------- images ---------- */
+function addFiles(list, target){
+  [...list].forEach(f => { const field = "f"+(++uid); files.set(field, f); target.push({field, caption:"", url:URL.createObjectURL(f)}); });
+}
+function thumbHTML(img, withCaption, kind, idx){
+  return `<div class="thumb"><img src="${img.url}" alt=""><button class="sm" data-rm="${kind}" data-idx="${idx}">✕</button>
+   ${withCaption ? `<input type="text" data-cap="${kind}" data-idx="${idx}" value="${img.caption.replace(/"/g,"&quot;")}" placeholder="${t("caption")}">` : ""}</div>`;
+}
+function renderLogos(){
+  $("#logoThumbs").innerHTML = logos.map((l,i) => thumbHTML(l,false,"logo",i)).join("");
+  $("#logoThumbs").querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { logos.splice(+b.dataset.idx,1); renderLogos(); });
+}
+$("#logoInput").onchange = e => { addFiles(e.target.files, logos); e.target.value=""; renderLogos(); };
+
+/* ---------- sections ---------- */
+function renderSections(){
+  const el = $("#sections");
+  el.innerHTML = sections.map((s,i) => `
+   <div class="sec" data-i="${i}">
+     <header><input type="text" data-f="title" value="${(s.title || secLabel(s.id)).replace(/"/g,"&quot;")}" placeholder="${t("sec_title")}">
+       <button class="sm" data-act="up" ${i===0?"disabled":""}>↑</button><button class="sm" data-act="down" ${i===sections.length-1?"disabled":""}>↓</button>
+       <button class="sm" data-act="del" title="${t("remove")}">✕</button></header>
+     <textarea data-f="content" placeholder="${t("sec_text")}">${s.content.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</textarea>
+     <label style="display:inline-block;cursor:pointer;color:var(--pri)">📎 ${t("add_img")}<input type="file" accept="image/*" multiple class="hidden" data-f="img"></label>
+     <div class="thumbs">${s.images.map((im,j)=>thumbHTML(im,true,"sec"+i,j)).join("")}</div>
+   </div>`).join("");
+  el.querySelectorAll(".sec").forEach(div => {
+    const i = +div.dataset.i, s = sections[i];
+    div.querySelector("[data-f=title]").oninput = e => s.title = e.target.value;
+    div.querySelector("[data-f=content]").oninput = e => s.content = e.target.value;
+    div.querySelector("[data-f=img]").onchange = e => { addFiles(e.target.files, s.images); renderSections(); };
+    div.querySelectorAll("[data-act]").forEach(b => b.onclick = () => {
+      const a = b.dataset.act;
+      if(a==="del") sections.splice(i,1);
+      else { const j = a==="up" ? i-1 : i+1; [sections[i],sections[j]] = [sections[j],sections[i]]; }
+      renderSections();
+    });
+    div.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { s.images.splice(+b.dataset.idx,1); renderSections(); });
+    div.querySelectorAll("[data-cap]").forEach(inp => inp.oninput = () => s.images[+inp.dataset.idx].caption = inp.value);
+  });
+}
+$("#addSec").onclick = () => { const s = newSec(); s.title = t("custom"); sections.push(s); renderSections(); };
+
+/* ---------- generate ---------- */
+function buildForm(){
+  const fd = new FormData();
+  const data = {
+    language: lang, template: state.template, paper: $("#paper").value, orientation: $("#orientation").value,
+    columns: +$("#columns").value, accent: $("#useAccent").checked ? $("#accent").value : "",
+    title: $("#title").value, authors: $("#authors").value, affiliations: $("#affiliations").value,
+    email: $("#email").value, url: $("#url").value, logos: logos.map(l => l.field),
+    sections: sections.map(s => ({id: s.id, title: s.title || secLabel(s.id), content: s.content,
+      images: s.images.map(im => ({path: im.field, caption: im.caption}))}))
+  };
+  fd.append("data", JSON.stringify(data));
+  const used = new Set([...data.logos, ...data.sections.flatMap(s => s.images.map(i => i.path))]);
+  used.forEach(f => fd.append(f, files.get(f)));
+  return fd;
+}
+async function generate(fmt){
+  const msg = $("#genMsg"); showMsg(msg, t("working"), "ok");
+  $("#genBtn").disabled = true;
+  try{
+    const r = await fetch("/api/generate?format="+fmt, {method:"POST", body: buildForm()});
+    if(!r.ok){ const j = await r.json().catch(()=>({error:"HTTP "+r.status})); return showMsg(msg, j.error, "err"); }
+    const blob = await r.blob();
+    showMsg(msg, r.headers.get("X-Poster-Overflow") ? t("overflow") : "", "err");
+    if(fmt==="pdf"){
+      pdfBlob = blob; $("#dlPdf").disabled = false;
+      $("#frame").src = URL.createObjectURL(blob); $("#frame").classList.remove("hidden"); $("#emptyPrev").classList.add("hidden");
+    } else save(blob, "poster-latex.zip");
+  }catch(e){ showMsg(msg, String(e), "err"); }
+  finally{ $("#genBtn").disabled = false; }
+}
+function save(blob, name){ const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000); }
+$("#genBtn").onclick = () => generate("pdf");
+$("#dlPdf").onclick = () => pdfBlob && save(pdfBlob, "poster.pdf");
+$("#dlZip").onclick = () => generate("zip");
+</script>
+</body>
+</html>

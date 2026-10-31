@@ -1,0 +1,72 @@
+"""Configuração central: provedores de IA, tamanhos de pôster e limites."""
+
+from __future__ import annotations
+
+import os
+from typing import Any, Dict
+
+LANGUAGES = ("pt-BR", "en-US")
+DEFAULT_LANGUAGE = "pt-BR"
+
+MAX_UPLOAD_BYTES = 60 * 1024 * 1024
+MAX_IMAGE_BYTES = 15 * 1024 * 1024
+MAX_IMAGES_TOTAL = 40
+MAX_DOC_CHARS = 120_000
+LATEX_TIMEOUT_S = 150
+
+# Tamanho do papel -> (opção tikzposter, tamanho da fonte base)
+PAPER_SIZES: Dict[str, Dict[str, str]] = {
+    "a0": {"paper": "a0paper", "font": "25pt"},
+    "a1": {"paper": "a1paper", "font": "20pt"},
+    "a2": {"paper": "a2paper", "font": "17pt"},
+    "a3": {"paper": "a3paper", "font": "12pt"},
+}
+
+# Provedores: chave via campo da requisição (nunca armazenada) ou variável de ambiente.
+PROVIDERS: Dict[str, Dict[str, Any]] = {
+    "google": {
+        "name": "Google Gemini",
+        "env": "GEMINI_API_KEY",
+        "default_model": "gemini-2.0-flash",
+    },
+    "openai": {
+        "name": "OpenAI",
+        "env": "OPENAI_API_KEY",
+        "default_model": "gpt-4o-mini",
+        "url": "https://api.openai.com/v1/chat/completions",
+    },
+    "anthropic": {
+        "name": "Anthropic Claude",
+        "env": "ANTHROPIC_API_KEY",
+        "default_model": "claude-3-5-haiku-latest",
+        "url": "https://api.anthropic.com/v1/messages",
+    },
+    "deepseek": {
+        "name": "DeepSeek",
+        "env": "DEEPSEEK_API_KEY",
+        "default_model": "deepseek-chat",
+        "url": "https://api.deepseek.com/chat/completions",
+    },
+    "nvidia": {
+        "name": "NVIDIA NIM",
+        "env": "NVIDIA_API_KEY",
+        "default_model": "meta/llama-3.3-70b-instruct",
+        "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+    },
+}
+
+
+def server_key_for(provider: str) -> str:
+    cfg = PROVIDERS.get(provider)
+    return os.environ.get(cfg["env"], "").strip() if cfg else ""
+
+
+def public_provider_info() -> Dict[str, Any]:
+    return {
+        pid: {
+            "name": cfg["name"],
+            "default_model": cfg["default_model"],
+            "server_key": bool(server_key_for(pid)),
+        }
+        for pid, cfg in PROVIDERS.items()
+    }

@@ -1,9 +1,6 @@
-# ==============================================================================
-# Render Blueprint Configuration (render.yaml)
-# ==============================================================================
 services:
   - type: web
-    name: latex-resume-backend
+    name: banner-generator
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free
@@ -12,10 +9,9 @@ services:
     autoDeploy: true
     healthCheckPath: /healthz
     envVars:
-      - key: NVIDIA_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
       - key: PYTHONUNBUFFERED
         value: "1"
       - key: PORT
         value: "10000"
-
