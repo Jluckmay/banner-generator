@@ -254,7 +254,8 @@ def test_latex_injection_does_not_read_files(client, tmp_path, monkeypatch):
 def test_security_headers(client):
     r = client.get("/")
     assert "default-src 'self'" in r.headers["Content-Security-Policy"]
-    assert r.headers["X-Frame-Options"] == "DENY" and r.headers["X-Content-Type-Options"] == "nosniff"
+    assert "frame-ancestors 'self'" in r.headers["Content-Security-Policy"]
+    assert r.headers["X-Frame-Options"] == "SAMEORIGIN" and r.headers["X-Content-Type-Options"] == "nosniff"
 
 
 def test_oversized_upload_rejected(client):

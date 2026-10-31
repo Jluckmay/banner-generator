@@ -35,11 +35,17 @@ def _headers(resp: Response) -> Response:
     resp.headers["X-Content-Type-Options"] = "nosniff"
     resp.headers["Referrer-Policy"] = "no-referrer"
     resp.headers["Cache-Control"] = "no-store"
-    resp.headers["X-Frame-Options"] = "DENY"
+    resp.headers["X-Frame-Options"] = "SAMEORIGIN"
     resp.headers["Content-Security-Policy"] = (
-        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
-        "img-src 'self' blob: data:; frame-src blob:; object-src blob:; connect-src 'self'; "
-        "base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+        "default-src 'self' data: blob:; "
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
+        "worker-src 'self' blob: data: https://cdnjs.cloudflare.com; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' blob: data:; "
+        "frame-src 'self' blob: data: chrome-extension:; "
+        "object-src 'self' blob: data:; "
+        "connect-src 'self' https://cdnjs.cloudflare.com; "
+        "base-uri 'none'; form-action 'self'; frame-ancestors 'self'"
     )
     return resp
 
