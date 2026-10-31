@@ -1,285 +1,518 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="light">
+<html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gerador de Banners Acadêmicos | Academic Poster Generator</title>
+<title>~/ banner-generator | 01 // LATEX ACADEMIC POSTER COMPILER</title>
 <link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 :root {
-  --bg: #f4f6fa;
-  --card: #ffffff;
-  --fg: #1a2233;
-  --muted: #5e6c84;
-  --line: #d8e0ec;
-  --pri: #1f4f82;
-  --pri-hover: #173d66;
-  --pri-fg: #ffffff;
-  --accent: #2e5c8a;
-  --danger: #d92d20;
-  --danger-bg: #fee4e2;
-  --ok: #079455;
-  --ok-bg: #d1fadf;
-  --warn: #b54708;
-  --warn-bg: #fef0c7;
-  --radius: 10px;
-  --shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
-  --viewer-bg: #272d38;
-}
-:root[data-theme="dark"] {
-  --bg: #0d121c;
-  --card: #151c28;
+  --font-mono: "Fira Code", "JetBrains Mono", Consolas, "Courier New", monospace;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --bg: #090a0d;
+  --bg-card: #0e1015;
+  --bg-subtle: #141720;
+  --bg-input: #08090c;
   --fg: #e6edf8;
-  --muted: #95a3b8;
-  --line: #263347;
-  --pri: #4b89dc;
-  --pri-hover: #679eeb;
-  --pri-fg: #0a111a;
-  --accent: #6aa6e0;
-  --danger: #f97066;
-  --danger-bg: rgba(217, 45, 32, 0.18);
-  --ok: #47cd89;
-  --ok-bg: rgba(7, 148, 85, 0.18);
-  --warn: #fdb022;
-  --warn-bg: rgba(181, 71, 8, 0.18);
-  --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
-  --viewer-bg: #11151c;
+  --fg-bright: #ffffff;
+  --muted: #7f8ba4;
+  --line: #1c202c;
+  --line-strong: #2a3142;
+  --red: #ff2a40;
+  --red-hover: #e51d32;
+  --red-glow: rgba(255, 42, 64, 0.35);
+  --amber: #fbbf24;
+  --amber-dark: #d97706;
+  --amber-glow: rgba(251, 191, 36, 0.25);
+  --grad-red-amber: linear-gradient(90deg, #ff2a40 0%, #ff6b35 50%, #fbbf24 100%);
+  --grad-primary-btn: linear-gradient(90deg, #ff2a40 0%, #ff4d30 100%);
+  --card-radius: 4px;
+  --btn-radius: 3px;
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.6);
+  --viewer-bg: #07080a;
 }
+
+:root[data-theme="light"] {
+  --bg: #f2f4f8;
+  --bg-card: #ffffff;
+  --bg-subtle: #f8fafc;
+  --bg-input: #ffffff;
+  --fg: #131720;
+  --fg-bright: #0a0d14;
+  --muted: #5e6b82;
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+  --red: #e52e3d;
+  --red-hover: #c91f2d;
+  --red-glow: rgba(229, 46, 61, 0.2);
+  --amber: #d97706;
+  --amber-dark: #b45309;
+  --amber-glow: rgba(217, 119, 6, 0.2);
+  --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.08);
+  --viewer-bg: #1c202a;
+}
+
 * { box-sizing: border-box; }
 body {
   margin: 0;
-  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font: 13.5px/1.55 var(--font-sans);
   background: var(--bg);
   color: var(--fg);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
+
+/* Header no estilo terminal da imagem (~/ soft-and-skills) */
 header {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  padding: 10px 24px;
-  background: var(--card);
+  padding: 18px 32px 14px;
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
   position: sticky;
   top: 0;
-  z-index: 40;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  z-index: 50;
+  backdrop-filter: blur(8px);
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1800px;
+  margin: 0 auto;
 }
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex: 1;
+  gap: 14px;
 }
-.brand img { width: 34px; height: 34px; }
-.brand-text h1 { margin: 0; font-size: 17px; font-weight: 700; color: var(--fg); line-height: 1.2; }
-.brand-text p { margin: 0; font-size: 11px; color: var(--muted); }
-.header-actions { display: flex; align-items: center; gap: 8px; }
+.brand-terminal-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--fg-bright);
+}
+.brand-terminal-title .prompt-prefix {
+  color: var(--red);
+  font-weight: 800;
+}
+.brand-tagline {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--red);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Layout Principal */
 main {
   display: grid;
-  grid-template-columns: minmax(360px, 530px) 1fr;
-  gap: 20px;
-  padding: 20px;
-  max-width: 1780px;
+  grid-template-columns: minmax(380px, 540px) 1fr;
+  gap: 22px;
+  padding: 22px 32px;
+  max-width: 1800px;
   margin: 0 auto;
   width: 100%;
   flex: 1;
   align-items: start;
 }
-@media (max-width: 1040px) {
-  main { grid-template-columns: 1fr; padding: 12px; }
-  #preview { position: static !important; height: 600px !important; margin-top: 16px; }
+@media (max-width: 1100px) {
+  main { grid-template-columns: 1fr; padding: 14px; }
+  header { padding: 12px 14px; }
+  .brand-terminal-title { font-size: 20px; }
+  #preview { position: static !important; height: 620px !important; margin-top: 18px; }
 }
+
+/* Cards no estilo da imagem: topo vermelho, fundo escuro, cantos retos */
 .card {
-  background: var(--card);
+  background: var(--bg-card);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: var(--shadow);
+  border-top: 2px solid var(--red);
+  border-radius: var(--card-radius);
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-card);
+  position: relative;
+}
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.card-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--amber);
+  color: #000000;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  line-height: 1;
 }
 .card h2 {
+  font-family: var(--font-mono);
   font-size: 14px;
   font-weight: 700;
-  margin: 0 0 12px;
+  margin: 0;
   display: flex;
+  align-items: center;
   gap: 8px;
-  align-items: center;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted);
+  color: var(--fg-bright);
+  letter-spacing: -0.01em;
 }
-.card h2 .n {
-  background: var(--pri);
-  color: var(--pri-fg);
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.card-sec-number {
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Labels e Controles de Formulário */
+label {
+  display: block;
+  font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 12px 0 5px;
 }
-label { display: block; font-size: 12px; font-weight: 600; color: var(--fg); margin: 10px 0 4px; }
 input[type=text], input[type=password], input[type=email], input[type=url], textarea, select {
   width: 100%;
-  padding: 8px 11px;
+  padding: 8px 12px;
   border: 1px solid var(--line);
-  border-radius: 7px;
-  background: var(--bg);
-  color: var(--fg);
-  font: inherit;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  border-radius: var(--btn-radius);
+  background: var(--bg-input);
+  color: var(--fg-bright);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  transition: all 0.15s ease;
 }
-input:focus, textarea:focus, select:focus {
+input[type=text]:focus, input[type=password]:focus, input[type=email]:focus, input[type=url]:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: var(--pri);
-  box-shadow: 0 0 0 3px rgba(31, 79, 130, 0.15);
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px var(--red-glow);
 }
-textarea { min-height: 95px; resize: vertical; }
-button {
-  font: inherit;
-  cursor: pointer;
-  border: 1px solid var(--line);
-  background: var(--card);
-  color: var(--fg);
-  padding: 8px 14px;
-  border-radius: 7px;
-  min-height: 38px;
+textarea {
+  min-height: 90px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Botões estilo terminal/chip da imagem */
+button, .btn-terminal {
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-subtle);
+  color: var(--fg);
+  padding: 7px 14px;
+  border-radius: var(--btn-radius);
+  min-height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  transition: all 0.15s;
+  gap: 8px;
+  transition: all 0.15s ease;
 }
-button:hover:not(:disabled) { background: var(--bg); border-color: var(--muted); }
+button:hover:not(:disabled), .btn-terminal:hover:not(:disabled) {
+  border-color: var(--red);
+  color: var(--fg-bright);
+  background: var(--bg-card);
+}
+button:disabled, .btn-terminal:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
 button.pri {
-  background: var(--pri);
-  color: var(--pri-fg);
-  border-color: var(--pri);
+  background: var(--grad-primary-btn);
+  color: #ffffff;
+  border: 1px solid var(--red);
+  box-shadow: 0 2px 14px var(--red-glow);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
-button.pri:hover:not(:disabled) { background: var(--pri-hover); border-color: var(--pri-hover); }
-button:disabled { opacity: 0.5; cursor: not-allowed; }
-button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
+button.pri:hover:not(:disabled) {
+  filter: brightness(1.15);
+  box-shadow: 0 4px 20px rgba(255, 42, 64, 0.55);
+}
+button.sm {
+  padding: 3px 9px;
+  min-height: 28px;
+  font-size: 11px;
+}
 .btn-toggle {
-  background: var(--bg);
+  background: var(--bg-input);
   border: 1px solid var(--line);
   color: var(--fg);
-  padding: 6px 11px;
-  border-radius: 6px;
-  font-size: 12px;
-  min-height: 32px;
+  padding: 5px 10px;
+  border-radius: var(--btn-radius);
+  font-size: 11.5px;
+  min-height: 30px;
 }
-.btn-toggle:hover { border-color: var(--pri); }
+.btn-toggle:hover {
+  border-color: var(--red);
+}
+
+/* Grid & Segmented Controls */
 .row { display: flex; gap: 10px; flex-wrap: wrap; }
 .row > * { flex: 1; min-width: 120px; }
-.seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--bg); }
-.seg label { flex: 1; margin: 0; padding: 8px 12px; text-align: center; cursor: pointer; color: var(--fg); font-size: 13px; font-weight: 600; }
+.seg {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: var(--btn-radius);
+  overflow: hidden;
+  background: var(--bg-input);
+}
+.seg label {
+  flex: 1;
+  margin: 0;
+  padding: 8px 12px;
+  text-align: center;
+  cursor: pointer;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
 .seg input { display: none; }
-.seg label:has(input:checked) { background: var(--pri); color: var(--pri-fg); }
+.seg label:has(input:checked) {
+  background: var(--bg-subtle);
+  color: var(--red);
+  font-weight: 700;
+  box-shadow: inset 0 -2px 0 var(--red);
+}
+
+/* Área de Drop de Arquivo */
 .drop {
-  border: 2px dashed var(--line);
-  border-radius: var(--radius);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--card-radius);
   padding: 22px 16px;
   text-align: center;
   color: var(--muted);
   cursor: pointer;
-  background: var(--bg);
+  background: var(--bg-input);
   transition: all 0.15s;
+  font-family: var(--font-mono);
+  font-size: 12px;
 }
-.drop:hover, .drop.over { border-color: var(--pri); color: var(--pri); background: rgba(31, 79, 130, 0.05); }
-.tpls { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.drop:hover, .drop.over {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(255, 42, 64, 0.04);
+}
+
+/* Grade de Templates */
+.tpls {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
 .tpl {
-  border: 2px solid var(--line);
-  border-radius: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--btn-radius);
   padding: 8px;
   cursor: pointer;
   text-align: center;
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
   font-weight: 600;
-  transition: all 0.15s;
+  background: var(--bg-input);
+  transition: all 0.15s ease;
 }
-.tpl:hover { border-color: var(--muted); }
-.tpl.sel { border-color: var(--pri); box-shadow: 0 0 0 2px var(--pri) inset; background: rgba(31, 79, 130, 0.04); }
-.tpl .sw { height: 42px; border-radius: 5px; margin-bottom: 6px; display: flex; overflow: hidden; border: 1px solid rgba(0,0,0,0.1); }
+.tpl:hover { border-color: var(--line-strong); }
+.tpl.sel {
+  border-color: var(--red);
+  box-shadow: 0 0 0 1px var(--red) inset, 0 2px 10px var(--red-glow);
+  color: var(--fg-bright);
+}
+.tpl .sw {
+  height: 38px;
+  border-radius: 2px;
+  margin-bottom: 6px;
+  display: flex;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+}
 .tpl .sw i { flex: 1; }
-.sec { border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 12px; background: var(--bg); }
-.sec-header { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-.sec-header input { flex: 1; font-weight: 700; }
-.thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+/* Seções e Upload de Imagens */
+.sec {
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--amber);
+  border-radius: var(--btn-radius);
+  padding: 12px;
+  margin-bottom: 12px;
+  background: var(--bg-subtle);
+}
+.sec-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.sec-header input {
+  flex: 1;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+.thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
 .thumb {
   width: 120px;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 6px;
+  border-radius: var(--btn-radius);
+  padding: 5px;
   font-size: 11px;
-  background: var(--card);
+  background: var(--bg-input);
   position: relative;
 }
-.thumb img { width: 100%; height: 75px; object-fit: contain; background: var(--bg); border-radius: 4px; display: block; }
-.thumb input { padding: 3px 6px; font-size: 11px; margin-top: 4px; }
+.thumb img {
+  width: 100%;
+  height: 72px;
+  object-fit: contain;
+  background: var(--bg);
+  border-radius: 2px;
+  display: block;
+}
+.thumb input {
+  padding: 3px 6px;
+  font-size: 10.5px;
+  margin-top: 4px;
+}
 .thumb .rm-btn {
   position: absolute;
   top: 2px;
   right: 2px;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   padding: 0;
-  min-height: 20px;
-  background: rgba(0,0,0,0.65);
+  min-height: 18px;
+  background: rgba(0, 0, 0, 0.75);
   color: #fff;
-  border: none;
+  border: 1px solid var(--line);
   border-radius: 50%;
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1;
 }
-.thumb .rm-btn:hover { background: var(--danger); }
-.msg { padding: 10px 14px; border-radius: 8px; margin-top: 10px; font-size: 13px; font-weight: 500; }
-.msg.err { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(217, 45, 32, 0.2); }
-.msg.ok { background: var(--ok-bg); color: var(--ok); border: 1px solid rgba(7, 148, 85, 0.2); }
-.hint { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+.thumb .rm-btn:hover {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+/* Mensagens de Feedback */
+.msg {
+  padding: 10px 14px;
+  border-radius: var(--btn-radius);
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+}
+.msg.err {
+  background: rgba(255, 42, 64, 0.1);
+  color: var(--red);
+  border: 1px solid var(--red);
+}
+.msg.ok {
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--amber);
+  border: 1px solid var(--amber);
+}
+.hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.45;
+}
 
 /* Visualizador de Pôster */
 #preview {
   position: sticky;
-  top: 70px;
-  height: calc(100vh - 90px);
-  min-height: 580px;
-  background: var(--card);
+  top: 78px;
+  height: calc(100vh - 100px);
+  min-height: 600px;
+  background: var(--bg-card);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-top: 2px solid var(--red);
+  border-radius: var(--card-radius);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-card);
 }
 #preview-header {
-  padding: 10px 14px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--card);
+  background: var(--bg-card);
   gap: 10px;
   flex-wrap: wrap;
 }
-#preview-header h3 { margin: 0; font-size: 13px; font-weight: 700; color: var(--fg); display: flex; align-items: center; gap: 6px; }
+#preview-header h3 {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--fg-bright);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+#preview-header h3 .indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+}
 #pdf-toolbar {
   display: none;
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: var(--bg);
+  background: var(--bg-subtle);
   border-bottom: 1px solid var(--line);
   flex-wrap: wrap;
 }
 #pdf-toolbar .tb-group { display: flex; align-items: center; gap: 4px; }
-#pdf-toolbar .tb-sep { width: 1px; height: 18px; background: var(--line); margin: 0 4px; }
+#pdf-toolbar .tb-sep { width: 1px; height: 16px; background: var(--line); margin: 0 4px; }
+
 #pdf-viewport-container {
   flex: 1;
   overflow: auto;
@@ -288,50 +521,61 @@ button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: 24px;
 }
 .empty-state {
   margin: auto;
   text-align: center;
   color: var(--muted);
-  max-width: 320px;
+  max-width: 340px;
   padding: 20px;
+  font-family: var(--font-mono);
 }
-.empty-state svg { width: 56px; height: 56px; stroke: currentColor; fill: none; opacity: 0.5; margin-bottom: 12px; }
-.empty-state p { margin: 0 0 16px; font-size: 13px; }
+.empty-state .terminal-icon {
+  font-size: 44px;
+  color: var(--red);
+  margin-bottom: 14px;
+  display: block;
+}
+.empty-state p {
+  margin: 0 0 16px;
+  font-size: 12px;
+  line-height: 1.5;
+}
 .loading-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.7);
+  background: rgba(9, 10, 13, 0.85);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   color: #fff;
   z-index: 20;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
+  font-family: var(--font-mono);
 }
 .spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid rgba(255,255,255,0.2);
-  border-top-color: #fff;
+  border: 3px solid rgba(255, 42, 64, 0.2);
+  border-top-color: var(--red);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.75s linear infinite;
   margin-bottom: 12px;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
 .pdf-page-wrapper {
-  margin-bottom: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
-  border-radius: 4px;
+  margin-bottom: 24px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+  border-radius: 2px;
   background: #ffffff;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: transform 0.15s;
 }
-.pdf-page-canvas { display: block; border-radius: 4px; max-width: none; }
+.pdf-page-canvas { display: block; border-radius: 2px; max-width: none; }
 #pdf-iframe { width: 100%; height: 100%; border: none; background: #fff; display: none; }
 .hidden { display: none !important; }
 </style>
@@ -339,19 +583,23 @@ button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
 <body>
 
 <header>
-  <div class="brand">
-    <img src="/assets/icons/favicon.svg" alt="Logo">
-    <div class="brand-text">
-      <h1 data-i18n="app_title">Gerador de Banners Acadêmicos</h1>
-      <p data-i18n="app_sub">Pôsteres científicos em LaTeX + PDF alta resolução</p>
+  <div class="header-top">
+    <div class="brand">
+      <div class="brand-terminal-title">
+        <span class="prompt-prefix">~/</span>
+        <span id="brandName">banner-generator</span>
+      </div>
     </div>
-  </div>
-  <div class="header-actions">
-    <select id="uiLang" class="btn-toggle" style="font-weight:600;" aria-label="Language">
-      <option value="pt-BR">🇧🇷 Português</option>
-      <option value="en-US">🇺🇸 English</option>
-    </select>
-    <button id="themeBtn" class="btn-toggle" title="Alternar tema" aria-label="Theme">◐</button>
+    <div class="brand-tagline">
+      <span>01 / ACADEMIC POSTER & LATEX COMPILER</span>
+      <div class="header-controls">
+        <select id="uiLang" class="btn-toggle" style="font-weight:600;" aria-label="Language">
+          <option value="pt-BR">🇧🇷 pt-BR</option>
+          <option value="en-US">🇺🇸 en-US</option>
+        </select>
+        <button id="themeBtn" class="btn-toggle" title="Alternar tema" aria-label="Theme">◐</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -360,21 +608,24 @@ button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
 
   <!-- 1. Modo de Preenchimento -->
   <section class="card">
-    <h2><span class="n">1</span><span data-i18n="s_mode">Como deseja preencher?</span></h2>
+    <div class="card-meta">
+      <h2><span class="card-sec-number">01 //</span> <span data-i18n="s_mode">MODO DE PREENCHIMENTO</span></h2>
+      <span class="card-icon-badge">&lt;/&gt;</span>
+    </div>
     <div class="seg" role="radiogroup">
       <label><input type="radio" name="mode" value="manual" checked><span data-i18n="mode_manual">Preencher manualmente</span></label>
       <label><input type="radio" name="mode" value="upload"><span data-i18n="mode_upload">Enviar trabalho</span></label>
     </div>
     <div id="uploadBox" class="hidden" style="margin-top:12px;">
       <div class="drop" id="drop" tabindex="0">
-        <span data-i18n="drop_work">Clique ou arraste seu trabalho aqui (PDF, DOCX, TXT, MD, TEX)</span>
-        <div class="hint" id="docName" style="font-weight:700;color:var(--fg);margin-top:6px;"></div>
+        <span data-i18n="drop_work">Arraste ou clique para enviar (PDF, DOCX, TXT, MD, TEX)</span>
+        <div class="hint" id="docName" style="font-weight:700;color:var(--amber);margin-top:6px;"></div>
       </div>
       <input id="docFile" type="file" accept=".pdf,.docx,.txt,.md,.tex" class="hidden">
       <div style="margin-top:10px;">
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;font-size:12px;color:var(--fg);">
           <input type="checkbox" id="useAI" checked>
-          <span data-i18n="use_ai">Usar IA para sintetizar e estruturar o trabalho em formato de pôster</span>
+          <span data-i18n="use_ai">Usar IA para sintetizar o trabalho em formato de pôster</span>
         </label>
       </div>
       <div id="aiBox" style="margin-top:10px;">
@@ -383,7 +634,7 @@ button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
           <div><label data-i18n="model">Modelo (opcional)</label><input type="text" id="model" autocomplete="off"></div>
         </div>
         <label data-i18n="api_key">Chave de API</label>
-        <input type="password" id="apiKey" autocomplete="off" placeholder="Cole sua chave aqui ou use a do servidor se configurada">
+        <input type="password" id="apiKey" autocomplete="off" placeholder="Cole sua chave aqui ou use a do servidor">
         <div class="hint" data-i18n="key_hint">A chave é utilizada unicamente nesta chamada e jamais é persistida em disco.</div>
       </div>
       <p style="margin:12px 0 0;"><button class="pri" id="extractBtn" data-i18n="extract">Extrair conteúdo do trabalho</button></p>
@@ -393,7 +644,10 @@ button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
 
   <!-- 2. Idioma do Banner -->
   <section class="card">
-    <h2><span class="n">2</span><span data-i18n="s_lang">Idioma do pôster</span></h2>
+    <div class="card-meta">
+      <h2><span class="card-sec-number">02 //</span> <span data-i18n="s_lang">IDIOMA DO PÔSTER</span></h2>
+      <span class="card-icon-badge">A字</span>
+    </div>
     <div class="seg" role="radiogroup">
       <label><input type="radio" name="lang" value="pt-BR" checked><span>Português (pt-BR)</span></label>
       <label><input type="radio" name="lang" value="en-US"><span>English (en-US)</span></label>
@@ -403,7 +657,10 @@ button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
 
   <!-- 3. Template e Dimensões -->
   <section class="card">
-    <h2><span class="n">3</span><span data-i18n="s_template">Template e formato</span></h2>
+    <div class="card-meta">
+      <h2><span class="card-sec-number">03 //</span> <span data-i18n="s_template">TEMPLATE E FORMATO</span></h2>
+      <span class="card-icon-badge">📐</span>
+    </div>
     <div class="tpls" id="tpls"></div>
     <div class="row">
       <div><label data-i18n="paper">Dimensões do Pôster</label><select id="paper"></select></div>
@@ -425,17 +682,20 @@ button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
       </div>
     </div>
     <div style="margin-top:12px;">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;font-size:12px;color:var(--fg);">
         <input type="checkbox" id="useAccent">
         <span data-i18n="accent">Cor de destaque personalizada:</span>
-        <input type="color" id="accent" value="#2e5c8a" style="width:36px;height:28px;padding:0;border:none;cursor:pointer;">
+        <input type="color" id="accent" value="#2e5c8a" style="width:34px;height:26px;padding:0;border:1px solid var(--line);cursor:pointer;background:transparent;">
       </label>
     </div>
   </section>
 
   <!-- 4. Dados Principais -->
   <section class="card">
-    <h2><span class="n">4</span><span data-i18n="s_info">Informações principais</span></h2>
+    <div class="card-meta">
+      <h2><span class="card-sec-number">04 //</span> <span data-i18n="s_info">INFORMAÇÕES PRINCIPAIS</span></h2>
+      <span class="card-icon-badge">📄</span>
+    </div>
     <label data-i18n="title">Título do Trabalho</label>
     <input type="text" id="title" maxlength="500" placeholder="Ex: Otimização de Algoritmos em Redes Complexas">
     
@@ -459,25 +719,28 @@ button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
     <!-- Upload de Logotipos -->
     <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;">
       <label style="display:flex;justify-content:space-between;align-items:center;">
-        <span><span data-i18n="logos_header">Logotipos do cabeçalho</span> <b id="hdrCount" style="color:var(--pri);">(0/2)</b></span>
+        <span><span data-i18n="logos_header">Logotipos do cabeçalho</span> <b id="hdrCount" style="color:var(--amber);">(0/2)</b></span>
       </label>
       <input type="file" id="logoHInput" accept="image/*" multiple>
       <div class="thumbs" id="logoHThumbs"></div>
 
       <div id="footerLogos" style="margin-top:12px;">
         <label style="display:flex;justify-content:space-between;align-items:center;">
-          <span><span data-i18n="logos_footer">Logotipos do rodapé</span> <b id="ftrCount" style="color:var(--pri);">(0/5)</b></span>
+          <span><span data-i18n="logos_footer">Logotipos do rodapé</span> <b id="ftrCount" style="color:var(--amber);">(0/5)</b></span>
         </label>
         <input type="file" id="logoFInput" accept="image/*" multiple>
         <div class="thumbs" id="logoFThumbs"></div>
       </div>
-      <div class="hint" id="logoMsg" style="color:var(--warn);font-weight:600;"></div>
+      <div class="hint" id="logoMsg" style="color:var(--amber);font-weight:600;"></div>
     </div>
   </section>
 
   <!-- 5. Seções e Imagens Específicas -->
   <section class="card">
-    <h2><span class="n">5</span><span data-i18n="s_sections">Seções, Textos e Gráficos</span></h2>
+    <div class="card-meta">
+      <h2><span class="card-sec-number">05 //</span> <span data-i18n="s_sections">SEÇÕES, TEXTOS E GRÁFICOS</span></h2>
+      <span class="card-icon-badge">⚡</span>
+    </div>
     <div class="hint" style="margin-bottom:12px;" data-i18n="sec_hint">
       Adicione textos, listas (- item), fórmulas ($E=mc^2$) e faça upload de imagens ou gráficos para cada seção específica.
     </div>
@@ -487,7 +750,10 @@ button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
 
   <!-- 6. Ações -->
   <section class="card">
-    <h2><span class="n">6</span><span data-i18n="s_generate">Gerar e Exportar</span></h2>
+    <div class="card-meta">
+      <h2><span class="card-sec-number">06 //</span> <span data-i18n="s_generate">GERAR E EXPORTAR</span></h2>
+      <span class="card-icon-badge">🚀</span>
+    </div>
     <div class="row">
       <button class="pri" id="genBtn" style="flex:2;" data-i18n="generate">⚡ Gerar / Atualizar Pôster</button>
       <button id="dlPdf" disabled data-i18n="dl_pdf">⬇ Baixar PDF</button>
@@ -502,7 +768,7 @@ button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
 <aside id="preview">
   <div id="preview-header">
     <h3>
-      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ok);"></span>
+      <span class="indicator"></span>
       <span data-i18n="preview_title">Visualização do Pôster</span>
     </h3>
     <div style="display:flex;gap:6px;">
@@ -514,7 +780,7 @@ button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
   <div id="pdf-toolbar">
     <div class="tb-group">
       <button id="btnZoomOut" class="btn-toggle sm" title="Reduzir zoom">-</button>
-      <span id="zoomDisplay" style="font-weight:700;font-size:12px;min-width:44px;text-align:center;">100%</span>
+      <span id="zoomDisplay" style="font-family:var(--font-mono);font-weight:700;font-size:11px;min-width:44px;text-align:center;color:var(--amber);">100%</span>
       <button id="btnZoomIn" class="btn-toggle sm" title="Aumentar zoom">+</button>
     </div>
     <div class="tb-sep"></div>
@@ -525,23 +791,21 @@ button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
     <div class="tb-sep"></div>
     <div class="tb-group" id="pageNavGroup" style="display:none;">
       <button id="btnPrevPage" class="btn-toggle sm">‹</button>
-      <span id="pageDisplay" style="font-size:12px;font-weight:600;">1 / 1</span>
+      <span id="pageDisplay" style="font-family:var(--font-mono);font-size:11px;font-weight:600;">1 / 1</span>
       <button id="btnNextPage" class="btn-toggle sm">›</button>
     </div>
   </div>
 
   <div id="pdf-viewport-container">
     <div class="empty-state" id="emptyPrev">
-      <svg viewBox="0 0 24 24" stroke-width="1.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
-      </svg>
-      <p data-i18n="preview_empty">A pré-visualização interativa do seu pôster acadêmico aparecerá aqui após clicar em "Gerar Pôster".</p>
+      <span class="terminal-icon">~/</span>
+      <p data-i18n="preview_empty">A pré-visualização interativa do seu pôster aparecerá aqui após clicar em "Gerar Pôster".</p>
       <button id="quickSampleBtn" class="btn-toggle sm" data-i18n="load_sample">Carregar Exemplo de Demonstração</button>
     </div>
 
     <div class="loading-overlay hidden" id="loadingOverlay">
       <div class="spinner"></div>
-      <div id="loadingText" style="font-weight:600;font-size:13px;" data-i18n="working">Compilando pôster LaTeX...</div>
+      <div id="loadingText" style="font-weight:600;font-size:12px;color:var(--red);" data-i18n="working">Compilando pôster LaTeX...</div>
     </div>
 
     <div id="pdfCanvasList"></div>
@@ -554,9 +818,8 @@ button.sm { padding: 4px 10px; min-height: 30px; font-size: 12px; }
 <script>
 const T = {
   "pt-BR": {
-    app_title: "Gerador de Banners Acadêmicos",
-    app_sub: "Pôsteres científicos em LaTeX + PDF alta resolução",
-    s_mode: "Como deseja preencher?",
+    app_title: "banner-generator",
+    s_mode: "MODO DE PREENCHIMENTO",
     mode_manual: "Preencher manualmente",
     mode_upload: "Enviar meu trabalho",
     drop_work: "Clique ou arraste seu trabalho aqui (PDF, DOCX, TXT, MD, TEX)",
@@ -566,16 +829,16 @@ const T = {
     api_key: "Chave de API",
     key_hint: "A chave é utilizada unicamente nesta chamada e jamais é persistida em disco. Sem chave, usa-se extração heurística.",
     extract: "Extrair conteúdo do trabalho",
-    s_lang: "Idioma do pôster",
+    s_lang: "IDIOMA DO PÔSTER",
     lang_hint: "Define os cabeçalhos padrão das seções e o pacote babel correspondente no LaTeX.",
-    s_template: "Template e formato",
+    s_template: "TEMPLATE E FORMATO",
     paper: "Dimensões do Pôster",
     orientation: "Orientação",
     portrait: "Retrato (Vertical)",
     landscape: "Paisagem (Horizontal)",
     columns: "Colunas",
     accent: "Cor de destaque personalizada:",
-    s_info: "Informações principais",
+    s_info: "INFORMAÇÕES PRINCIPAIS",
     title: "Título do Trabalho",
     authors: "Autores",
     affiliations: "Afiliações Institucionais (uma por linha)",
@@ -584,7 +847,7 @@ const T = {
     logos_header: "Logotipos do cabeçalho",
     logos_footer: "Logotipos do rodapé",
     logo_limit: "Limite de logos atingido para este template.",
-    s_sections: "Seções, Textos e Gráficos",
+    s_sections: "SEÇÕES, TEXTOS E GRÁFICOS",
     sec_hint: "Adicione textos, listas (- item), fórmulas ($E=mc^2$) e faça upload de imagens ou gráficos para cada seção específica.",
     add_section: "+ Adicionar Nova Seção",
     sec_title: "Título da seção",
@@ -592,7 +855,7 @@ const T = {
     add_img: "Adicionar imagem / gráfico a esta seção",
     caption: "Legenda da figura",
     remove: "Remover",
-    s_generate: "Gerar e Exportar",
+    s_generate: "GERAR E EXPORTAR",
     generate: "⚡ Gerar / Atualizar Pôster",
     dl_pdf: "⬇ Baixar PDF",
     dl_zip: "📦 Código LaTeX (.zip)",
@@ -610,9 +873,8 @@ const T = {
     custom: "Nova Seção"
   },
   "en-US": {
-    app_title: "Academic Poster Generator",
-    app_sub: "Scientific posters in LaTeX + High-Res PDF",
-    s_mode: "How do you want to fill it in?",
+    app_title: "banner-generator",
+    s_mode: "INPUT MODE",
     mode_manual: "Fill manually",
     mode_upload: "Upload paper",
     drop_work: "Click or drag your paper here (PDF, DOCX, TXT, MD, TEX)",
@@ -622,16 +884,16 @@ const T = {
     api_key: "API Key",
     key_hint: "Key is used solely for this request and never persisted to disk. Without key, heuristic extraction is used.",
     extract: "Extract paper content",
-    s_lang: "Poster language",
+    s_lang: "POSTER LANGUAGE",
     lang_hint: "Sets the default section headings and corresponding LaTeX babel package.",
-    s_template: "Template and format",
+    s_template: "TEMPLATE AND FORMAT",
     paper: "Poster Dimensions",
     orientation: "Orientation",
     portrait: "Portrait (Vertical)",
     landscape: "Landscape (Horizontal)",
     columns: "Columns",
     accent: "Custom accent color:",
-    s_info: "Main Information",
+    s_info: "MAIN INFORMATION",
     title: "Paper Title",
     authors: "Authors",
     affiliations: "Institutional Affiliations (one per line)",
@@ -640,7 +902,7 @@ const T = {
     logos_header: "Header logos",
     logos_footer: "Footer logos",
     logo_limit: "Logo limit reached for this template.",
-    s_sections: "Sections, Text and Charts",
+    s_sections: "SECTIONS, TEXT AND CHARTS",
     sec_hint: "Add text, lists (- item), formulas ($E=mc^2$) and upload images or charts to each specific section.",
     add_section: "+ Add New Section",
     sec_title: "Section title",
@@ -648,7 +910,7 @@ const T = {
     add_img: "Add image / chart to this section",
     caption: "Figure caption",
     remove: "Remove",
-    s_generate: "Generate & Export",
+    s_generate: "GENERATE & EXPORT",
     generate: "⚡ Generate / Refresh Poster",
     dl_pdf: "⬇ Download PDF",
     dl_zip: "📦 LaTeX Source (.zip)",
@@ -677,7 +939,7 @@ const state = {
   pageNum: 1,
   totalPages: 1,
   scale: 1.0,
-  fitMode: "width" // 'width' | 'page' | 'custom'
+  fitMode: "width"
 };
 
 const t = k => (T[lang] && T[lang][k]) || k;
@@ -715,10 +977,6 @@ function newSec(id, title = "", content = "") {
     $("#uiLang").value = lang;
     const langRadio = document.querySelector(`input[name=lang][value="${lang}"]`);
     if (langRadio) langRadio.checked = true;
-
-    if (matchMedia("(prefers-color-scheme: dark)").matches) {
-      document.documentElement.dataset.theme = "dark";
-    }
 
     $("#provider").innerHTML = Object.entries(CFG.providers).map(([k, v]) =>
       `<option value="${k}">${v.name}${v.server_key ? " ✓" : ""}</option>`
@@ -928,8 +1186,8 @@ function renderSections() {
       </div>
       <textarea data-f="content" placeholder="${t("sec_text")}">${(s.content || "").replace(/&/g, "&amp;").replace(/</g, "&lt;")}</textarea>
       <div style="margin-top:6px;">
-        <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;color:var(--pri);font-weight:600;">
-          📎 ${t("add_img")}
+        <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;color:var(--amber);font-weight:600;font-family:var(--font-mono);font-size:11px;">
+          [+ 📎 ${t("add_img")}]
           <input type="file" accept="image/*" multiple class="hidden" data-f="img">
         </label>
       </div>
@@ -1131,7 +1389,7 @@ function renderPosterPages() {
   const list = $("#pdfCanvasList");
   list.innerHTML = "";
 
-  const availWidth = Math.max(300, container.clientWidth - 40);
+  const availWidth = Math.max(300, container.clientWidth - 48);
 
   state.pdfDoc.getPage(1).then(firstPage => {
     const unscaled = firstPage.getViewport({ scale: 1.0 });
@@ -1139,7 +1397,7 @@ function renderPosterPages() {
     if (state.fitMode === "width") {
       state.scale = availWidth / unscaled.width;
     } else if (state.fitMode === "page") {
-      const availHeight = Math.max(400, container.clientHeight - 40);
+      const availHeight = Math.max(400, container.clientHeight - 48);
       state.scale = Math.min(availWidth / unscaled.width, availHeight / unscaled.height);
     }
 
