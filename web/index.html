@@ -1697,18 +1697,42 @@ function renderTemplates() {
 
 const slots = () => (CFG && CFG.templates[state.template] && CFG.templates[state.template].logos) || { header: 2, footer: 0 };
 
+function updatePaperOptions() {
+  if (!CFG) return;
+  const tp = CFG.templates[state.template];
+  if (!tp || !tp.papers) return;
+  const paperSelect = $("#paper");
+  if (!paperSelect) return;
+  const prev = paperSelect.value;
+  const isLandscape = $("#orientation") && $("#orientation").value === "landscape";
+
+  paperSelect.innerHTML = tp.papers.map(p => {
+    const dim = CFG.sizes[p];
+    if (!dim) return `<option value="${p}">${p}</option>`;
+    const w = isLandscape ? dim[1] : dim[0];
+    const h = isLandscape ? dim[0] : dim[1];
+    const label = p.startsWith("a") ? p.toUpperCase() + ` (${w} × ${h} cm)` : `${w} × ${h} cm`;
+    return `<option value="${p}">${label}</option>`;
+  }).join("");
+
+  if (tp.papers.includes(prev)) {
+    paperSelect.value = prev;
+  } else {
+    paperSelect.value = tp.default_paper || tp.papers[0];
+  }
+}
+
 function applyTemplateOptions(reset) {
   if (!CFG) return;
   const tp = CFG.templates[state.template];
   const prev = $("#paper").value;
-  $("#paper").innerHTML = tp.papers.map(p => {
-    const dim = CFG.sizes[p];
-    const label = dim ? (p.startsWith("a") ? p.toUpperCase() + ` (${dim[0]} × ${dim[1]} cm)` : `${dim[0]} × ${dim[1]} cm`) : p;
-    return `<option value="${p}">${label}</option>`;
-  }).join("");
-
-  $("#paper").value = (!reset && tp.papers.includes(prev)) ? prev : tp.default_paper;
-  if (reset) $("#columns").value = state.template === "dcc" ? "2" : $("#columns").value;
+  updatePaperOptions();
+  if (reset) {
+    $("#paper").value = tp.default_paper || tp.papers[0];
+    $("#columns").value = state.template === "dcc" ? "2" : $("#columns").value;
+  } else if (tp.papers.includes(prev)) {
+    $("#paper").value = prev;
+  }
 
   const s = slots();
   logosH.length = Math.min(logosH.length, s.header);
@@ -2061,7 +2085,12 @@ function escapeHtml(str) {
 
 ["paper", "orientation", "columns"].forEach(id => {
   const el = $("#" + id);
-  if (el) el.addEventListener("change", updateDraftPreview);
+  if (el) el.addEventListener("change", () => {
+    if (id === "orientation") {
+      updatePaperOptions();
+    }
+    updateDraftPreview();
+  });
 });
 
 ["useColors", "accent", "colorTitle", "colorSubtitle", "colorBody", "colorCaption", "colorBg"].forEach(id => {
