@@ -57,6 +57,30 @@ TEMPLATES: Dict[str, Dict[str, Any]] = {
         "papers": None, "default_paper": "60x90",
         "logos": {"header": MAX_LOGOS_HEADER, "footer": MAX_LOGOS_FOOTER},
     },
+    "mostra_ic": {
+        "name": {"pt-BR": "Mostra IC (UFOP)", "en-US": "Mostra IC (UFOP)"},
+        "engine": "sciposter",
+        "colors": ("0A3B75", "1F2937", "4B5563"), "bg": "FFFFFF", "sans": False,
+        "default_columns": 2,
+        "papers": None, "default_paper": "a0",
+        "logos": {"header": MAX_LOGOS_HEADER, "footer": 0},
+    },
+    "uzh": {
+        "name": {"pt-BR": "UZH / LiRI (Zurique)", "en-US": "UZH / LiRI (Zurich)"},
+        "engine": "a0poster",
+        "colors": ("0028A5", "3353B7", "1F2937"), "bg": "FFFFFF", "sans": True,
+        "default_columns": 2,
+        "papers": None, "default_paper": "a0",
+        "logos": {"header": MAX_LOGOS_HEADER, "footer": 0},
+    },
+    "tudelft": {
+        "name": {"pt-BR": "TU Delft (Beamer)", "en-US": "TU Delft (Beamer)"},
+        "engine": "beamer",
+        "colors": ("00A6D6", "002B49", "007396"), "bg": "F8FAFC", "sans": True,
+        "default_columns": 2,
+        "papers": None, "default_paper": "a0",
+        "logos": {"header": MAX_LOGOS_HEADER, "footer": 0},
+    },
 }
 
 

@@ -192,10 +192,24 @@ def _hex_to_latex(name: str, value: str) -> str:
 
 def build_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
     """Gera o fonte LaTeX. `images` mapeia caminhos de upload -> nome de arquivo no build."""
-    if TEMPLATES[poster["template"]].get("engine") == "article":
+    engine = TEMPLATES[poster["template"]].get("engine")
+    if engine == "article":
         from .article import build_article_tex
 
         return build_article_tex(poster, images)
+    elif engine == "sciposter":
+        from .sciposter import build_sciposter_tex
+
+        return build_sciposter_tex(poster, images)
+    elif engine == "a0poster":
+        from .a0poster import build_a0poster_tex
+
+        return build_a0poster_tex(poster, images)
+    elif engine == "beamer":
+        from .beamer import build_beamer_tex
+
+        return build_beamer_tex(poster, images)
+
     labels = labels_for(poster["language"])
     tpl = TEMPLATES[poster["template"]]
     paper = POSTER_SIZES[poster["paper"]]
