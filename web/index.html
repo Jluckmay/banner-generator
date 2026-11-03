@@ -137,10 +137,30 @@ main {
   align-items: start;
 }
 @media (max-width: 1100px) {
-  main { grid-template-columns: 1fr; padding: 14px; }
+  main {
+    display: flex;
+    flex-direction: column;
+    padding: 14px;
+  }
   header { padding: 12px 14px; }
   .brand-terminal-title { font-size: 20px; }
-  #preview { position: static !important; height: 620px !important; margin-top: 18px; }
+  #form {
+    display: contents;
+  }
+  #form > section:nth-of-type(1) { order: 1; }
+  #form > section:nth-of-type(2) { order: 2; }
+  #card-template { order: 3; }
+  #preview {
+    order: 4;
+    position: static !important;
+    height: 620px !important;
+    margin-top: 0;
+    margin-bottom: 18px;
+    width: 100%;
+  }
+  #form > section:nth-of-type(4) { order: 5; }
+  #form > section:nth-of-type(5) { order: 6; }
+  #form > section:nth-of-type(6) { order: 7; }
 }
 
 /* Cards no estilo da imagem: topo vermelho, fundo escuro, cantos retos */
@@ -978,7 +998,7 @@ button.sm {
   </section>
 
   <!-- 3. Template e Dimensões -->
-  <section class="card">
+  <section class="card" id="card-template">
     <div class="card-meta">
       <h2><span class="card-sec-number">03 //</span> <span data-i18n="s_template">TEMPLATE E FORMATO</span></h2>
       <span class="card-icon-badge">📐</span>
