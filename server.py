@@ -15,7 +15,7 @@ from src import config
 from src.extractors import ALLOWED_DOC_EXT, extract_text, heuristic_parse
 from src.i18n import DEFAULT_SECTION_IDS, LABELS
 from src.images import save_image
-from src.latex import build_tex, fit_compile, make_zip, new_build_dir
+from src.latex import build_tex, compile_tex, fit_compile, make_zip, new_build_dir
 from src.llm import LLMError, ai_extract, resolve_key
 from src.poster import normalize_poster
 from src.templates import public_templates
@@ -118,15 +118,41 @@ def api_extract() -> Tuple[Response, int] | Response:
 @app.post("/api/generate")
 def api_generate() -> Tuple[Response, int] | Response:
     """Gera o pôster. Campo `data` (JSON) + arquivos de imagem referenciados por nome de campo."""
+    fmt = request.args.get("format", "pdf")
+    if fmt not in ("pdf", "zip", "tex"):
+        return _err("Formato inválido.")
+
+    custom_tex_file = request.files.get("custom_tex")
+    if custom_tex_file and custom_tex_file.filename:
+        tex = custom_tex_file.read().decode("utf-8", errors="replace")
+        if not tex.strip():
+            return _err("Arquivo .tex vazio.")
+        if fmt == "tex":
+            return Response(tex, mimetype="text/plain", headers={"Content-Disposition": 'attachment; filename="poster.tex"'})
+        build = new_build_dir()
+        try:
+            if not _BUILD_SLOTS.acquire(timeout=20):
+                return _err("Servidor ocupado, tente novamente em instantes.", 503)
+            try:
+                pdf, _ = compile_tex(tex, build)
+            except RuntimeError as exc:
+                return _err(str(exc), 500)
+            except Exception:
+                return _err("Tempo esgotado ou erro ao compilar o arquivo LaTeX customizado.", 500)
+            finally:
+                _BUILD_SLOTS.release()
+            if fmt == "zip":
+                return Response(make_zip(tex, build), mimetype="application/zip", headers={"Content-Disposition": 'attachment; filename="poster-latex.zip"'})
+            return Response(pdf, mimetype="application/pdf", headers={"Content-Disposition": 'inline; filename="poster.pdf"'})
+        finally:
+            shutil.rmtree(build, ignore_errors=True)
+
     try:
         data = json.loads(request.form.get("data", ""))
         if not isinstance(data, dict):
             raise ValueError
     except ValueError:
         return _err("Dados do pôster inválidos.")
-    fmt = request.args.get("format", "pdf")
-    if fmt not in ("pdf", "zip", "tex"):
-        return _err("Formato inválido.")
 
     poster = normalize_poster(data)
     if not poster["title"]:

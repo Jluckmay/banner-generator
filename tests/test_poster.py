@@ -290,3 +290,30 @@ def test_docx_zip_bomb_and_garbage_handled(client):
     assert r.status_code == 400
     r = client.post("/api/extract", data={"mode": "basic", "file": (io.BytesIO(b"%PDF-1.4 broken"), "a.pdf")})
     assert r.status_code == 400
+
+
+def test_custom_colors_normalized():
+    from src.poster import normalize_poster
+    p = normalize_poster({
+        "title": "Title",
+        "sections": [{"id": "sec1", "title": "S1", "content": "C1"}],
+        "colors": {
+            "accent": "#ff2a40",
+            "title": "ffffff",
+            "subtitle": "#e6edf8",
+            "body": "1a1a1a",
+            "bg": "#f0fdfa",
+        }
+    })
+    assert p["colors"]["accent"] == "FF2A40"
+    assert p["colors"]["title"] == "FFFFFF"
+    assert p["colors"]["subtitle"] == "E6EDF8"
+    assert p["colors"]["body"] == "1A1A1A"
+    assert p["colors"]["bg"] == "F0FDFA"
+
+
+def test_custom_tex_upload(client):
+    tex_data = b"\\documentclass{article}\\begin{document}Custom Poster\\end{document}"
+    r = client.post("/api/generate?format=tex", data={"custom_tex": (io.BytesIO(tex_data), "custom.tex")})
+    assert r.status_code == 200
+    assert "Custom Poster" in r.text

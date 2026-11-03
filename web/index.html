@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>~/ banner-generator | 01 // LATEX ACADEMIC POSTER COMPILER</title>
 <link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/assets/icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -578,7 +581,118 @@ button.sm {
 .pdf-page-canvas { display: block; border-radius: 2px; max-width: none; }
 #pdf-iframe { width: 100%; height: 100%; border: none; background: #fff; display: none; }
 .hidden { display: none !important; }
+
+/* ── Custom file input (styled) ── */
+.file-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--fg);
+  background: var(--bg-subtle);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--btn-radius);
+  padding: 7px 14px;
+  min-height: 34px;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.file-btn:hover { border-color: var(--red); color: var(--fg-bright); background: var(--bg-card); }
+.file-btn-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.file-name-display {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+  max-width: 230px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-name-display.has-file { color: var(--amber); font-style: normal; font-weight: 600; }
+
+/* ── Language toggle button ── */
+.lang-toggle {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--btn-radius);
+  overflow: hidden;
+  background: var(--bg-input);
+}
+.lang-toggle label {
+  margin: 0;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+  transition: all 0.15s ease;
+  border-radius: 0;
+  background: transparent;
+}
+.lang-toggle label:hover { color: var(--fg-bright); background: var(--bg-subtle); }
+.lang-toggle input[type=radio] { display: none; }
+.lang-toggle label:has(input:checked) { background: var(--red); color: #fff; font-weight: 700; }
+.lang-toggle-sep { width: 1px; background: var(--line-strong); }
+.lang-section-inner { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.lang-section-inner .hint { margin: 0; flex: 1; min-width: 160px; }
+
+/* ── Color palette pickers ── */
+.color-pickers-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--line);
+  border-radius: var(--btn-radius);
+}
+.color-picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.color-picker-item label {
+  margin: 0;
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.color-picker-item input[type=color] {
+  width: 34px;
+  height: 28px;
+  padding: 2px;
+  border: 2px solid var(--line);
+  border-radius: 4px;
+  cursor: pointer;
+  background: transparent;
+  transition: border-color 0.15s;
+}
+.color-picker-item input[type=color]:hover { border-color: var(--red); }
+
+/* ── Custom LaTeX template ── */
+.custom-tpl-box {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--bg-subtle);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--btn-radius);
+}
 </style>
+
 </head>
 <body>
 
@@ -648,11 +762,14 @@ button.sm {
       <h2><span class="card-sec-number">02 //</span> <span data-i18n="s_lang">IDIOMA DO PÔSTER</span></h2>
       <span class="card-icon-badge">A字</span>
     </div>
-    <div class="seg" role="radiogroup">
-      <label><input type="radio" name="lang" value="pt-BR" checked><span>Português (pt-BR)</span></label>
-      <label><input type="radio" name="lang" value="en-US"><span>English (en-US)</span></label>
+    <div class="lang-section-inner">
+      <div class="lang-toggle" role="radiogroup" aria-label="Idioma do pôster">
+        <label><input type="radio" name="lang" value="pt-BR" checked>🇧🇷 pt-BR</label>
+        <div class="lang-toggle-sep"></div>
+        <label><input type="radio" name="lang" value="en-US">🇺🇸 en-US</label>
+      </div>
+      <div class="hint" data-i18n="lang_hint">Define os cabeçalhos padrão das seções e o pacote babel correspondente no LaTeX.</div>
     </div>
-    <div class="hint" data-i18n="lang_hint">Define os cabeçalhos padrão das seções e o pacote babel correspondente no LaTeX.</div>
   </section>
 
   <!-- 3. Template e Dimensões -->
@@ -661,9 +778,43 @@ button.sm {
       <h2><span class="card-sec-number">03 //</span> <span data-i18n="s_template">TEMPLATE E FORMATO</span></h2>
       <span class="card-icon-badge">📐</span>
     </div>
-    <div class="tpls" id="tpls"></div>
+    <div class="tpls" id="tpls">
+      <div class="tpl sel" data-id="classic" tabindex="0" role="button">
+        <div class="sw" style="background:#EEF2F7"><i style="background:#1F3A5F"></i><i style="background:#2E5C8A"></i><i style="background:#9DB9D8"></i></div>
+        Clássico
+      </div>
+      <div class="tpl" data-id="modern" tabindex="0" role="button">
+        <div class="sw" style="background:#F0FDFA"><i style="background:#0F766E"></i><i style="background:#14B8A6"></i><i style="background:#99F6E4"></i></div>
+        Moderno
+      </div>
+      <div class="tpl" data-id="minimal" tabindex="0" role="button">
+        <div class="sw" style="background:#FFFFFF"><i style="background:#374151"></i><i style="background:#6B7280"></i><i style="background:#D1D5DB"></i></div>
+        Minimalista
+      </div>
+      <div class="tpl" data-id="bold" tabindex="0" role="button">
+        <div class="sw" style="background:#FFF7ED"><i style="background:#7C2D12"></i><i style="background:#EA580C"></i><i style="background:#FED7AA"></i></div>
+        Ousado
+      </div>
+      <div class="tpl" data-id="corner" tabindex="0" role="button">
+        <div class="sw" style="background:#F0FDF4"><i style="background:#14532D"></i><i style="background:#16A34A"></i><i style="background:#BBF7D0"></i></div>
+        Esmeralda
+      </div>
+      <div class="tpl" data-id="dcc" tabindex="0" role="button">
+        <div class="sw" style="background:#FFFFFF"><i style="background:#CC0000"></i><i style="background:#444444"></i><i style="background:#1A1A1A"></i></div>
+        DCC / UFMG
+      </div>
+    </div>
     <div class="row">
-      <div><label data-i18n="paper">Dimensões do Pôster</label><select id="paper"></select></div>
+      <div>
+        <label data-i18n="paper">Dimensões do Pôster</label>
+        <select id="paper">
+          <option value="a0" selected>A0 (84.1 × 118.9 cm)</option>
+          <option value="60x90">60 × 90 cm</option>
+          <option value="90x120">90 × 120 cm</option>
+          <option value="a1">A1 (59.4 × 84.1 cm)</option>
+          <option value="a2">A2 (42.0 × 59.4 cm)</option>
+        </select>
+      </div>
       <div>
         <label data-i18n="orientation">Orientação</label>
         <select id="orientation">
@@ -681,12 +832,57 @@ button.sm {
         </select>
       </div>
     </div>
+    <!-- Cores personalizadas -->
     <div style="margin-top:12px;">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;font-size:12px;color:var(--fg);">
-        <input type="checkbox" id="useAccent">
-        <span data-i18n="accent">Cor de destaque personalizada:</span>
-        <input type="color" id="accent" value="#2e5c8a" style="width:34px;height:26px;padding:0;border:1px solid var(--line);cursor:pointer;background:transparent;">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;font-size:12px;color:var(--fg);margin-bottom:4px;">
+        <input type="checkbox" id="useColors">
+        <span data-i18n="custom_colors">Paleta de cores personalizada</span>
       </label>
+      <div id="colorPickersBox" class="color-pickers-row hidden">
+        <div class="color-picker-item">
+          <label data-i18n="color_accent">Destaque</label>
+          <input type="color" id="accent" value="#2e5c8a">
+        </div>
+        <div class="color-picker-item">
+          <label data-i18n="color_title">Título</label>
+          <input type="color" id="colorTitle" value="#ffffff">
+        </div>
+        <div class="color-picker-item">
+          <label data-i18n="color_subtitle">Autores</label>
+          <input type="color" id="colorSubtitle" value="#e6edf8">
+        </div>
+        <div class="color-picker-item">
+          <label data-i18n="color_body">Texto</label>
+          <input type="color" id="colorBody" value="#1a1a1a">
+        </div>
+        <div class="color-picker-item">
+          <label data-i18n="color_caption">Legenda</label>
+          <input type="color" id="colorCaption" value="#374151">
+        </div>
+        <div class="color-picker-item">
+          <label data-i18n="color_bg">Fundo</label>
+          <input type="color" id="colorBg" value="#eef2f7">
+        </div>
+      </div>
+    </div>
+
+    <!-- Template LaTeX personalizado -->
+    <div class="custom-tpl-box">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;font-size:12px;color:var(--fg);margin-bottom:0;">
+        <input type="checkbox" id="useCustomTex">
+        <span data-i18n="custom_tex_label">Usar template LaTeX próprio (.tex)</span>
+      </label>
+      <div id="customTexBox" class="hidden" style="margin-top:8px;">
+        <div class="file-btn-wrap">
+          <label class="file-btn" for="customTexFile">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px;"><path d="M2 2h8l4 4v10H2V2z"/><path d="M10 2v4h4"/></svg>
+            <span data-i18n="custom_tex_btn">Selecionar arquivo .tex</span>
+          </label>
+          <span class="file-name-display" id="customTexName" data-i18n="no_file_chosen">Nenhum arquivo</span>
+        </div>
+        <input type="file" id="customTexFile" accept=".tex,text/x-tex" class="hidden">
+        <div class="hint" data-i18n="custom_tex_hint" style="margin-top:6px;">O arquivo .tex será compilado diretamente com pdflatex. Certifique-se de que é autocontido (todos os pacotes e conteúdo incluídos).</div>
+      </div>
     </div>
   </section>
 
@@ -870,7 +1066,18 @@ const T = {
     extracted: "Conteúdo extraído com sucesso! Revise e edite os campos abaixo.",
     no_file: "Selecione um arquivo de trabalho antes de extrair.",
     overflow: "Aviso: o conteúdo excedeu a página no tamanho selecionado. Reduza os textos ou imagens para ajuste ideal.",
-    custom: "Nova Seção"
+    custom: "Nova Seção",
+    custom_colors: "Paleta de cores personalizada",
+    color_accent: "Destaque",
+    color_title: "Título",
+    color_subtitle: "Autores",
+    color_body: "Texto",
+    color_caption: "Legenda",
+    color_bg: "Fundo",
+    custom_tex_label: "Usar template LaTeX próprio (.tex)",
+    custom_tex_btn: "Selecionar arquivo .tex",
+    no_file_chosen: "Nenhum arquivo",
+    custom_tex_hint: "O arquivo .tex será compilado diretamente com pdflatex. Certifique-se de que é autocontido (todos os pacotes e conteúdo incluídos)."
   },
   "en-US": {
     app_title: "banner-generator",
@@ -925,12 +1132,105 @@ const T = {
     extracted: "Content successfully extracted! Review and edit the fields below.",
     no_file: "Please select a paper file before extracting.",
     overflow: "Warning: content exceeded page boundaries at selected paper size. Please shorten text/images for ideal fit.",
-    custom: "New Section"
+    custom: "New Section",
+    custom_colors: "Custom color palette",
+    color_accent: "Accent",
+    color_title: "Title",
+    color_subtitle: "Authors",
+    color_body: "Body",
+    color_caption: "Caption",
+    color_bg: "Background",
+    custom_tex_label: "Use custom LaTeX template (.tex)",
+    custom_tex_btn: "Select .tex file",
+    no_file_chosen: "No file chosen",
+    custom_tex_hint: "The .tex file will be compiled directly with pdflatex. Ensure it is self-contained with all required packages and content."
+  }
+};
+
+const DEFAULT_CFG = {
+  languages: ["pt-BR", "en-US"],
+  papers: ["60x90", "90x120", "a0", "a1", "a2"],
+  sizes: {
+    "60x90": [60.0, 90.0],
+    "90x120": [90.0, 120.0],
+    "a0": [84.1, 118.9],
+    "a1": [59.4, 84.1],
+    "a2": [42.0, 59.4]
+  },
+  templates: {
+    "classic": {
+      "name": { "pt-BR": "Clássico", "en-US": "Classic" },
+      "bg": "EEF2F7",
+      "colors": ["1F3A5F", "2E5C8A", "9DB9D8"],
+      "papers": ["60x90", "90x120", "a0", "a1", "a2"],
+      "default_paper": "a0",
+      "logos": { "header": 2, "footer": 0 }
+    },
+    "modern": {
+      "name": { "pt-BR": "Moderno", "en-US": "Modern" },
+      "bg": "F0FDFA",
+      "colors": ["0F766E", "14B8A6", "99F6E4"],
+      "papers": ["60x90", "90x120", "a0", "a1", "a2"],
+      "default_paper": "a0",
+      "logos": { "header": 2, "footer": 0 }
+    },
+    "minimal": {
+      "name": { "pt-BR": "Minimalista", "en-US": "Minimal" },
+      "bg": "FFFFFF",
+      "colors": ["374151", "6B7280", "D1D5DB"],
+      "papers": ["60x90", "90x120", "a0", "a1", "a2"],
+      "default_paper": "a0",
+      "logos": { "header": 2, "footer": 0 }
+    },
+    "bold": {
+      "name": { "pt-BR": "Ousado", "en-US": "Bold" },
+      "bg": "FFF7ED",
+      "colors": ["7C2D12", "EA580C", "FED7AA"],
+      "papers": ["60x90", "90x120", "a0", "a1", "a2"],
+      "default_paper": "a0",
+      "logos": { "header": 2, "footer": 0 }
+    },
+    "corner": {
+      "name": { "pt-BR": "Esmeralda", "en-US": "Emerald" },
+      "bg": "F0FDF4",
+      "colors": ["14532D", "16A34A", "BBF7D0"],
+      "papers": ["60x90", "90x120", "a0", "a1", "a2"],
+      "default_paper": "a0",
+      "logos": { "header": 2, "footer": 0 }
+    },
+    "dcc": {
+      "name": { "pt-BR": "DCC/UFMG", "en-US": "DCC/UFMG" },
+      "bg": "FFFFFF",
+      "colors": ["CC0000", "444444", "1A1A1A"],
+      "papers": ["60x90", "90x120", "a0", "a1", "a2"],
+      "default_paper": "60x90",
+      "logos": { "header": 2, "footer": 5 }
+    }
+  },
+  providers: {
+    "google": { "name": "Google Gemini", "default_model": "gemini-2.0-flash", "server_key": false },
+    "openai": { "name": "OpenAI", "default_model": "gpt-4o-mini", "server_key": false },
+    "anthropic": { "name": "Anthropic Claude", "default_model": "claude-3-5-haiku-latest", "server_key": false },
+    "deepseek": { "name": "DeepSeek", "default_model": "deepseek-chat", "server_key": false }
+  },
+  sections: ["abstract", "introduction", "objectives", "methods", "results", "conclusions", "references"],
+  labels: {
+    "pt-BR": {
+      "abstract": "Resumo", "introduction": "Introdução", "objectives": "Objetivos",
+      "methods": "Metodologia", "results": "Resultados", "conclusions": "Conclusões",
+      "references": "Referências", "contact": "Contato", "acknowledgments": "Agradecimentos"
+    },
+    "en-US": {
+      "abstract": "Abstract", "introduction": "Introduction", "objectives": "Objectives",
+      "methods": "Methods", "results": "Results", "conclusions": "Conclusions",
+      "references": "References", "contact": "Contact", "acknowledgments": "Acknowledgments"
+    }
   }
 };
 
 const $ = s => document.querySelector(s);
-let CFG = null, lang = "pt-BR", sections = [], logosH = [], logosF = [], uid = 0, pdfBlob = null, docFile = null;
+let CFG = DEFAULT_CFG, lang = "pt-BR", sections = [], logosH = [], logosF = [], uid = 0, pdfBlob = null, docFile = null;
+let customTexFileObj = null;
 const files = new Map(); // field id -> File
 const state = {
   template: "classic",
@@ -947,6 +1247,7 @@ const t = k => (T[lang] && T[lang][k]) || k;
 function applyI18n() {
   document.documentElement.lang = lang;
   document.querySelectorAll("[data-i18n]").forEach(e => {
+    if (e.id === "customTexName" && e.classList.contains("has-file")) return;
     e.textContent = t(e.dataset.i18n);
   });
   if (CFG) {
@@ -971,13 +1272,22 @@ function newSec(id, title = "", content = "") {
 /* ---------- Inicialização ---------- */
 (async function init() {
   try {
-    CFG = await (await fetch("/api/config")).json();
-    const nav = (navigator.language || "").toLowerCase().startsWith("en") ? "en-US" : "pt-BR";
-    lang = nav;
-    $("#uiLang").value = lang;
-    const langRadio = document.querySelector(`input[name=lang][value="${lang}"]`);
-    if (langRadio) langRadio.checked = true;
+    const res = await fetch("/api/config");
+    if (res.ok) {
+      const data = await res.json();
+      CFG = data;
+    }
+  } catch (err) {
+    console.warn("Backend /api/config inacessível, utilizando valores padrão locais:", err);
+  }
 
+  const nav = (navigator.language || "").toLowerCase().startsWith("en") ? "en-US" : "pt-BR";
+  lang = nav;
+  if ($("#uiLang")) $("#uiLang").value = lang;
+  const langRadio = document.querySelector(`input[name=lang][value="${lang}"]`);
+  if (langRadio) langRadio.checked = true;
+
+  if (CFG && CFG.providers && $("#provider")) {
     $("#provider").innerHTML = Object.entries(CFG.providers).map(([k, v]) =>
       `<option value="${k}">${v.name}${v.server_key ? " ✓" : ""}</option>`
     ).join("");
@@ -987,17 +1297,17 @@ function newSec(id, title = "", content = "") {
       if (CFG.providers[p]) $("#model").placeholder = CFG.providers[p].default_model;
     };
     $("#provider").onchange();
+  }
 
-    // Seções padrão
+  // Seções padrão
+  if (sections.length === 0) {
     ["abstract", "introduction", "objectives", "methods", "results", "conclusions", "references"].forEach(id => {
       sections.push(newSec(id));
     });
-
-    state.template = "classic";
-    applyI18n();
-  } catch (err) {
-    console.error("Falha ao inicializar configurações:", err);
   }
+
+  state.template = "classic";
+  applyI18n();
 })();
 
 /* ---------- Alternância de Idioma e Tema ---------- */
@@ -1255,16 +1565,55 @@ $("#quickSampleBtn").onclick = () => {
   generate("pdf");
 };
 
+/* ---------- Toggles de Cores e Template Customizado ---------- */
+const useColorsEl = $("#useColors");
+if (useColorsEl) {
+  useColorsEl.onchange = e => {
+    $("#colorPickersBox").classList.toggle("hidden", !e.target.checked);
+  };
+}
+
+const useCustomTexEl = $("#useCustomTex");
+if (useCustomTexEl) {
+  useCustomTexEl.onchange = e => {
+    $("#customTexBox").classList.toggle("hidden", !e.target.checked);
+  };
+}
+
+const customTexFileEl = $("#customTexFile");
+if (customTexFileEl) {
+  customTexFileEl.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    customTexFileObj = file;
+    const nameEl = $("#customTexName");
+    nameEl.textContent = "📄 " + file.name;
+    nameEl.classList.add("has-file");
+  };
+}
+
 /* ---------- Geração e Pré-visualização do Pôster ---------- */
 function buildForm() {
   const fd = new FormData();
+  const useColors = $("#useColors") && $("#useColors").checked;
+  const accentVal = useColors ? $("#accent").value : "";
+  const customColors = useColors ? {
+    accent: $("#accent").value,
+    title: $("#colorTitle").value,
+    subtitle: $("#colorSubtitle").value,
+    body: $("#colorBody").value,
+    caption: $("#colorCaption").value,
+    bg: $("#colorBg").value
+  } : null;
+
   const data = {
     language: lang,
     template: state.template,
     paper: $("#paper").value,
     orientation: $("#orientation").value,
     columns: +$("#columns").value,
-    accent: $("#useAccent").checked ? $("#accent").value : "",
+    accent: accentVal,
+    colors: customColors,
     title: $("#title").value,
     authors: $("#authors").value,
     affiliations: $("#affiliations").value,
@@ -1280,6 +1629,9 @@ function buildForm() {
     }))
   };
   fd.append("data", JSON.stringify(data));
+  if ($("#useCustomTex") && $("#useCustomTex").checked && customTexFileObj) {
+    fd.append("custom_tex", customTexFileObj);
+  }
   const used = new Set([
     ...data.logos_header,
     ...data.logos_footer,

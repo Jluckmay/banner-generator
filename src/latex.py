@@ -203,7 +203,18 @@ def build_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
     if poster["orientation"] == "landscape":
         pw, ph = ph, pw
     c1, c2, c3 = tpl["colors"]
-    if poster.get("accent"):
+    bg_color = tpl["bg"]
+    if poster.get("colors"):
+        colors = poster["colors"]
+        if colors.get("accent"):
+            c1 = colors["accent"]
+        if colors.get("subtitle"):
+            c2 = colors["subtitle"]
+        if colors.get("title"):
+            c3 = colors["title"]
+        if colors.get("bg"):
+            bg_color = colors["bg"]
+    elif poster.get("accent"):
         c1 = c2 = poster["accent"]
     font = "\\renewcommand{\\familydefault}{\\sfdefault}\n" if tpl["sans"] else ""
 
@@ -267,7 +278,7 @@ def build_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
   {_hex_to_latex('colorTwo', c2)}
   {_hex_to_latex('colorThree', c3)}
 }}{{
-  {_hex_to_latex('posterbg', tpl['bg'])}
+  {_hex_to_latex('posterbg', bg_color)}
   \\colorlet{{backgroundcolor}}{{posterbg}}
   \\colorlet{{framecolor}}{{colorOne}}
   \\colorlet{{titlefgcolor}}{{white}}

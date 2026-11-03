@@ -69,6 +69,13 @@ def normalize_poster(data: Dict[str, Any]) -> Dict[str, Any]:
             title = sid.capitalize()
         sections.append({"id": sid, "title": title, "content": content, "images": images})
 
+    colors: Dict[str, str] = {}
+    if isinstance(data.get("colors"), dict):
+        for k in ("accent", "title", "subtitle", "body", "caption", "bg"):
+            val = data["colors"].get(k)
+            if val:
+                colors[k] = _hex(val, "")
+
     return {
         "language": lang,
         "template": template,
@@ -76,6 +83,7 @@ def normalize_poster(data: Dict[str, Any]) -> Dict[str, Any]:
         "orientation": orientation,
         "columns": columns,
         "accent": _hex(data.get("accent"), ""),
+        "colors": colors,
         "title": _s(data.get("title"), 500),
         "authors": _s(data.get("authors"), 1500),
         "affiliations": _s(data.get("affiliations"), 2000),

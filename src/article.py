@@ -54,7 +54,9 @@ def build_article_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
     labels = labels_for(poster["language"])
     tpl = TEMPLATES[poster["template"]]
     c1, c2, c3 = tpl["colors"]
-    if poster.get("accent"):
+    if poster.get("colors") and poster["colors"].get("accent"):
+        c1 = poster["colors"]["accent"]
+    elif poster.get("accent"):
         c1 = poster["accent"]
     width, height = article_dims(poster)
     fit = float(poster.get("_fit") or 1.0)
