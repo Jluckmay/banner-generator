@@ -582,6 +582,211 @@ button.sm {
 #pdf-iframe { width: 100%; height: 100%; border: none; background: #fff; display: none; }
 .hidden { display: none !important; }
 
+/* ── Preview Mode Switcher (Draft vs PDF) ── */
+.preview-mode-toggle {
+  display: inline-flex;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--btn-radius);
+  overflow: hidden;
+  background: var(--bg-input);
+}
+.preview-mode-toggle button {
+  border: none;
+  border-radius: 0;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.preview-mode-toggle button.active {
+  background: var(--red);
+  color: #fff;
+  font-weight: 700;
+}
+.preview-mode-toggle button:hover:not(.active) {
+  color: var(--fg-bright);
+  background: var(--bg-subtle);
+}
+
+/* ── Live Draft Poster Preview ── */
+.draft-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  transition: opacity 0.2s ease;
+}
+.draft-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--line-strong);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--amber);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.draft-badge .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 8px var(--amber);
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.8); }
+}
+
+.draft-poster {
+  width: 100%;
+  background: #ffffff;
+  color: #1a1a1a;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 22px;
+  box-sizing: border-box;
+}
+.draft-poster.portrait {
+  min-height: 520px;
+}
+.draft-poster.landscape {
+  min-height: 420px;
+}
+
+.draft-top-bar {
+  height: 8px;
+  margin: -22px -22px 16px -22px;
+  width: calc(100% + 44px);
+}
+.draft-header {
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  border-radius: 4px;
+  text-align: center;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.draft-logos-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.draft-logo-img {
+  max-height: 38px;
+  max-width: 120px;
+  object-fit: contain;
+}
+.draft-title {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0;
+  letter-spacing: -0.02em;
+  word-break: break-word;
+}
+.draft-authors {
+  font-size: 10.5px;
+  font-weight: 600;
+  margin-top: 4px;
+  line-height: 1.3;
+}
+.draft-affil {
+  font-size: 9px;
+  opacity: 0.8;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+.draft-divider {
+  height: 4px;
+  margin: 0 0 14px 0;
+  width: 100%;
+}
+.draft-grid {
+  display: grid;
+  gap: 12px;
+  flex: 1;
+  align-content: start;
+}
+.draft-block {
+  background: #ffffff;
+  border-radius: 4px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 9.5px;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+.draft-block-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-bottom: 4px;
+  border-bottom: 2px solid currentColor;
+}
+.draft-block-body {
+  color: #374151;
+  overflow: hidden;
+  word-break: break-word;
+}
+.draft-block-body p {
+  margin: 0 0 4px;
+}
+.draft-block-imgs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.draft-block-img {
+  width: 100%;
+  max-height: 75px;
+  object-fit: contain;
+  background: #f8fafc;
+  border-radius: 2px;
+  border: 1px solid #e2e8f0;
+}
+.draft-footer {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #cbd5e1;
+}
+.draft-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
 /* ── Custom file input (styled) ── */
 .file-btn {
   display: inline-flex;
@@ -967,7 +1172,11 @@ button.sm {
       <span class="indicator"></span>
       <span data-i18n="preview_title">Visualização do Pôster</span>
     </h3>
-    <div style="display:flex;gap:6px;">
+    <div style="display:flex;gap:6px;align-items:center;">
+      <div id="previewModeToggle" class="preview-mode-toggle">
+        <button id="btnViewDraft" class="active" type="button" data-i18n="view_draft">📐 Rascunho</button>
+        <button id="btnViewPdf" class="hidden" type="button" data-i18n="view_pdf">📄 PDF</button>
+      </div>
       <a id="openTabBtn" href="#" target="_blank" class="btn-toggle hidden" style="text-decoration:none;" data-i18n="open_tab">↗ Nova Aba</a>
       <button id="prevDlBtn" class="btn-toggle hidden" data-i18n="dl_quick">⬇ Baixar PDF</button>
     </div>
@@ -993,10 +1202,28 @@ button.sm {
   </div>
 
   <div id="pdf-viewport-container">
-    <div class="empty-state" id="emptyPrev">
-      <span class="terminal-icon">~/</span>
-      <p data-i18n="preview_empty">A pré-visualização interativa do seu pôster aparecerá aqui após clicar em "Gerar Pôster".</p>
-      <button id="quickSampleBtn" class="btn-toggle sm" data-i18n="load_sample">Carregar Exemplo de Demonstração</button>
+    <div id="draftPreview" class="draft-container">
+      <div class="draft-badge">
+        <span class="dot"></span>
+        <span id="draftBadgeText">PRÉ-VISUALIZAÇÃO EM TEMPO REAL</span>
+      </div>
+      <div id="draftPoster" class="draft-poster portrait">
+        <div id="draftTopBar" class="draft-top-bar hidden"></div>
+        <header id="draftHeader" class="draft-header">
+          <div id="draftHeaderLogos" class="draft-logos-row hidden"></div>
+          <h1 id="draftTitle" class="draft-title">Título do Trabalho</h1>
+          <div id="draftAuthors" class="draft-authors">Autores do Trabalho</div>
+          <div id="draftAffil" class="draft-affil">Afiliação Institucional</div>
+        </header>
+        <div id="draftDivider" class="draft-divider hidden"></div>
+        <div id="draftGrid" class="draft-grid"></div>
+        <footer id="draftFooter" class="draft-footer hidden">
+          <div id="draftFooterLogos" class="draft-logos-row"></div>
+        </footer>
+      </div>
+      <div class="draft-actions">
+        <button id="quickSampleBtn" class="btn-toggle sm" data-i18n="load_sample">Carregar Exemplo de Demonstração</button>
+      </div>
     </div>
 
     <div class="loading-overlay hidden" id="loadingOverlay">
@@ -1077,7 +1304,10 @@ const T = {
     custom_tex_label: "Usar template LaTeX próprio (.tex)",
     custom_tex_btn: "Selecionar arquivo .tex",
     no_file_chosen: "Nenhum arquivo",
-    custom_tex_hint: "O arquivo .tex será compilado diretamente com pdflatex. Certifique-se de que é autocontido (todos os pacotes e conteúdo incluídos)."
+    custom_tex_hint: "O arquivo .tex será compilado diretamente com pdflatex. Certifique-se de que é autocontido (todos os pacotes e conteúdo incluídos).",
+    view_draft: "📐 Rascunho",
+    view_pdf: "📄 PDF Compilado",
+    draft_badge: "Pré-visualização em tempo real"
   },
   "en-US": {
     app_title: "banner-generator",
@@ -1143,7 +1373,10 @@ const T = {
     custom_tex_label: "Use custom LaTeX template (.tex)",
     custom_tex_btn: "Select .tex file",
     no_file_chosen: "No file chosen",
-    custom_tex_hint: "The .tex file will be compiled directly with pdflatex. Ensure it is self-contained with all required packages and content."
+    custom_tex_hint: "The .tex file will be compiled directly with pdflatex. Ensure it is self-contained with all required packages and content.",
+    view_draft: "📐 Live Draft",
+    view_pdf: "📄 Compiled PDF",
+    draft_badge: "Live Real-Time Preview"
   }
 };
 
@@ -1323,6 +1556,8 @@ function newSec(id, title = "", content = "") {
 
   state.template = "classic";
   applyI18n();
+  setViewMode("draft");
+  updateDraftPreview();
 })();
 
 /* ---------- Alternância de Idioma e Tema ---------- */
@@ -1429,6 +1664,7 @@ function renderTemplates() {
       state.template = el.dataset.id;
       renderTemplates();
       applyTemplateOptions(true);
+      updateDraftPreview();
     };
     el.onkeydown = e => { if (e.key === "Enter") el.click(); };
   });
@@ -1453,6 +1689,7 @@ function applyTemplateOptions(reset) {
   logosH.length = Math.min(logosH.length, s.header);
   logosF.length = Math.min(logosF.length, s.footer);
   renderLogos();
+  updateDraftPreview();
 }
 
 /* ---------- Logotipos ---------- */
@@ -1478,6 +1715,7 @@ function renderLogos() {
       b.onclick = () => { arr.splice(+b.dataset.idx, 1); renderLogos(); };
     });
   });
+  updateDraftPreview();
 }
 
 function addFiles(list, target) {
@@ -1523,8 +1761,14 @@ function renderSections() {
 
   el.querySelectorAll(".sec").forEach(div => {
     const i = +div.dataset.i, s = sections[i];
-    div.querySelector("[data-f=title]").oninput = e => { s.title = e.target.value; };
-    div.querySelector("[data-f=content]").oninput = e => { s.content = e.target.value; };
+    div.querySelector("[data-f=title]").oninput = e => {
+      s.title = e.target.value;
+      updateDraftPreview();
+    };
+    div.querySelector("[data-f=content]").oninput = e => {
+      s.content = e.target.value;
+      updateDraftPreview();
+    };
     div.querySelector("[data-f=img]").onchange = e => {
       addFiles(e.target.files, s.images);
       renderSections();
@@ -1547,6 +1791,7 @@ function renderSections() {
       inp.oninput = () => { s.images[+inp.dataset.idx].caption = inp.value; };
     });
   });
+  updateDraftPreview();
 }
 
 $("#addSec").onclick = () => {
@@ -1580,6 +1825,219 @@ $("#quickSampleBtn").onclick = () => {
   renderSections();
   generate("pdf");
 };
+
+/* ---------- Alternância de Visualização (Rascunho vs PDF) ---------- */
+let currentViewMode = "draft";
+
+function setViewMode(mode) {
+  currentViewMode = mode;
+  const btnDraft = $("#btnViewDraft");
+  const btnPdf = $("#btnViewPdf");
+  const draftCont = $("#draftPreview");
+  const toolbar = $("#pdf-toolbar");
+  const canvasList = $("#pdfCanvasList");
+  const iframe = $("#pdf-iframe");
+
+  if (btnDraft) btnDraft.classList.toggle("active", mode === "draft");
+  if (btnPdf) btnPdf.classList.toggle("active", mode === "pdf");
+
+  if (mode === "draft") {
+    if (draftCont) draftCont.classList.remove("hidden");
+    if (toolbar) toolbar.style.display = "none";
+    if (canvasList) canvasList.style.display = "none";
+    if (iframe) iframe.style.display = "none";
+    updateDraftPreview();
+  } else {
+    if (draftCont) draftCont.classList.add("hidden");
+    if (state.pdfDoc) {
+      if (toolbar) toolbar.style.display = "flex";
+      if (canvasList) canvasList.style.display = "block";
+      if (iframe) iframe.style.display = "none";
+      renderPosterPages();
+    } else if (pdfBlob) {
+      if (toolbar) toolbar.style.display = "none";
+      if (canvasList) canvasList.style.display = "none";
+      if (iframe) iframe.style.display = "block";
+    }
+  }
+}
+
+if ($("#btnViewDraft")) $("#btnViewDraft").onclick = () => setViewMode("draft");
+if ($("#btnViewPdf")) {
+  $("#btnViewPdf").onclick = () => {
+    if (!pdfBlob) {
+      // Se ainda não gerou PDF, executa a compilação
+      generate("pdf");
+    } else {
+      setViewMode("pdf");
+    }
+  };
+}
+
+/* ---------- Pré-visualização Dinâmica em Tempo Real (Draft Preview) ---------- */
+function updateDraftPreview() {
+  const poster = $("#draftPoster");
+  if (!poster) return;
+
+  const tplId = state.template || "classic";
+  const tpl = (CFG.templates && CFG.templates[tplId]) || CFG.templates["classic"];
+  const paper = $("#paper") ? $("#paper").value : "a0";
+  const orient = $("#orientation") ? $("#orientation").value : "portrait";
+  const cols = $("#columns") ? Math.max(1, Math.min(5, +$("#columns").value || 2)) : 2;
+
+  // Dimensões e Proporção (Aspect Ratio)
+  const sizes = (CFG.sizes && CFG.sizes[paper]) || [84.1, 118.9];
+  const isLandscape = orient === "landscape";
+  poster.classList.toggle("landscape", isLandscape);
+  poster.classList.toggle("portrait", !isLandscape);
+  const aspect = isLandscape ? (sizes[1] / sizes[0]) : (sizes[0] / sizes[1]);
+  poster.style.aspectRatio = `${aspect}`;
+
+  // Cores
+  const useColors = $("#useColors") && $("#useColors").checked;
+  const defPalette = tpl.colors || ["1F3A5F", "2E5C8A", "9DB9D8"];
+  const accent = useColors ? $("#accent").value : `#${defPalette[0]}`;
+  const titleColor = useColors ? $("#colorTitle").value : (tplId === "classic" || tplId === "bold" || tplId === "corner" ? "#ffffff" : `#${defPalette[0]}`);
+  const subtitleColor = useColors ? $("#colorSubtitle").value : (tplId === "classic" || tplId === "bold" || tplId === "corner" ? "rgba(255,255,255,0.85)" : "#4b5563");
+  const bodyColor = useColors ? $("#colorBody").value : "#1f2937";
+  const bgColor = useColors ? $("#colorBg").value : `#${tpl.bg || "ffffff"}`;
+
+  poster.style.backgroundColor = bgColor;
+
+  // Header & Barra de Destaque
+  const topBar = $("#draftTopBar");
+  const header = $("#draftHeader");
+  const divider = $("#draftDivider");
+  const draftTitle = $("#draftTitle");
+  const draftAuthors = $("#draftAuthors");
+  const draftAffil = $("#draftAffil");
+
+  // Top bar para DCC
+  if (tplId === "dcc") {
+    topBar.classList.remove("hidden");
+    topBar.style.backgroundColor = accent;
+    divider.classList.remove("hidden");
+    divider.style.backgroundColor = accent;
+  } else {
+    topBar.classList.add("hidden");
+    divider.classList.add("hidden");
+  }
+
+  // Estilização do Header por template
+  if (tplId === "classic" || tplId === "bold" || tplId === "corner") {
+    header.style.backgroundColor = accent;
+    header.style.border = "none";
+    header.style.borderRadius = "4px";
+    draftTitle.style.color = titleColor;
+    draftAuthors.style.color = subtitleColor;
+    draftAffil.style.color = subtitleColor;
+  } else if (tplId === "modern") {
+    header.style.backgroundColor = "#ffffff";
+    header.style.border = "none";
+    header.style.borderBottom = `3px solid ${accent}`;
+    header.style.borderRadius = "0";
+    draftTitle.style.color = titleColor;
+    draftAuthors.style.color = subtitleColor;
+    draftAffil.style.color = subtitleColor;
+  } else if (tplId === "dcc") {
+    header.style.backgroundColor = "transparent";
+    header.style.border = "none";
+    header.style.borderRadius = "0";
+    draftTitle.style.color = accent;
+    draftAuthors.style.color = "#333333";
+    draftAffil.style.color = "#666666";
+  } else {
+    // minimal
+    header.style.backgroundColor = "transparent";
+    header.style.borderBottom = `2px solid ${accent}`;
+    header.style.borderRadius = "0";
+    draftTitle.style.color = titleColor;
+    draftAuthors.style.color = subtitleColor;
+    draftAffil.style.color = subtitleColor;
+  }
+
+  // Textos Principais
+  const titleVal = ($("#title") && $("#title").value.trim()) || "Título do Trabalho";
+  const authorsVal = ($("#authors") && $("#authors").value.trim()) || "Autores do Trabalho";
+  const affilVal = ($("#affiliations") && $("#affiliations").value.trim()) || "Afiliação Institucional";
+  draftTitle.textContent = titleVal;
+  draftAuthors.textContent = authorsVal;
+  draftAffil.textContent = affilVal;
+
+  // Logotipos no Header
+  const headerLogosEl = $("#draftHeaderLogos");
+  if (logosH && logosH.length > 0) {
+    headerLogosEl.classList.remove("hidden");
+    headerLogosEl.innerHTML = logosH.map(l => `<img class="draft-logo-img" src="${l.preview}" alt="Logo">`).join("");
+  } else {
+    headerLogosEl.classList.add("hidden");
+    headerLogosEl.innerHTML = "";
+  }
+
+  // Logotipos no Footer
+  const footerEl = $("#draftFooter");
+  const footerLogosEl = $("#draftFooterLogos");
+  if (logosF && logosF.length > 0) {
+    footerEl.classList.remove("hidden");
+    footerLogosEl.innerHTML = logosF.map(l => `<img class="draft-logo-img" src="${l.preview}" alt="Logo Footer">`).join("");
+  } else {
+    footerEl.classList.add("hidden");
+    footerLogosEl.innerHTML = "";
+  }
+
+  // Seções e Grade de Colunas
+  const grid = $("#draftGrid");
+  if (grid) {
+    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    const renderedSections = sections.filter(s => s && ((s.title && s.title.trim()) || (s.content && s.content.trim()) || s.images.length > 0));
+    const activeSections = renderedSections.length > 0 ? renderedSections : sections;
+
+    grid.innerHTML = activeSections.map(s => {
+      const sTitle = (s.title && s.title.trim()) || secLabel(s.id) || "Seção";
+      const sBody = (s.content && s.content.trim()) || "Conteúdo descritivo da seção de pesquisa.";
+      const paragraphs = sBody.split("\n\n").slice(0, 3).map(p => `<p>${escapeHtml(p)}</p>`).join("");
+      const imgHtml = (s.images && s.images.length > 0)
+        ? `<div class="draft-block-imgs">${s.images.slice(0, 2).map(im => `<img class="draft-block-img" src="${im.preview}" alt="Figura">`).join("")}</div>`
+        : "";
+
+      return `
+        <div class="draft-block" style="border-top-color: ${accent};">
+          <div class="draft-block-title" style="color: ${accent}; border-bottom-color: ${accent};">
+            ${escapeHtml(sTitle)}
+          </div>
+          <div class="draft-block-body" style="color: ${bodyColor};">
+            ${paragraphs}
+          </div>
+          ${imgHtml}
+        </div>
+      `;
+    }).join("");
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+// Ouvintes para atualização automática da pré-visualização
+["title", "authors", "affiliations", "email", "url"].forEach(id => {
+  const el = $("#" + id);
+  if (el) el.addEventListener("input", updateDraftPreview);
+});
+
+["paper", "orientation", "columns"].forEach(id => {
+  const el = $("#" + id);
+  if (el) el.addEventListener("change", updateDraftPreview);
+});
+
+["useColors", "accent", "colorTitle", "colorSubtitle", "colorBody", "colorCaption", "colorBg"].forEach(id => {
+  const el = $("#" + id);
+  if (el) {
+    el.addEventListener("input", updateDraftPreview);
+    el.addEventListener("change", updateDraftPreview);
+  }
+});
 
 /* ---------- Toggles de Cores e Template Customizado ---------- */
 const useColorsEl = $("#useColors");
@@ -1704,7 +2162,7 @@ async function generate(fmt) {
 
 /* ---------- Visualizador Interativo com PDF.js e Fallback ---------- */
 function renderPdfJsViewer(bytes, blobUrl) {
-  $("#emptyPrev").classList.add("hidden");
+  setViewMode("pdf");
   const toolbar = $("#pdf-toolbar");
   const canvasList = $("#pdfCanvasList");
   const iframe = $("#pdf-iframe");
@@ -1743,6 +2201,7 @@ function renderPdfJsViewer(bytes, blobUrl) {
 }
 
 function fallbackViewer(blobUrl) {
+  setViewMode("pdf");
   $("#pdf-toolbar").style.display = "none";
   $("#pdfCanvasList").style.display = "none";
   const ifr = $("#pdf-iframe");
