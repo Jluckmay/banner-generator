@@ -707,10 +707,10 @@ button.sm {
     <div class="brand-tagline">
       <span>01 / ACADEMIC POSTER & LATEX COMPILER</span>
       <div class="header-controls">
-        <select id="uiLang" class="btn-toggle" style="font-weight:600;" aria-label="Language">
-          <option value="pt-BR">🇧🇷 pt-BR</option>
-          <option value="en-US">🇺🇸 en-US</option>
-        </select>
+        <button id="uiLangToggle" class="btn-toggle" type="button" title="Alternar idioma da interface (pt-BR / en-US)" aria-label="Alternar idioma da interface">
+          <span id="uiLangFlag">🇧🇷</span>
+          <span id="uiLangText">pt-BR</span>
+        </button>
         <button id="themeBtn" class="btn-toggle" title="Alternar tema" aria-label="Theme">◐</button>
       </div>
     </div>
@@ -764,9 +764,9 @@ button.sm {
     </div>
     <div class="lang-section-inner">
       <div class="lang-toggle" role="radiogroup" aria-label="Idioma do pôster">
-        <label><input type="radio" name="lang" value="pt-BR" checked>🇧🇷 pt-BR</label>
+        <label><input type="radio" name="posterLang" value="pt-BR" checked>🇧🇷 pt-BR</label>
         <div class="lang-toggle-sep"></div>
-        <label><input type="radio" name="lang" value="en-US">🇺🇸 en-US</label>
+        <label><input type="radio" name="posterLang" value="en-US">🇺🇸 en-US</label>
       </div>
       <div class="hint" data-i18n="lang_hint">Define os cabeçalhos padrão das seções e o pacote babel correspondente no LaTeX.</div>
     </div>
@@ -1229,7 +1229,7 @@ const DEFAULT_CFG = {
 };
 
 const $ = s => document.querySelector(s);
-let CFG = DEFAULT_CFG, lang = "pt-BR", sections = [], logosH = [], logosF = [], uid = 0, pdfBlob = null, docFile = null;
+let CFG = DEFAULT_CFG, uiLang = "pt-BR", posterLang = "pt-BR", sections = [], logosH = [], logosF = [], uid = 0, pdfBlob = null, docFile = null;
 let customTexFileObj = null;
 const files = new Map(); // field id -> File
 const state = {
@@ -1242,10 +1242,25 @@ const state = {
   fitMode: "width"
 };
 
-const t = k => (T[lang] && T[lang][k]) || k;
+const t = k => (T[uiLang] && T[uiLang][k]) || k;
+
+function updateUiLangToggle() {
+  const flagEl = $("#uiLangFlag");
+  const textEl = $("#uiLangText");
+  if (flagEl && textEl) {
+    if (uiLang === "pt-BR") {
+      flagEl.textContent = "🇧🇷";
+      textEl.textContent = "pt-BR";
+    } else {
+      flagEl.textContent = "🇺🇸";
+      textEl.textContent = "en-US";
+    }
+  }
+}
 
 function applyI18n() {
-  document.documentElement.lang = lang;
+  document.documentElement.lang = uiLang;
+  updateUiLangToggle();
   document.querySelectorAll("[data-i18n]").forEach(e => {
     if (e.id === "customTexName" && e.classList.contains("has-file")) return;
     e.textContent = t(e.dataset.i18n);
@@ -1262,7 +1277,7 @@ function showMsg(el, text, cls) {
 }
 
 function secLabel(id) {
-  return (CFG && CFG.labels && CFG.labels[lang] && CFG.labels[lang][id]) || "";
+  return (CFG && CFG.labels && CFG.labels[posterLang] && CFG.labels[posterLang][id]) || "";
 }
 
 function newSec(id, title = "", content = "") {
@@ -1282,10 +1297,10 @@ function newSec(id, title = "", content = "") {
   }
 
   const nav = (navigator.language || "").toLowerCase().startsWith("en") ? "en-US" : "pt-BR";
-  lang = nav;
-  if ($("#uiLang")) $("#uiLang").value = lang;
-  const langRadio = document.querySelector(`input[name=lang][value="${lang}"]`);
-  if (langRadio) langRadio.checked = true;
+  uiLang = nav;
+  posterLang = "pt-BR";
+  const posterRadio = document.querySelector(`input[name=posterLang][value="${posterLang}"]`);
+  if (posterRadio) posterRadio.checked = true;
 
   if (CFG && CFG.providers && $("#provider")) {
     $("#provider").innerHTML = Object.entries(CFG.providers).map(([k, v]) =>
@@ -1311,21 +1326,22 @@ function newSec(id, title = "", content = "") {
 })();
 
 /* ---------- Alternância de Idioma e Tema ---------- */
-document.querySelectorAll("input[name=lang]").forEach(r => {
+const uiLangToggleBtn = $("#uiLangToggle");
+if (uiLangToggleBtn) {
+  uiLangToggleBtn.onclick = () => {
+    uiLang = uiLang === "pt-BR" ? "en-US" : "pt-BR";
+    applyI18n();
+  };
+}
+
+document.querySelectorAll("input[name=posterLang]").forEach(r => {
   r.onchange = () => {
     if (r.checked) {
-      lang = r.value;
-      $("#uiLang").value = lang;
-      applyI18n();
+      posterLang = r.value;
+      renderSections();
     }
   };
 });
-$("#uiLang").onchange = e => {
-  lang = e.target.value;
-  const r = document.querySelector(`input[name=lang][value="${lang}"]`);
-  if (r) r.checked = true;
-  applyI18n();
-};
 $("#themeBtn").onclick = () => {
   const d = document.documentElement;
   d.dataset.theme = d.dataset.theme === "dark" ? "light" : "dark";
@@ -1359,7 +1375,7 @@ $("#extractBtn").onclick = async () => {
   if (!docFile) return showMsg(msg, t("no_file"), "err");
   const fd = new FormData();
   fd.append("file", docFile);
-  fd.append("language", lang);
+  fd.append("language", posterLang);
   fd.append("mode", $("#useAI").checked ? "ai" : "basic");
   fd.append("provider", $("#provider").value);
   fd.append("model", $("#model").value);
@@ -1404,7 +1420,7 @@ function renderTemplates() {
   $("#tpls").innerHTML = Object.entries(CFG.templates).map(([id, tp]) => `
     <div class="tpl ${state.template === id ? "sel" : ""}" data-id="${id}" tabindex="0" role="button">
       <div class="sw" style="background:#${tp.bg}">${tp.colors.map(c => `<i style="background:#${c}"></i>`).join("")}</div>
-      ${(tp.name && tp.name[lang]) || id}
+      ${(tp.name && tp.name[uiLang]) || id}
     </div>
   `).join("");
 
@@ -1607,7 +1623,7 @@ function buildForm() {
   } : null;
 
   const data = {
-    language: lang,
+    language: posterLang,
     template: state.template,
     paper: $("#paper").value,
     orientation: $("#orientation").value,
