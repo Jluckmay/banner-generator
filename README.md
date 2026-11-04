@@ -2,9 +2,13 @@
 
 Gera pôsteres e banners acadêmicos em **LaTeX → PDF** com suporte a múltiplos motores (`tikzposter`, `article`, `sciposter`, `a0poster`, `beamerposter`), em **pt-BR** ou **en-US**.
 
+Oferece duas interfaces completas e integradas:
+1. **Aplicação Web (SPA)**: HTML5 + CSS3 responsivo + JavaScript puro, com visualizador PDF.js integrado, pronta para GitHub Pages e servidor backend Flask.
+2. **Aplicação Local Streamlit (`app.py`)**: Interface interativa em Python puro com geração direta, upload de arquivos, chamada a modelos de IA e visualização em alta resolução.
+
 ---
 
-## 📁 Estrutura do Projeto
+## 📁 Estrutura do Projeto / Project Structure
 
 ```
 banner-generator/
@@ -12,7 +16,7 @@ banner-generator/
 │   ├── icons/               # Favicons em múltiplos formatos (SVG, PNG, ICO)
 │   └── README.md            # Especificações de design dos assets
 ├── examples/                # Dados e exemplos de uso via API
-│   ├── sample_poster.json   # Payload de exemplo para testes
+│   ├── sample_poster.json   # Payload de exemplo para testes (padrão 60x90)
 │   └── README.md            # Guia de teste com cURL
 ├── src/                     # Núcleo da aplicação backend
 │   ├── a0poster.py          # Renderizador do template UZH / LiRI (a0poster)
@@ -30,17 +34,19 @@ banner-generator/
 ├── tests/                   # Suíte de testes automatizados (pytest)
 │   ├── conftest.py          # Fixtures e cliente de teste Flask
 │   └── test_poster.py       # Testes de validação, compilação e segurança
-├── .nojekyll                # Desativa Jekyll no GitHub Pages
-├── Dockerfile               # Configuração de container Docker
-├── index.html               # Interface SPA completa (HTML5 + CSS3 + JS puro)
+├── .nojekyll                # Desativa processamento Jekyll no GitHub Pages
+├── app.py                   # Interface local interativa em Streamlit
+├── Dockerfile               # Configuração de container Docker para Render/Cloud
+├── index.html               # Interface SPA web (HTML5 + CSS3 + JS puro)
 ├── pyproject.toml           # Metadados do pacote Python
+├── render.yaml              # Manifesto de deploy Infrastructure-as-Code no Render
 ├── requirements.txt         # Dependências do projeto
-└── server.py                # Servidor web Flask e rotas da API
+└── server.py                # Servidor web Flask e rotas da API REST
 ```
 
 ---
 
-## 🚀 Recursos
+## 🚀 Recursos Principais
 
 1. **Dois Modos de Entrada**:
    - **Manual**: Preenchimento interativo com pré-visualização em tempo real (Draft Preview).
@@ -60,18 +66,18 @@ banner-generator/
    - **TU Delft**: Estrutura modular em colunas com base em Beamer (`beamerposter`).
 
 3. **Dimensões e Adaptação Universal**:
-   - Dimensões disponíveis: **A0** (84.1 × 118.9 cm), **60 × 90 cm**, **90 × 120 cm**, **A1** (59.4 × 84.1 cm), **A2** (42.0 × 59.4 cm).
+   - Dimensões disponíveis: **60 × 90 cm** (Padrão), **90 × 120 cm**, **A0** (84.1 × 118.9 cm), **A1** (59.4 × 84.1 cm), **A2** (42.0 × 59.4 cm).
    - Orientações: **Retrato** (Portrait) e **Paisagem** (Landscape).
-   - O template se adapta dinamicamente às dimensões selecionadas sem forçar troca de papel.
+   - O template se adapta dinamicamente às dimensões selecionadas sem alterar o estilo visual.
 
 4. **Elementos Ricos**:
-   - Upload de imagens e gráficos por seção (com suporte a legendas).
-   - Logotipos em cabeçalho e rodapé.
+   - Upload de imagens e gráficos por seção (com suporte a legendas de figuras).
+   - Logotipos em cabeçalho (até 2) e rodapé (até 5).
    - Geração automática de QR Code para links de artigos e repositórios.
    - Algoritmo de redução e ajuste de fonte automático para prevenir transbordamento de página (*Zero-Overflow*).
 
 5. **Exportação**:
-   - Pré-visualização instantânea no navegador via PDF.js.
+   - Pré-visualização instantânea no navegador via PDF.js ou renderizador de imagem.
    - Download do PDF pronto para impressão de alta resolução.
    - Download de arquivo `.zip` contendo o código-fonte LaTeX (`poster.tex`) e todas as imagens/figuras incluídas.
 
@@ -81,7 +87,7 @@ banner-generator/
 
 - **Isolamento de LaTeX**: Execução estrita com `pdflatex -no-shell-escape` e tempo limite configurado (`LATEX_TIMEOUT_S = 150`).
 - **Sanitização de Fórmulas Matemáticas**: Expressões matemáticas `$...$` validadas contra lista de comandos permitidos.
-- **Zero-Storage**: Todo processamento é efetuado em diretórios efêmeros (`tempfile.mkdtemp`), completamente removidos após a resposta HTTP.
+- **Zero-Storage**: Todo processamento é efetuado em diretórios efêmeros (`tempfile.mkdtemp`), completamente removidos após a resposta.
 - **Prevenção de Ataques XML**: Documentos DOCX processados através de `defusedxml`.
 - **Higiene de Imagens**: Arquivos enviados são revalidados e decodificados com o Pillow antes de qualquer inclusão no documento.
 - **Segurança Web**: Cabeçalhos Content-Security-Policy (CSP) estritos, escape contra XSS e liberação explícita de memória em `URL.revokeObjectURL`.
@@ -94,21 +100,37 @@ banner-generator/
 - Python ≥ 3.10
 - Distribuição LaTeX instalada (`pdflatex` no PATH): [TeX Live](https://www.tug.org/texlive/) ou [MiKTeX].
 
-### Executando Localmente
 ```bash
-# 1. Instalar dependências
+# 1. Clonar o repositório
+git clone https://github.com/Jluckmay/banner-generator.git
+cd banner-generator
+
+# 2. Instalar dependências
 pip install -r requirements.txt
+```
 
-# 2. Iniciar servidor
+### Opção A: Executar a Versão Local em Streamlit
+Uma interface gráfica rica em Python nativo com suporte a upload, IA e renderização local:
+```bash
+streamlit run app.py
+```
+A aplicação abrirá automaticamente no navegador em `http://localhost:8501`.
+
+### Opção B: Executar o Servidor Web Flask + Interface SPA
+```bash
 python server.py
-# Acesso disponível em http://127.0.0.1:5000
+```
+Acesse a aplicação web em `http://127.0.0.1:5000`.
 
-# 3. Rodar suíte de testes
+### Rodar a Suíte de Testes Automatizados
+```bash
 python -m pytest
 ```
 
-### Variáveis de Ambiente Opcionais (Provedores de IA)
-As chaves podem ser inseridas na própria interface ou configuradas via variáveis de ambiente:
+---
+
+## 🔑 Provedores de IA (Opcional)
+As chaves de API podem ser inseridas diretamente na interface do usuário ou carregadas via variáveis de ambiente:
 ```bash
 export GEMINI_API_KEY="sua-chave"
 export OPENAI_API_KEY="sua-chave"
@@ -117,14 +139,102 @@ export DEEPSEEK_API_KEY="sua-chave"
 export NVIDIA_API_KEY="sua-chave"
 ```
 
-### Hospedagem no GitHub Pages
-O projeto está pronto para publicação estática no GitHub Pages:
-- **Deploy Automático via GitHub Actions**: No repositório, acesse **Settings > Pages** e selecione `Source: GitHub Actions`. O workflow `.github/workflows/deploy-pages.yml` fará o build e publicação a cada push na branch `main`.
-- **Deploy via Branch**: Alternativamente, selecione `Deploy from a branch > main / (root)` (o arquivo `.nojekyll` e `index.html` na raiz garantem o carregamento correto dos assets).
-- **Backend API**: A interface estática no GitHub Pages permite conectar-se ao backend (ex: serviço implantado no Render conforme `render.yaml`) através do campo de configuração de API embutido na seção 06.
+---
+
+## 🌐 Hospedagem e Publicação
+
+- **GitHub Pages (Frontend)**:
+  - Configure em **Settings > Pages > Deploy from a branch > main / (root)** ou via **GitHub Actions** (`.github/workflows/deploy-pages.yml`).
+  - O arquivo `.nojekyll` garante o carregamento de todos os assets.
+- **Render (Backend / Docker)**:
+  - Conecte o repositório ao [Render](https://dashboard.render.com).
+  - O arquivo `render.yaml` provisiona o container Docker com TeX Live e Gunicorn automaticamente.
+  - No frontend do GitHub Pages, aponte a URL do Render no campo de configuração da API.
 
 ---
 
-## English Summary
+## 🇺🇸 English Documentation
 
-Academic poster generator producing print-ready LaTeX PDFs with multi-engine support (`tikzposter`, `article`, `sciposter`, `a0poster`, `beamerposter`). Supports manual editing or paper uploads (PDF, DOCX, TXT, MD, TEX) with optional AI summarization. Features 9 templates, decoupled adaptable dimensions (A0, 60×90, 90×120, A1, A2), automatic font fitting, image uploads, QR codes, and full LaTeX source `.zip` export.
+An automated academic poster and banner generator that converts structured data or scientific papers into print-ready **LaTeX → PDF** posters, supporting multiple underlying engines (`tikzposter`, `article`, `sciposter`, `a0poster`, `beamerposter`) with full **pt-BR** and **en-US** localization.
+
+### Key Features
+
+1. **Two Input Modes**:
+   - **Manual Mode**: Interactive field editing with live draft preview.
+   - **Paper Upload Mode**: Ingest papers in `.pdf`, `.docx`, `.txt`, `.md`, or `.tex` formats.
+     - *AI-Powered* (Google Gemini, OpenAI, Claude, DeepSeek, NVIDIA NIM): Automatically summarizes and structures content into designated poster sections.
+     - *Heuristic Fallback* (Offline / No Key): Extracts sections based on academic heading patterns (Abstract, Introduction, Methods, Results, etc.).
+
+2. **9 Visual Style Templates**:
+   - **Classic**: Traditional academic conference format (`tikzposter`).
+   - **Modern**: Clean vertical gradient and contemporary typography (`tikzposter`).
+   - **Minimal**: Editorial, minimalist layout with high contrast (`tikzposter`).
+   - **Bold**: High-contrast warm blocks (`tikzposter`).
+   - **Emerald Waves**: Curved accents in emerald tones (`tikzposter`).
+   - **Academic Red**: Contrasting header/footer accent bars with up to 5 footer logos (`article`).
+   - **Mostra IC**: Scientific symposium layout with callout boxes (`sciposter`).
+   - **UZH / LiRI**: Swiss academic institutional typography (`a0poster`).
+   - **TU Delft**: Modular column layout based on Beamer (`beamerposter`).
+
+3. **Decoupled Universal Dimensions**:
+   - Supported dimensions: **60 × 90 cm** (Default), **90 × 120 cm**, **A0** (84.1 × 118.9 cm), **A1** (59.4 × 84.1 cm), **A2** (42.0 × 59.4 cm).
+   - Orientations: **Portrait** (Vertical) and **Landscape** (Horizontal).
+   - Templates dynamically adjust to the chosen size without forced layout constraints.
+
+4. **Rich Academic Elements**:
+   - Section image/figure uploads with custom figure captions.
+   - Header logos (up to 2) and footer logos (up to 5).
+   - Dynamic QR code generation for repository and paper links.
+   - Intelligent *Zero-Overflow* font fitting algorithm that automatically scales down point size if text overflows.
+
+5. **Export & Previews**:
+   - Real-time client-side draft preview and compiled PDF.js viewer.
+   - Download high-resolution print-ready PDF.
+   - Download complete LaTeX source bundle (`.zip`) containing `poster.tex` and all referenced figures.
+
+### Installation & Prerequisites
+
+- **Python**: Version 3.10 or higher.
+- **LaTeX Distribution**: `pdflatex` available in `PATH` ([TeX Live 2023+] or [MiKTeX]).
+
+```bash
+git clone https://github.com/Jluckmay/banner-generator.git
+cd banner-generator
+pip install -r requirements.txt
+```
+
+### Running Locally
+
+#### 1. Local Streamlit Application (`app.py`)
+Run the native Python desktop interface:
+```bash
+streamlit run app.py
+```
+Opens in your default browser at `http://localhost:8501`.
+
+#### 2. Flask REST Server + Web SPA (`server.py`)
+Run the Flask API backend and serve the static SPA:
+```bash
+python server.py
+```
+Available at `http://127.0.0.1:5000`.
+
+#### 3. Automated Test Suite
+```bash
+python -m pytest
+```
+
+### Environment Variables (Optional AI Providers)
+API keys can be supplied directly in the UI or exported as environment variables:
+```bash
+export GEMINI_API_KEY="your-api-key"
+export OPENAI_API_KEY="your-api-key"
+export ANTHROPIC_API_KEY="your-api-key"
+export DEEPSEEK_API_KEY="your-api-key"
+export NVIDIA_API_KEY="your-api-key"
+```
+
+### Deployment
+
+- **GitHub Pages**: Static hosting of `index.html`. Deploy via GitHub Actions (`.github/workflows/deploy-pages.yml`) or directly from `main / (root)` branch.
+- **Render**: Docker deployment configured in `render.yaml`. Builds with TeX Live and Gunicorn for serverless PDF generation. Connect the deployed Render URL inside the web interface's API configuration field.
