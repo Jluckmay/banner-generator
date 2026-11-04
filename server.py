@@ -67,8 +67,6 @@ def _headers(resp: Response) -> Response:
 
 @app.get("/")
 def index() -> Response:
-    if (ROOT / "web" / "index.html").exists():
-        return send_from_directory(ROOT / "web", "index.html")
     return send_from_directory(ROOT, "index.html")
 
 

@@ -12,7 +12,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 COPY src/ ./src/
-COPY web/ ./web/
+COPY index.html ./
 COPY assets/ ./assets/
 COPY server.py ./
 

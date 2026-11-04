@@ -30,9 +30,9 @@ banner-generator/
 ├── tests/                   # Suíte de testes automatizados (pytest)
 │   ├── conftest.py          # Fixtures e cliente de teste Flask
 │   └── test_poster.py       # Testes de validação, compilação e segurança
-├── web/                     # Frontend da aplicação
-│   └── index.html           # Interface SPA completa (HTML5 + CSS3 + JS puro)
+├── .nojekyll                # Desativa Jekyll no GitHub Pages
 ├── Dockerfile               # Configuração de container Docker
+├── index.html               # Interface SPA completa (HTML5 + CSS3 + JS puro)
 ├── pyproject.toml           # Metadados do pacote Python
 ├── requirements.txt         # Dependências do projeto
 └── server.py                # Servidor web Flask e rotas da API

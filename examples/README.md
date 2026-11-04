@@ -19,3 +19,4 @@ curl -X POST "http://127.0.0.1:5000/api/generate?format=zip" \
   -F "data=<examples/sample_poster.json" \
   --output poster.zip
 ```
+
