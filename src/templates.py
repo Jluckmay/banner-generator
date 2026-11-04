@@ -54,7 +54,7 @@ TEMPLATES: Dict[str, Dict[str, Any]] = {
         "engine": "article",
         "colors": ("CC0000", "444444", "1A1A1A"), "bg": "FFFFFF", "sans": True,
         "default_columns": 2,
-        "papers": None, "default_paper": "a0",
+        "papers": None, "default_paper": "60x90",
         "logos": {"header": MAX_LOGOS_HEADER, "footer": MAX_LOGOS_FOOTER},
     },
     "mostra_ic": {
@@ -62,7 +62,7 @@ TEMPLATES: Dict[str, Dict[str, Any]] = {
         "engine": "sciposter",
         "colors": ("0A3B75", "1F2937", "4B5563"), "bg": "FFFFFF", "sans": False,
         "default_columns": 2,
-        "papers": None, "default_paper": "a0",
+        "papers": None, "default_paper": "60x90",
         "logos": {"header": MAX_LOGOS_HEADER, "footer": 0},
     },
     "uzh": {
@@ -70,7 +70,7 @@ TEMPLATES: Dict[str, Dict[str, Any]] = {
         "engine": "a0poster",
         "colors": ("0028A5", "3353B7", "1F2937"), "bg": "FFFFFF", "sans": True,
         "default_columns": 2,
-        "papers": None, "default_paper": "a0",
+        "papers": None, "default_paper": "60x90",
         "logos": {"header": MAX_LOGOS_HEADER, "footer": 0},
     },
     "tudelft": {
@@ -78,7 +78,7 @@ TEMPLATES: Dict[str, Dict[str, Any]] = {
         "engine": "beamer",
         "colors": ("00A6D6", "002B49", "007396"), "bg": "F8FAFC", "sans": True,
         "default_columns": 2,
-        "papers": None, "default_paper": "a0",
+        "papers": None, "default_paper": "60x90",
         "logos": {"header": MAX_LOGOS_HEADER, "footer": 0},
     },
 }
@@ -89,7 +89,7 @@ def papers_for(tid: str) -> list:
 
 
 def default_paper_for(tid: str) -> str:
-    return TEMPLATES[tid].get("default_paper", "a0")
+    return TEMPLATES[tid].get("default_paper", "60x90")
 
 
 def public_templates() -> Dict[str, Any]:

@@ -6,7 +6,7 @@
   "url": "https://github.com/Jluckmay/banner-generator",
   "language": "pt-BR",
   "template": "classic",
-  "paper": "a0",
+  "paper": "60x90",
   "orientation": "portrait",
   "columns": 2,
   "sections": [

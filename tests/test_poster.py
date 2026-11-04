@@ -81,7 +81,7 @@ def test_split_columns_balanced():
 
 def test_normalize_defaults():
     p = normalize_poster({"template": "nope", "paper": "z", "columns": 99, "sections": [{"id": "abstract", "content": "x"}]})
-    assert p["template"] == "classic" and p["paper"] == "a0" and p["columns"] == 4
+    assert p["template"] == "classic" and p["paper"] == "60x90" and p["columns"] == 4
     assert p["sections"][0]["title"] == "Resumo"
 
 
@@ -172,11 +172,11 @@ def test_fit_reduces_font_and_flags_overflow(client):
 
 def test_logo_limits_per_template():
     p = normalize_poster({"template": "dcc", "logos_header": list("abc"), "logos_footer": list("abcdefg"), "sections": []})
-    assert len(p["logos_header"]) == 2 and len(p["logos_footer"]) == 5 and p["paper"] == "a0"
+    assert len(p["logos_header"]) == 2 and len(p["logos_footer"]) == 5 and p["paper"] == "60x90"
     p_custom = normalize_poster({"template": "dcc", "paper": "60x90", "sections": []})
     assert p_custom["paper"] == "60x90"
     c = normalize_poster({"template": "classic", "logos_header": list("abc"), "logos_footer": ["x"], "paper": "a3", "sections": []})
-    assert len(c["logos_header"]) == 2 and c["logos_footer"] == [] and c["paper"] == "a0"
+    assert len(c["logos_header"]) == 2 and c["logos_footer"] == [] and c["paper"] == "60x90"
 
 
 @pytest.mark.skipif(not shutil.which("pdflatex"), reason="pdflatex ausente")

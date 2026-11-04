@@ -130,7 +130,7 @@ header {
 /* Layout Principal */
 main {
   display: grid;
-  grid-template-columns: minmax(380px, 540px) 1fr;
+  grid-template-columns: minmax(380px, 520px) 1fr;
   gap: 22px;
   padding: 22px 32px;
   max-width: 1800px;
@@ -138,93 +138,6 @@ main {
   width: 100%;
   flex: 1;
   align-items: start;
-}
-@media (max-width: 1100px) {
-  main {
-    display: flex;
-    flex-direction: column;
-    padding: 14px;
-  }
-  header { padding: 12px 14px; }
-  .brand-terminal-title { font-size: 20px; }
-  #form {
-    display: contents;
-  }
-  #form > section:nth-of-type(1) { order: 1; }
-  #form > section:nth-of-type(2) { order: 2; }
-  #card-template { order: 3; }
-  #preview {
-    order: 4;
-    position: static !important;
-    height: clamp(480px, 75vh, 640px) !important;
-    margin-top: 0;
-    margin-bottom: 18px;
-    width: 100%;
-  }
-  #form > section:nth-of-type(4) { order: 5; }
-  #form > section:nth-of-type(5) { order: 6; }
-  #form > section:nth-of-type(6) { order: 7; }
-}
-
-@media (max-width: 768px) {
-  header { padding: 10px 14px; }
-  .header-top {
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: space-between;
-  }
-  .brand-terminal-title { font-size: 16px; flex-wrap: wrap; gap: 6px; }
-  .header-actions { gap: 6px; flex-wrap: wrap; }
-  .btn-toggle { padding: 5px 8px; font-size: 11px; }
-
-  main { padding: 10px; }
-  .card { padding: 14px 12px; margin-bottom: 14px; }
-  .card h2 { font-size: 13px; }
-
-  #preview {
-    height: clamp(400px, 70vh, 560px) !important;
-    margin-bottom: 14px;
-  }
-  #pdf-viewport-container { padding: 10px; }
-  .draft-poster { padding: 14px 10px; }
-  .draft-grid { gap: 8px; }
-  .draft-block { padding: 8px 10px; font-size: 9px; }
-  .draft-block-title { font-size: 9.5px; }
-
-  .tpls {
-    grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
-    gap: 8px;
-  }
-  .tpl { padding: 6px; font-size: 11px; }
-  .tpl .sw { height: 26px; }
-
-  .row { gap: 8px; }
-  .row > * { min-width: 100%; }
-  button, .btn-terminal { min-height: 38px; }
-  button.pri { min-height: 42px; font-size: 13px; }
-  input[type="text"], input[type="password"], select, textarea {
-    min-height: 38px;
-    font-size: 13px;
-  }
-  .file-btn { min-height: 38px; }
-  .sec-header { flex-wrap: wrap; }
-  .sec-header input[data-f="title"] { min-width: 100%; margin-bottom: 6px; }
-}
-
-@media (max-width: 480px) {
-  .brand-terminal-title { font-size: 14px; }
-  .brand-prompt { font-size: 12px; }
-  .card { padding: 12px 10px; }
-  .seg label { padding: 6px 4px; font-size: 10.5px; }
-  .preview-mode-toggle button { padding: 4px 8px; font-size: 10px; }
-  #preview-header { padding: 8px 10px; }
-  #pdf-toolbar { padding: 4px 6px; font-size: 11px; }
-  .tpls { grid-template-columns: repeat(2, 1fr); }
-  .draft-poster.portrait { min-height: 380px; }
-  .draft-poster.landscape { min-height: 300px; }
-  .draft-title { font-size: 13.5px; }
-  .draft-actions { flex-direction: column; width: 100%; }
-  .draft-actions button { width: 100%; }
 }
 
 /* Cards no estilo da imagem: topo vermelho, fundo escuro, cantos retos */
@@ -1340,6 +1253,130 @@ button.sm {
   border: 1px dashed var(--line-strong);
   border-radius: var(--btn-radius);
 }
+
+/* ══════════════════════════════════════════════════════════
+   MEDIA QUERIES RESPONSIVAS (Colocadas ao final da folha)
+   ══════════════════════════════════════════════════════════ */
+
+/* Telas Médias / Laptops / Tablets Paisagem (901px a 1200px) */
+@media (max-width: 1200px) and (min-width: 901px) {
+  main {
+    grid-template-columns: minmax(360px, 480px) 1fr;
+    gap: 16px;
+    padding: 16px 20px;
+  }
+  .card { padding: 16px 14px; margin-bottom: 14px; }
+  .tpls {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px;
+  }
+  #preview {
+    top: 70px;
+    height: calc(100vh - 86px);
+    min-height: 520px;
+  }
+}
+
+/* Telas Menores / Tablets Retrato e Mobile (<= 900px) */
+@media (max-width: 900px) {
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px;
+    gap: 0;
+  }
+  header { padding: 12px 14px; }
+  .brand-terminal-title { font-size: 20px; }
+  #form {
+    display: contents;
+  }
+  #form > section.card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+  #form > section:nth-of-type(1) { order: 1; }
+  #form > section:nth-of-type(2) { order: 2; }
+  #card-template { order: 3; }
+  #preview {
+    order: 4;
+    position: static !important;
+    height: clamp(480px, 75vh, 640px) !important;
+    margin-top: 0;
+    margin-bottom: 18px;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+  #form > section:nth-of-type(4) { order: 5; }
+  #form > section:nth-of-type(5) { order: 6; }
+  #form > section:nth-of-type(6) { order: 7; }
+}
+
+@media (max-width: 768px) {
+  header { padding: 10px 14px; }
+  .header-top {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+  }
+  .brand-terminal-title { font-size: 16px; flex-wrap: wrap; gap: 6px; }
+  .header-actions { gap: 6px; flex-wrap: wrap; }
+  .btn-toggle { padding: 5px 8px; font-size: 11px; }
+
+  main { padding: 10px; }
+  .card { padding: 14px 12px; margin-bottom: 14px; }
+  .card h2 { font-size: 13px; }
+
+  #preview {
+    height: clamp(400px, 70vh, 560px) !important;
+    margin-bottom: 14px;
+  }
+  #pdf-viewport-container { padding: 10px; }
+  .draft-poster { padding: 14px 10px; }
+  .draft-grid { gap: 8px; }
+  .draft-block { padding: 8px 10px; font-size: 9px; }
+  .draft-block-title { font-size: 9.5px; }
+
+  .tpls {
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)) !important;
+    gap: 8px;
+  }
+  .tpl { padding: 6px; font-size: 11px; }
+  .tpl .sw { height: 28px; }
+
+  .row { gap: 8px; }
+  .row > * { min-width: 100% !important; flex: 1 1 100%; }
+  button, .btn-terminal { min-height: 38px; }
+  button.pri { min-height: 42px; font-size: 13px; }
+  input[type="text"], input[type="password"], select, textarea {
+    min-height: 38px;
+    font-size: 13px;
+  }
+  .file-btn { min-height: 38px; }
+  .sec-header { flex-wrap: wrap; }
+  .sec-header input[data-f="title"] { min-width: 100%; margin-bottom: 6px; }
+}
+
+@media (max-width: 480px) {
+  .brand-terminal-title { font-size: 14px; }
+  .brand-prompt { font-size: 12px; }
+  .brand-tagline { display: none !important; }
+  .card { padding: 12px 10px; }
+  .seg label { padding: 6px 4px; font-size: 10.5px; }
+  .preview-mode-toggle button { padding: 4px 8px; font-size: 10px; }
+  #preview-header { padding: 8px 10px; }
+  #pdf-toolbar { padding: 4px 6px; font-size: 11px; }
+  .tpls { grid-template-columns: repeat(2, 1fr) !important; }
+  .draft-poster.portrait { min-height: 360px; }
+  .draft-poster.landscape { min-height: 280px; }
+  .draft-title { font-size: 13px; }
+  .draft-authors { font-size: 9.5px; }
+  .draft-affil { font-size: 8.5px; }
+  .draft-actions { flex-direction: column; width: 100%; }
+  .draft-actions button { width: 100%; }
+}
 </style>
 
 </head>
@@ -1457,9 +1494,9 @@ button.sm {
       <div>
         <label data-i18n="paper">Dimensões do Pôster</label>
         <select id="paper">
-          <option value="a0" selected>A0 (84.1 × 118.9 cm)</option>
-          <option value="60x90">60 × 90 cm</option>
+          <option value="60x90" selected>60 × 90 cm</option>
           <option value="90x120">90 × 120 cm</option>
+          <option value="a0">A0 (84.1 × 118.9 cm)</option>
           <option value="a1">A1 (59.4 × 84.1 cm)</option>
           <option value="a2">A2 (42.0 × 59.4 cm)</option>
         </select>
@@ -2189,9 +2226,9 @@ function updatePaperOptions() {
   if (!CFG) return;
   const paperSelect = $("#paper");
   if (!paperSelect) return;
-  const prev = paperSelect.value || "a0";
+  const prev = paperSelect.value || "60x90";
   const isLandscape = $("#orientation") && $("#orientation").value === "landscape";
-  const papers = CFG.papers || (CFG.templates[state.template] && CFG.templates[state.template].papers) || ["a0", "60x90", "90x120", "a1", "a2"];
+  const papers = CFG.papers || (CFG.templates[state.template] && CFG.templates[state.template].papers) || ["60x90", "90x120", "a0", "a1", "a2"];
 
   paperSelect.innerHTML = papers.map(p => {
     const dim = CFG.sizes[p];
@@ -2211,7 +2248,7 @@ function updatePaperOptions() {
 
 function applyTemplateOptions(reset) {
   if (!CFG) return;
-  const prev = $("#paper") ? $("#paper").value : "a0";
+  const prev = $("#paper") ? $("#paper").value : "60x90";
   updatePaperOptions();
   // As dimensões do poster são preservadas; o template adapta-se ao tamanho selecionado
   if ($("#paper") && prev) {

@@ -7,6 +7,7 @@ from typing import Any, Dict
 
 LANGUAGES = ("pt-BR", "en-US")
 DEFAULT_LANGUAGE = "pt-BR"
+DEFAULT_PAPER = "60x90"
 
 MAX_UPLOAD_BYTES = 60 * 1024 * 1024
 MAX_IMAGE_BYTES = 15 * 1024 * 1024
