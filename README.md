@@ -78,7 +78,11 @@ banner-generator/
    - O template se adapta dinamicamente às dimensões selecionadas sem forçar distorções no design.
 
 4. **Customização Avançada**:
-   - **Paleta de Cores Personalizada**: Controle individual de cores de destaque, título, subtítulo, texto e fundo.
+   - **Paleta de Cores Hexadecimal & Seletor Dark Integrado**:
+     - Controle individual das 6 cores do documento (`Destaque`, `Título`, `Autores`, `Texto`, `Legenda`, `Fundo`).
+     - Campos hexadecimais explícitos (`#RRGGBB`) em fonte monospace para digitação e cópia/cola direta.
+     - Seletor flutuante escuro exclusivo (*Dark Hex Popover*) com canvas 2D de saturação/brilho, slider de matiz (*hue*), ferramenta conta-gotas (*EyeDropper*) e chips de presets dos templates.
+     - Suporte nativo ao modo escuro via `<meta name="color-scheme" content="dark">`.
    - **Template LaTeX Próprio (`.tex`)**: Upload e compilação direta de templates `.tex` personalizados com suporte a todos os parâmetros.
 
 5. **Responsividade Total (Mobile a Desktop)**:
@@ -165,13 +169,15 @@ export NVIDIA_API_KEY="sua-chave"
 
 ## 🌐 Hospedagem e Publicação
 
+- **Servidor Oficial de Produção**: `https://banner-generator-t5p4.onrender.com`
 - **GitHub Pages (Frontend)**:
   - Configure em **Settings > Pages > Deploy from a branch > main / (root)** ou via **GitHub Actions** (`.github/workflows/deploy-pages.yml`).
   - O arquivo `.nojekyll` garante o carregamento de todos os assets.
+  - O frontend detecta automaticamente o ambiente (`getApiBase`): conecta-se ao servidor Render padrão quando hospedado no GitHub Pages e utiliza caminhos relativos ao executar localmente.
 - **Render (Backend / Docker)**:
   - Conecte o repositório ao [Render](https://dashboard.render.com).
   - O arquivo `render.yaml` provisiona o container Docker com TeX Live e Gunicorn automaticamente.
-  - No frontend do GitHub Pages, aponte a URL do Render no campo de configuração da API.
+  - Endereço de produção provisionado: `https://banner-generator-t5p4.onrender.com`.
 
 ---
 
@@ -208,7 +214,11 @@ The project provides two complete interfaces:
    - Templates dynamically adjust to the chosen dimensions without forced layout constraints or visual distortion.
 
 4. **Advanced Customization**:
-   - **Custom Color Palette**: Individual color pickers for accent, title, authors/subtitles, body text, and background.
+   - **Hexadecimal Color Palette & Integrated Dark Popover**:
+     - Dedicated control for all 6 document colors (`Accent`, `Title`, `Authors`, `Body`, `Caption`, `Background`).
+     - Monospace hex input fields (`#RRGGBB`) with direct typing, pasting, and bidirectional synchronization.
+     - Custom *Dark Hex Popover* with 2D saturation/brightness canvas, hue slider, eyedropper tool (*EyeDropper API*), and template preset chips.
+     - Full dark theme consistency enforced with `<meta name="color-scheme" content="dark">`.
    - **Custom LaTeX Template (`.tex`)**: Upload and direct compilation of external `.tex` templates.
 
 5. **Full Mobile & Desktop Responsiveness**:
@@ -276,5 +286,6 @@ export NVIDIA_API_KEY="your-api-key"
 
 ### Deployment
 
-- **GitHub Pages**: Static hosting of `index.html`. Deploy via GitHub Actions (`.github/workflows/deploy-pages.yml`) or directly from `main / (root)` branch.
-- **Render**: Docker deployment configured in `render.yaml`. Builds with TeX Live and Gunicorn for serverless PDF generation. Connect the deployed Render URL inside the web interface's API configuration field.
+- **Default Production Server**: `https://banner-generator-t5p4.onrender.com`
+- **GitHub Pages**: Static hosting of `index.html`. Deploy via GitHub Actions (`.github/workflows/deploy-pages.yml`) or directly from `main / (root)` branch. Automatically connects to the default Render server when hosted online, or uses local endpoints during local development.
+- **Render**: Docker deployment configured in `render.yaml`. Builds with TeX Live and Gunicorn for serverless PDF generation. Pre-configured service URL: `https://banner-generator-t5p4.onrender.com`.
