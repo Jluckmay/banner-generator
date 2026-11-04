@@ -88,6 +88,7 @@ def api_config() -> Response:
             "papers": list(config.POSTER_SIZES),
             "sizes": {k: v["cm"] for k, v in config.POSTER_SIZES.items()},
             "templates": public_templates(),
+            "default_provider": config.DEFAULT_PROVIDER,
             "providers": config.public_provider_info(),
             "sections": DEFAULT_SECTION_IDS,
             "labels": {lang: {k: v for k, v in d.items() if k != "babel"} for lang, d in LABELS.items()},
@@ -116,7 +117,7 @@ def api_extract() -> Tuple[Response, int] | Response:
     warning = ""
     result: Dict[str, Any] | None = None
     if mode == "ai":
-        provider = request.form.get("provider", "google")
+        provider = request.form.get("provider", config.DEFAULT_PROVIDER)
         try:
             key = resolve_key(provider, request.form.get("api_key"))
             result = ai_extract(text, language, provider, key, request.form.get("model") or None)

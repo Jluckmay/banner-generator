@@ -1840,7 +1840,7 @@ button.sm {
       <div id="aiBox" style="margin-top:10px;">
         <div class="row">
           <div><label data-i18n="provider">Provedor de IA</label><select id="provider"></select></div>
-          <div><label data-i18n="model">Modelo (opcional)</label><input type="text" id="model" data-i18n-ph="ph_model" autocomplete="off" placeholder="Ex: gemini-2.0-flash ou gpt-4o-mini"></div>
+          <div><label data-i18n="model">Modelo (opcional)</label><input type="text" id="model" autocomplete="off" placeholder="nvidia/llama-3.1-nemotron-70b-instruct"></div>
         </div>
         <label data-i18n="api_key">Chave de API</label>
         <input type="password" id="apiKey" data-i18n-ph="ph_api_key" autocomplete="new-password" spellcheck="false" data-lpignore="true" autocapitalize="off" placeholder="Cole sua chave aqui ou use a do servidor">
@@ -2446,12 +2446,13 @@ const DEFAULT_CFG = {
       "logos": { "header": 2, "footer": 0 }
     }
   },
+  default_provider: "nvidia",
   providers: {
+    "nvidia": { "name": "NVIDIA NIM", "default_model": "nvidia/llama-3.1-nemotron-70b-instruct", "server_key": true },
     "google": { "name": "Google Gemini", "default_model": "gemini-2.0-flash", "server_key": false },
     "openai": { "name": "OpenAI", "default_model": "gpt-4o-mini", "server_key": false },
     "anthropic": { "name": "Anthropic Claude", "default_model": "claude-3-5-haiku-latest", "server_key": false },
-    "deepseek": { "name": "DeepSeek", "default_model": "deepseek-chat", "server_key": false },
-    "nvidia": { "name": "NVIDIA NIM", "default_model": "nvidia/llama-3.1-nemotron-70b-instruct", "server_key": false }
+    "deepseek": { "name": "DeepSeek", "default_model": "deepseek-chat", "server_key": false }
   },
   sections: ["abstract", "introduction", "objectives", "methods", "results", "conclusions", "references"],
   labels: {
@@ -2512,6 +2513,7 @@ function applyI18n() {
     renderTemplates();
     renderSections();
     applyTemplateOptions(false);
+    if ($("#provider") && $("#provider").onchange) $("#provider").onchange();
   }
 }
 
@@ -2636,15 +2638,47 @@ async function wakeUpServer() {
 function populateProviders() {
   if (CFG && CFG.providers && $("#provider")) {
     const prevVal = $("#provider").value;
-    $("#provider").innerHTML = Object.entries(CFG.providers).map(([k, v]) =>
-      `<option value="${k}">${v.name}${v.server_key ? " ✓" : ""}</option>`
-    ).join("");
+    const entries = Object.entries(CFG.providers);
+
+    // Ordena priorizando o provedor padrão do servidor Render no topo
+    entries.sort((a, b) => {
+      const aServer = a[1].server_key || a[0] === "nvidia";
+      const bServer = b[1].server_key || b[0] === "nvidia";
+      if (aServer && !bServer) return -1;
+      if (!aServer && bServer) return 1;
+      return 0;
+    });
+
+    $("#provider").innerHTML = entries.map(([k, v]) => {
+      const isServer = v.server_key || k === "nvidia";
+      const serverTag = isServer
+        ? (uiLang === "en-US" ? " (Render Server) ✓" : " (Servidor Render) ✓")
+        : (v.server_key ? " ✓" : "");
+      return `<option value="${k}">${v.name}${serverTag}</option>`;
+    }).join("");
+
+    // O provedor padrão selecionado é o servidor backend Render (nvidia)
+    const serverDefault = entries.find(e => e[1].server_key || e[0] === "nvidia");
+    const defaultKey = serverDefault ? serverDefault[0] : (CFG.default_provider || "nvidia");
+
     if (prevVal && CFG.providers[prevVal]) {
       $("#provider").value = prevVal;
+    } else {
+      $("#provider").value = defaultKey;
     }
+
     $("#provider").onchange = () => {
       const p = $("#provider").value;
-      if (CFG.providers[p]) $("#model").placeholder = CFG.providers[p].default_model;
+      if (CFG.providers[p]) {
+        $("#model").placeholder = CFG.providers[p].default_model;
+        const isServer = CFG.providers[p].server_key || p === "nvidia";
+        const apiKeyInput = $("#apiKey");
+        if (apiKeyInput) {
+          apiKeyInput.placeholder = isServer
+            ? (uiLang === "en-US" ? "Using Render Server key (optional: enter custom key)" : "Usando chave do Servidor Render (opcional: digite chave própria)")
+            : t("ph_api_key");
+        }
+      }
     };
     $("#provider").onchange();
   }
@@ -2688,6 +2722,22 @@ function populateProviders() {
   if (statusBadge) {
     statusBadge.onclick = () => wakeUpServer();
   }
+
+  /* ---------- Modo de Entrada (Manual vs Upload) ---------- */
+  function setMode(m) {
+    document.querySelectorAll("input[name=mode]").forEach(r => {
+      r.checked = (r.value === m);
+    });
+    const box = $("#uploadBox");
+    if (box) box.classList.toggle("hidden", m !== "upload");
+  }
+  document.querySelectorAll("input[name=mode]").forEach(r => {
+    r.onchange = () => setMode(r.value);
+  });
+
+  if (window.location.hash === "#upload") {
+    setMode("upload");
+  }
 })();
 
 /* ---------- Alternância de Idioma e Tema ---------- */
@@ -2712,13 +2762,6 @@ $("#themeBtn").onclick = () => {
   const d = document.documentElement;
   d.dataset.theme = d.dataset.theme === "dark" ? "light" : "dark";
 };
-
-/* ---------- Modo de Entrada (Manual vs Upload) ---------- */
-document.querySelectorAll("input[name=mode]").forEach(r => {
-  r.onchange = () => {
-    $("#uploadBox").classList.toggle("hidden", r.value !== "upload" || !r.checked);
-  };
-});
 $("#useAI").onchange = e => $("#aiBox").classList.toggle("hidden", !e.target.checked);
 
 /* ---------- Drag and Drop / Upload do Trabalho ---------- */

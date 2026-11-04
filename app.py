@@ -412,7 +412,7 @@ with col_form:
                 provider = st.selectbox(
                     t("provider"),
                     options=list(config.PROVIDERS.keys()),
-                    format_func=lambda x: config.PROVIDERS[x]["name"],
+                    format_func=lambda x: f"{config.PROVIDERS[x][\"name\"]}{' (Servidor Backend) ✓' if config.server_key_for(x) or x == 'nvidia' else ''}",
                 )
             with ai_mod_col:
                 model_input = st.text_input(t("model"), placeholder=t("ph_model"))

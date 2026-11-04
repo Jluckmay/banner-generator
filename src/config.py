@@ -28,8 +28,16 @@ POSTER_SIZES: Dict[str, Dict[str, Any]] = {
 MAX_LOGOS_HEADER = 2
 MAX_LOGOS_FOOTER = 5
 
+DEFAULT_PROVIDER = "nvidia"
+
 # Provedores: chave via campo da requisição (nunca armazenada) ou variável de ambiente.
 PROVIDERS: Dict[str, Dict[str, Any]] = {
+    "nvidia": {
+        "name": "NVIDIA NIM",
+        "env": "NVIDIA_API_KEY",
+        "default_model": "nvidia/llama-3.1-nemotron-70b-instruct",
+        "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+    },
     "google": {
         "name": "Google Gemini",
         "env": "GEMINI_API_KEY",
@@ -52,12 +60,6 @@ PROVIDERS: Dict[str, Dict[str, Any]] = {
         "env": "DEEPSEEK_API_KEY",
         "default_model": "deepseek-chat",
         "url": "https://api.deepseek.com/chat/completions",
-    },
-    "nvidia": {
-        "name": "NVIDIA NIM",
-        "env": "NVIDIA_API_KEY",
-        "default_model": "nvidia/llama-3.1-nemotron-70b-instruct",
-        "url": "https://integrate.api.nvidia.com/v1/chat/completions",
     },
 }
 
