@@ -55,10 +55,11 @@ banner-generator/
 
 ## 🚀 Recursos Principais
 
-1. **Dois Modos de Entrada**:
+1. **Dois Modos de Entrada & Síntese Inteligente**:
    - **Manual**: Preenchimento interativo de seções com pré-visualização em tempo real (Rascunho Interativo).
    - **Upload de Artigo**: Envio de arquivos acadêmicos (`.pdf`, `.docx`, `.txt`, `.md`, `.tex`).
      - *Com IA* (Google Gemini, OpenAI, Claude, DeepSeek, NVIDIA NIM): Sumariza e formata o trabalho diretamente nas seções do banner.
+       - **Tabelas e Diagramas em LaTeX**: A IA estrutura automaticamente dados quantitativos em tabelas LaTeX (`tabular` / `booktabs`) na seção de Resultados e fluxogramas em TikZ (`tikzpicture`) na Metodologia, **sem inventar dados** (fidelidade estrita aos dados e etapas do trabalho original).
      - *Sem IA / Heurística*: Extração estrutural automática baseada em cabeçalhos (Resumo, Introdução, Metodologia, Resultados, etc.).
 
 2. **9 Templates de Estilo Visual**:
@@ -170,6 +171,8 @@ export NVIDIA_API_KEY="sua-chave"
 ## 🌐 Hospedagem e Publicação
 
 - **Servidor Oficial de Produção**: `https://banner-generator-t5p4.onrender.com`
+  - **Despertar Automático & Persistência a Inatividade**: Ao carregar o frontend, uma rotina em segundo plano dispara imediatamente uma solicitação de wake-up ao servidor Render com badge interativo no cabeçalho (*Render: Conectando/Online*).
+  - **Tolerância a Falhas**: Todas as requisições (`/api/extract`, `/api/generate`) possuem mecanismo de retentativas automáticas e backoff exponencial (`robustFetch`) que mantêm a operação resiliente durante o cold-start de ~30-60s do Render gratuito, além de heartbeat periódico para evitar hibernação durante o uso.
 - **GitHub Pages (Frontend)**:
   - Configure em **Settings > Pages > Deploy from a branch > main / (root)** ou via **GitHub Actions** (`.github/workflows/deploy-pages.yml`).
   - O arquivo `.nojekyll` garante o carregamento de todos os assets.
@@ -191,10 +194,11 @@ The project provides two complete interfaces:
 
 ### Key Features
 
-1. **Two Input Modes**:
+1. **Two Input Modes & AI Synthesis**:
    - **Manual Mode**: Interactive field editing with live draft preview.
    - **Paper Upload Mode**: Ingest scientific papers in `.pdf`, `.docx`, `.txt`, `.md`, or `.tex` formats.
      - *AI-Powered* (Google Gemini, OpenAI, Claude, DeepSeek, NVIDIA NIM): Automatically summarizes and structures content into designated banner sections.
+       - **LaTeX Tables and Diagrams**: AI automatically formats numerical data into compact LaTeX tables (`tabular` / `booktabs`) in Results and process pipelines into TikZ flowcharts (`tikzpicture`) in Methodology, **with zero hallucination / strictly without inventing data** (pure fidelity to the explicit text and metrics).
      - *Heuristic Fallback* (Offline / No Key): Automatically extracts sections using structural academic heading patterns (Abstract, Introduction, Methods, Results, Conclusions, etc.).
 
 2. **9 Visual Style Templates**:
@@ -287,5 +291,7 @@ export NVIDIA_API_KEY="your-api-key"
 ### Deployment
 
 - **Default Production Server**: `https://banner-generator-t5p4.onrender.com`
+  - **Instant Server Wakeup & Spin-Down Resilience**: When loading the frontend, a non-blocking background wake-up ping triggers immediately, showing real-time connectivity status via a header badge (*Render: Waking up/Online*).
+  - **Cold-Start Fault Tolerance**: All network calls (`/api/extract`, `/api/generate`) utilize automatic retries with backoff (`robustFetch`) to seamlessly endure Render's free-tier ~30-60s cold-start, paired with background keep-alive heartbeats during editing sessions.
 - **GitHub Pages**: Static hosting of `index.html`. Deploy via GitHub Actions (`.github/workflows/deploy-pages.yml`) or directly from `main / (root)` branch. Automatically connects to the default Render server when hosted online, or uses local endpoints during local development.
 - **Render**: Docker deployment configured in `render.yaml`. Builds with TeX Live and Gunicorn for serverless PDF generation. Pre-configured service URL: `https://banner-generator-t5p4.onrender.com`.

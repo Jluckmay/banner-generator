@@ -139,6 +139,62 @@ header {
   align-items: center;
   gap: 8px;
 }
+.server-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: 9999px;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  min-height: 32px;
+}
+.server-status-badge:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+.server-status-badge .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.server-status-badge.status-connecting {
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fcd34d;
+}
+.server-status-badge.status-connecting .status-dot {
+  background-color: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+  animation: statusPulse 1.4s ease-in-out infinite;
+}
+.server-status-badge.status-online {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #6ee7b7;
+}
+.server-status-badge.status-online .status-dot {
+  background-color: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+.server-status-badge.status-offline {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+.server-status-badge.status-offline .status-dot {
+  background-color: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.85); }
+}
 
 /* Layout Principal */
 main {
@@ -795,6 +851,55 @@ button.sm {
 }
 .draft-block-body p {
   margin: 0 0 4px;
+}
+.draft-block-body table.draft-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 6px 0;
+  font-size: 0.82em;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #cbd5e1;
+}
+.draft-block-body table.draft-table th {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 700;
+  padding: 4px 6px;
+  border: 1px solid #cbd5e1;
+  text-align: center;
+}
+.draft-block-body table.draft-table td {
+  padding: 3px 6px;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  text-align: center;
+}
+.draft-block-body .draft-diagram {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 6px;
+  margin: 6px 0;
+  background: #f8fafc;
+  border: 1px dashed #94a3b8;
+  border-radius: 4px;
+  font-size: 0.8em;
+}
+.draft-block-body .draft-diag-node {
+  padding: 4px 8px;
+  background: #ffffff;
+  border: 1.5px solid var(--tpl-accent, #2563eb);
+  border-radius: 4px;
+  font-weight: 600;
+  color: #1e293b;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.draft-block-body .draft-diag-arrow {
+  color: #64748b;
+  font-weight: 800;
+  font-size: 1.1em;
 }
 .draft-block-imgs {
   display: flex;
@@ -1693,6 +1798,10 @@ button.sm {
         <span class="brand-tagline-text" data-i18n="tagline">01 / PÔSTER ACADÊMICO &amp; COMPILADOR LATEX</span>
       </div>
       <div class="header-controls">
+        <div id="serverStatusBadge" class="server-status-badge status-connecting" title="Clique para testar conexão com o servidor">
+          <span class="status-dot"></span>
+          <span id="serverStatusText">Render: Conectando...</span>
+        </div>
         <button id="uiLangToggle" class="btn-toggle" type="button" title="Alternar idioma da interface (pt-BR / en-US)" aria-label="Alternar idioma da interface">
           <span id="uiLangFlag">🇧🇷</span>
           <span id="uiLangText">pt-BR</span>
@@ -2160,7 +2269,11 @@ const T = {
     ph_affiliations: "Ex: Departamento de Ciência da Computação - Universidade Federal",
     ph_email: "contato@universidade.edu.br",
     ph_url: "https://github.com/usuario/projeto",
-    ph_backend_url: "http://127.0.0.1:5000 ou https://banner-generator-t5p4.onrender.com"
+    ph_backend_url: "http://127.0.0.1:5000 ou https://banner-generator-t5p4.onrender.com",
+    server_online: "Render: Online",
+    server_connecting: "Render: Acordando...",
+    server_offline: "Render: Desconectado",
+    server_retry_tip: "Clique para testar conexão com o servidor"
   },
   "en-US": {
     app_title: "banner-generator",
@@ -2241,7 +2354,11 @@ const T = {
     ph_affiliations: "e.g. Department of Computer Science - Stanford University",
     ph_email: "contact@university.edu",
     ph_url: "https://github.com/username/project",
-    ph_backend_url: "http://127.0.0.1:5000 or https://banner-generator-t5p4.onrender.com"
+    ph_backend_url: "http://127.0.0.1:5000 or https://banner-generator-t5p4.onrender.com",
+    server_online: "Render: Online",
+    server_connecting: "Render: Waking up...",
+    server_offline: "Render: Offline",
+    server_retry_tip: "Click to test server connection"
   }
 };
 
@@ -2334,7 +2451,7 @@ const DEFAULT_CFG = {
     "openai": { "name": "OpenAI", "default_model": "gpt-4o-mini", "server_key": false },
     "anthropic": { "name": "Anthropic Claude", "default_model": "claude-3-5-haiku-latest", "server_key": false },
     "deepseek": { "name": "DeepSeek", "default_model": "deepseek-chat", "server_key": false },
-    "nvidia": { "name": "NVIDIA NIM", "default_model": "meta/llama-3.3-70b-instruct", "server_key": false }
+    "nvidia": { "name": "NVIDIA NIM", "default_model": "nvidia/llama-3.1-nemotron-70b-instruct", "server_key": false }
   },
   sections: ["abstract", "introduction", "objectives", "methods", "results", "conclusions", "references"],
   labels: {
@@ -2421,24 +2538,127 @@ function getApiBase() {
   return DEFAULT_API_BASE;
 }
 
+
+/* ---------- Status do Servidor, Conexão e Tolerância a Falhas (Render Wakeup) ---------- */
+function updateServerBadge(status, label) {
+  const badge = $("#serverStatusBadge");
+  const txt = $("#serverStatusText");
+  if (!badge || !txt) return;
+
+  badge.classList.remove("status-connecting", "status-online", "status-offline");
+  badge.classList.add("status-" + status);
+
+  if (label) {
+    txt.textContent = label;
+  } else {
+    txt.textContent = (status === "online") ? t("server_online") : (status === "connecting") ? t("server_connecting") : t("server_offline");
+  }
+}
+
+async function robustFetch(url, options = {}, { maxRetries = 6, retryDelay = 4000, onStatusUpdate = null, timeout = 120000 } = {}) {
+  let lastErr = null;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    try {
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timer);
+
+      // Render spin-down / gateway cold-start (502/503/504)
+      if ((res.status === 502 || res.status === 503 || res.status === 504) && attempt < maxRetries) {
+        const msg = (uiLang === "en-US")
+          ? `Render server waking up from sleep... retrying (${attempt}/${maxRetries})`
+          : `Servidor Render acordando do repouso... tentando novamente (${attempt}/${maxRetries})`;
+        if (onStatusUpdate) onStatusUpdate(msg);
+        updateServerBadge("connecting", (uiLang === "en-US") ? `Render: Waking up (${attempt}/${maxRetries})...` : `Render: Acordando (${attempt}/${maxRetries})...`);
+        await new Promise(r => setTimeout(r, retryDelay));
+        continue;
+      }
+      updateServerBadge("online", t("server_online"));
+      return res;
+    } catch (err) {
+      clearTimeout(timer);
+      lastErr = err;
+      if (attempt < maxRetries) {
+        const msg = (uiLang === "en-US")
+          ? `Render server waking up from sleep... retrying (${attempt}/${maxRetries})`
+          : `Servidor Render acordando do repouso... tentando novamente (${attempt}/${maxRetries})`;
+        if (onStatusUpdate) onStatusUpdate(msg);
+        updateServerBadge("connecting", (uiLang === "en-US") ? `Render: Waking up (${attempt}/${maxRetries})...` : `Render: Acordando (${attempt}/${maxRetries})...`);
+        await new Promise(r => setTimeout(r, retryDelay));
+      } else {
+        updateServerBadge("offline", t("server_offline"));
+        throw err;
+      }
+    }
+  }
+  throw lastErr || new Error("Falha ao comunicar com o servidor.");
+}
+
+let keepAliveTimer = null;
+
+async function wakeUpServer() {
+  updateServerBadge("connecting", t("server_connecting"));
+  const apiBase = getApiBase();
+
+  const maxWakeAttempts = 25; // Até ~100 segundos cobrindo boot do Render
+  for (let attempt = 1; attempt <= maxWakeAttempts; attempt++) {
+    try {
+      const res = await fetch(apiBase + "/healthz", { signal: AbortSignal.timeout(12000) });
+      if (res.ok) {
+        // Servidor ativo! Carrega configuração viva do servidor
+        try {
+          const cfgRes = await fetch(apiBase + "/api/config", { signal: AbortSignal.timeout(8000) });
+          if (cfgRes.ok) {
+            const data = await cfgRes.json();
+            CFG = data;
+            populateProviders();
+          }
+        } catch (_) {}
+
+        updateServerBadge("online", t("server_online"));
+
+        // Configura keep-alive a cada 8 minutos para evitar spin-down enquanto usuário edita
+        if (keepAliveTimer) clearInterval(keepAliveTimer);
+        keepAliveTimer = setInterval(() => {
+          fetch(apiBase + "/healthz", { signal: AbortSignal.timeout(5000) }).catch(() => {});
+        }, 8 * 60 * 1000);
+        return;
+      }
+    } catch (_) {}
+
+    updateServerBadge("connecting", (uiLang === "en-US") ? `Render: Waking up (${attempt}/${maxWakeAttempts})...` : `Render: Acordando (${attempt}/${maxWakeAttempts})...`);
+    await new Promise(r => setTimeout(r, 4000));
+  }
+  updateServerBadge("offline", t("server_offline"));
+}
+
+function populateProviders() {
+  if (CFG && CFG.providers && $("#provider")) {
+    const prevVal = $("#provider").value;
+    $("#provider").innerHTML = Object.entries(CFG.providers).map(([k, v]) =>
+      `<option value="${k}">${v.name}${v.server_key ? " ✓" : ""}</option>`
+    ).join("");
+    if (prevVal && CFG.providers[prevVal]) {
+      $("#provider").value = prevVal;
+    }
+    $("#provider").onchange = () => {
+      const p = $("#provider").value;
+      if (CFG.providers[p]) $("#model").placeholder = CFG.providers[p].default_model;
+    };
+    $("#provider").onchange();
+  }
+}
+
 /* ---------- Inicialização ---------- */
-(async function init() {
+(function init() {
   const beInput = $("#backendUrlInput");
   if (beInput) {
     beInput.value = localStorage.getItem("banner_api_base") || "";
     beInput.oninput = () => {
       localStorage.setItem("banner_api_base", beInput.value.trim());
+      wakeUpServer();
     };
-  }
-
-  try {
-    const res = await fetch(getApiBase() + "/api/config");
-    if (res.ok) {
-      const data = await res.json();
-      CFG = data;
-    }
-  } catch (err) {
-    console.warn("Backend /api/config inacessível, utilizando valores padrão locais:", err);
   }
 
   const nav = (navigator.language || "").toLowerCase().startsWith("en") ? "en-US" : "pt-BR";
@@ -2447,17 +2667,7 @@ function getApiBase() {
   const posterRadio = document.querySelector(`input[name=posterLang][value="${posterLang}"]`);
   if (posterRadio) posterRadio.checked = true;
 
-  if (CFG && CFG.providers && $("#provider")) {
-    $("#provider").innerHTML = Object.entries(CFG.providers).map(([k, v]) =>
-      `<option value="${k}">${v.name}${v.server_key ? " ✓" : ""}</option>`
-    ).join("");
-
-    $("#provider").onchange = () => {
-      const p = $("#provider").value;
-      if (CFG.providers[p]) $("#model").placeholder = CFG.providers[p].default_model;
-    };
-    $("#provider").onchange();
-  }
+  populateProviders();
 
   // Seções padrão
   if (sections.length === 0) {
@@ -2470,6 +2680,14 @@ function getApiBase() {
   applyI18n();
   setViewMode("draft");
   updateDraftPreview();
+
+  // Acorda o servidor em segundo plano sem travar a interface
+  wakeUpServer();
+
+  const statusBadge = $("#serverStatusBadge");
+  if (statusBadge) {
+    statusBadge.onclick = () => wakeUpServer();
+  }
 })();
 
 /* ---------- Alternância de Idioma e Tema ---------- */
@@ -2532,7 +2750,9 @@ $("#extractBtn").onclick = async () => {
   $("#extractBtn").disabled = true;
   showMsg(msg, t("working"), "ok");
   try {
-    const r = await fetch(getApiBase() + "/api/extract", { method: "POST", body: fd });
+    const r = await robustFetch(getApiBase() + "/api/extract", { method: "POST", body: fd }, {
+      onStatusUpdate: (stMsg) => showMsg(msg, stMsg, "ok")
+    });
     const j = await r.json();
     if (!r.ok) return showMsg(msg, j.error || "Erro na extração", "err");
     fillFromExtract(j.poster);
@@ -3007,7 +3227,7 @@ function updateDraftPreview() {
     grid.innerHTML = activeSections.map(s => {
       const sTitle = (s.title && s.title.trim()) || secLabel(s.id) || dFb.section;
       const sBody = (s.content && s.content.trim()) || dFb.content;
-      const paragraphs = sBody.split("\n\n").slice(0, 3).map(p => `<p>${escapeHtml(p)}</p>`).join("");
+      const bodyHtml = renderDraftBody(sBody);
       const imgHtml = (s.images && s.images.length > 0)
         ? `<div class="draft-block-imgs">${s.images.slice(0, 2).map(im => `<img class="draft-block-img" src="${escapeHtml(im.url || im.preview || "")}" alt="Figura">`).join("")}</div>`
         : "";
@@ -3018,13 +3238,100 @@ function updateDraftPreview() {
             ${escapeHtml(sTitle)}
           </div>
           <div class="draft-block-body" style="color: ${bodyColor};">
-            ${paragraphs}
+            ${bodyHtml}
           </div>
           ${imgHtml}
         </div>
       `;
     }).join("");
   }
+}
+
+
+function formatInlineText(str) {
+  let esc = escapeHtml(str);
+  esc = esc.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  esc = esc.replace(/(?<!\w)\*([^*]+?)\*(?!\w)/g, "<em>$1</em>");
+  return esc;
+}
+
+function renderLatexTabularToHtml(tex) {
+  const match = tex.match(/\\begin\{(?:tabular\*?|tabularx)\}(?:\{[^}]*\})*([\s\S]*?)\\end\{(?:tabular\*?|tabularx)\}/i);
+  if (!match) return `<p style="margin:0 0 4px;">${escapeHtml(tex)}</p>`;
+  const inner = match[1];
+  const rows = inner.split(/\\\\/).map(r => r.replace(/\\hline|\\toprule|\\midrule|\\bottomrule/g, "").trim()).filter(Boolean);
+  if (!rows.length) return "";
+
+  let html = '<table class="draft-table"><tbody>';
+  rows.forEach((r, idx) => {
+    const cells = r.split(/&/).map(c => c.trim().replace(/\\textbf\{([^}]+)\}/g, "$1").replace(/\\textit\{([^}]+)\}/g, "$1").replace(/\\%/g, "%"));
+    html += "<tr>" + cells.map(c => {
+      const tag = idx === 0 ? "th" : "td";
+      return `<${tag}>${formatInlineText(c)}</${tag}>`;
+    }).join("") + "</tr>";
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+function renderTikzToHtml(tex) {
+  const nodeMatches = [...tex.matchAll(/\\node\b.*?\{([^}]+)\}/gi)];
+  if (nodeMatches.length > 0) {
+    const nodes = nodeMatches.map(m => m[1].replace(/\\textbf\{([^}]+)\}/g, "$1").trim());
+    return `
+      <div class="draft-diagram">
+        ${nodes.map((n, i) => `
+          <div class="draft-diag-node">${formatInlineText(n)}</div>
+          ${i < nodes.length - 1 ? '<span class="draft-diag-arrow">→</span>' : ''}
+        `).join("")}
+      </div>
+    `;
+  }
+  return `<div class="draft-diagram"><span style="font-weight:600;color:var(--tpl-accent,#2563eb);">[Diagrama Metodológico TikZ]</span></div>`;
+}
+
+function renderMarkdownTableToHtml(lines) {
+  const headers = lines[0].replace(/^\||\|$/g, "").split("|").map(h => h.trim());
+  const rows = lines.slice(2).map(ln => ln.replace(/^\||\|$/g, "").split("|").map(c => c.trim()));
+  let html = '<table class="draft-table"><thead><tr>';
+  headers.forEach(h => { html += `<th>${formatInlineText(h)}</th>`; });
+  html += '</tr></thead><tbody>';
+  rows.forEach(r => {
+    html += '<tr>' + r.map(c => `<td>${formatInlineText(c)}</td>`).join("") + '</tr>';
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+function renderDraftBody(text) {
+  if (!text) return "";
+  const blocks = text.trim().split(/\n\s*\n/);
+  return blocks.map(block => {
+    const trimmed = block.trim();
+    if (!trimmed) return "";
+
+    // 1. Tabela LaTeX
+    if (/\\begin\{(?:tabular\*?|tabularx)\}/i.test(trimmed)) {
+      return renderLatexTabularToHtml(trimmed);
+    }
+    // 2. Diagrama TikZ
+    if (/\\begin\{tikzpicture\}/i.test(trimmed)) {
+      return renderTikzToHtml(trimmed);
+    }
+    // 3. Tabela Markdown
+    const lines = trimmed.split("\n").map(l => l.trim()).filter(Boolean);
+    if (lines.length >= 2 && lines[0].includes("|") && /^\s*\|?\s*:?-+:?\s*(\|:?-+:?\s*)+\|?\s*$/.test(lines[1])) {
+      return renderMarkdownTableToHtml(lines);
+    }
+    // 4. Lista de itens
+    const isList = lines.every(l => /^[-*•–]\s+/.test(l) || /^\d+[.)]\s+/.test(l));
+    if (isList) {
+      const items = lines.map(l => l.replace(/^[-*•–\d.)]\s+/, ""));
+      return `<ul style="margin:2px 0 4px 14px;padding:0;">${items.map(it => `<li>${formatInlineText(it)}</li>`).join("")}</ul>`;
+    }
+    // 5. Parágrafo simples
+    return `<p style="margin:0 0 4px;">${formatInlineText(trimmed)}</p>`;
+  }).join("");
 }
 
 function escapeHtml(str) {
@@ -3495,7 +3802,11 @@ async function generate(fmt) {
   }
 
   try {
-    const r = await fetch(getApiBase() + "/api/generate?format=" + fmt, { method: "POST", body: buildForm() });
+    const r = await robustFetch(getApiBase() + "/api/generate?format=" + fmt, { method: "POST", body: buildForm() }, {
+      onStatusUpdate: (stMsg) => {
+        $("#loadingText").textContent = stMsg;
+      }
+    });
     if (!r.ok) {
       const j = await r.json().catch(() => ({ error: "HTTP " + r.status }));
       showMsg(msg, j.error || "Erro ao compilar pôster", "err");
