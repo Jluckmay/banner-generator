@@ -147,7 +147,7 @@ def build_article_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
   {{{_fs(36, s, 1.2)}\\textbf{{{authors}}}}}\\par
   \\vspace{{{cm(0.6)}}}
   {{{_fs(30, s, 1.2)}\\textcolor{{darkgray}}{{{affil}}}}}\\par
-\end{{center}}
+\\end{{center}}
 \\vspace{{{cm(0.4)}}}
 \\noindent\\textcolor{{accent}}{{\\rule{{\\textwidth}}{{{_pt(8 * s)}pt}}}}\\par
 \\vspace{{{cm(0.8)}}}
