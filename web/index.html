@@ -2,7 +2,10 @@
 <html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; worker-src 'self' blob: data: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' blob: data:; frame-src 'self' blob: data: chrome-extension:; object-src 'self' blob: data:; connect-src 'self' https://cdnjs.cloudflare.com; base-uri 'none'; form-action 'self';">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>banner-generator | Gerador de Pôsteres Acadêmicos</title>
 <link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/assets/icons/favicon-32.png" sizes="32x32" type="image/png">
@@ -153,7 +156,7 @@ main {
   #preview {
     order: 4;
     position: static !important;
-    height: 620px !important;
+    height: clamp(480px, 75vh, 640px) !important;
     margin-top: 0;
     margin-bottom: 18px;
     width: 100%;
@@ -161,6 +164,67 @@ main {
   #form > section:nth-of-type(4) { order: 5; }
   #form > section:nth-of-type(5) { order: 6; }
   #form > section:nth-of-type(6) { order: 7; }
+}
+
+@media (max-width: 768px) {
+  header { padding: 10px 14px; }
+  .header-top {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+  }
+  .brand-terminal-title { font-size: 16px; flex-wrap: wrap; gap: 6px; }
+  .header-actions { gap: 6px; flex-wrap: wrap; }
+  .btn-toggle { padding: 5px 8px; font-size: 11px; }
+
+  main { padding: 10px; }
+  .card { padding: 14px 12px; margin-bottom: 14px; }
+  .card h2 { font-size: 13px; }
+
+  #preview {
+    height: clamp(400px, 70vh, 560px) !important;
+    margin-bottom: 14px;
+  }
+  #pdf-viewport-container { padding: 10px; }
+  .draft-poster { padding: 14px 10px; }
+  .draft-grid { gap: 8px; }
+  .draft-block { padding: 8px 10px; font-size: 9px; }
+  .draft-block-title { font-size: 9.5px; }
+
+  .tpls {
+    grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+    gap: 8px;
+  }
+  .tpl { padding: 6px; font-size: 11px; }
+  .tpl .sw { height: 26px; }
+
+  .row { gap: 8px; }
+  .row > * { min-width: 100%; }
+  button, .btn-terminal { min-height: 38px; }
+  button.pri { min-height: 42px; font-size: 13px; }
+  input[type="text"], input[type="password"], select, textarea {
+    min-height: 38px;
+    font-size: 13px;
+  }
+  .file-btn { min-height: 38px; }
+  .sec-header { flex-wrap: wrap; }
+  .sec-header input[data-f="title"] { min-width: 100%; margin-bottom: 6px; }
+}
+
+@media (max-width: 480px) {
+  .brand-terminal-title { font-size: 14px; }
+  .brand-prompt { font-size: 12px; }
+  .card { padding: 12px 10px; }
+  .seg label { padding: 6px 4px; font-size: 10.5px; }
+  .preview-mode-toggle button { padding: 4px 8px; font-size: 10px; }
+  #preview-header { padding: 8px 10px; }
+  #pdf-toolbar { padding: 4px 6px; font-size: 11px; }
+  .tpls { grid-template-columns: repeat(2, 1fr); }
+  .draft-poster.portrait { min-height: 380px; }
+  .draft-poster.landscape { min-height: 300px; }
+  .draft-title { font-size: 13.5px; }
+  .draft-actions { flex-direction: column; width: 100%; }
+  .draft-actions button { width: 100%; }
 }
 
 /* Cards no estilo da imagem: topo vermelho, fundo escuro, cantos retos */
@@ -1267,7 +1331,7 @@ button.sm {
           <div><label data-i18n="model">Modelo (opcional)</label><input type="text" id="model" autocomplete="off"></div>
         </div>
         <label data-i18n="api_key">Chave de API</label>
-        <input type="password" id="apiKey" autocomplete="off" placeholder="Cole sua chave aqui ou use a do servidor">
+        <input type="password" id="apiKey" autocomplete="new-password" spellcheck="false" data-lpignore="true" autocapitalize="off" placeholder="Cole sua chave aqui ou use a do servidor">
         <div class="hint" data-i18n="key_hint">A chave é utilizada unicamente nesta chamada e jamais é persistida em disco.</div>
       </div>
       <p style="margin:12px 0 0;"><button class="pri" id="extractBtn" data-i18n="extract">Extrair conteúdo do trabalho</button></p>
@@ -1491,7 +1555,7 @@ button.sm {
         <button id="btnViewDraft" class="active" type="button" data-i18n="view_draft">📐 Rascunho</button>
         <button id="btnViewPdf" class="hidden" type="button" data-i18n="view_pdf">📄 PDF</button>
       </div>
-      <a id="openTabBtn" href="#" target="_blank" class="btn-toggle hidden" style="text-decoration:none;" data-i18n="open_tab">↗ Nova Aba</a>
+      <a id="openTabBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-toggle hidden" style="text-decoration:none;" data-i18n="open_tab">↗ Nova Aba</a>
       <button id="prevDlBtn" class="btn-toggle hidden" data-i18n="dl_quick">⬇ Baixar PDF</button>
     </div>
   </div>
@@ -1845,7 +1909,7 @@ function applyI18n() {
 }
 
 function showMsg(el, text, cls) {
-  el.innerHTML = text ? `<div class="msg ${cls}">${text}</div>` : "";
+  el.innerHTML = text ? `<div class="msg ${escapeHtml(cls)}">${escapeHtml(text)}</div>` : "";
 }
 
 function secLabel(id) {
@@ -2070,11 +2134,13 @@ function applyTemplateOptions(reset) {
 
 /* ---------- Logotipos ---------- */
 function thumbHTML(img, withCaption, kind, idx) {
+  const safeUrl = escapeHtml(img.url);
+  const safeCap = escapeHtml(img.caption || "");
   return `
     <div class="thumb">
       <button type="button" class="rm-btn" data-rm="${kind}" data-idx="${idx}" title="${t("remove")}">✕</button>
-      <img src="${img.url}" alt="">
-      ${withCaption ? `<input type="text" data-cap="${kind}" data-idx="${idx}" value="${img.caption.replace(/"/g, "&quot;")}" placeholder="${t("caption")}">` : ""}
+      <img src="${safeUrl}" alt="Preview">
+      ${withCaption ? `<input type="text" data-cap="${kind}" data-idx="${idx}" value="${safeCap}" placeholder="${t("caption")}">` : ""}
     </div>
   `;
 }
@@ -2088,7 +2154,14 @@ function renderLogos() {
   [["#logoHThumbs", logosH, "lh"], ["#logoFThumbs", logosF, "lf"]].forEach(([sel, arr, kind]) => {
     $(sel).innerHTML = arr.map((l, i) => thumbHTML(l, false, kind, i)).join("");
     $(sel).querySelectorAll("[data-rm]").forEach(b => {
-      b.onclick = () => { arr.splice(+b.dataset.idx, 1); renderLogos(); };
+      b.onclick = () => {
+        const removed = arr.splice(+b.dataset.idx, 1)[0];
+        if (removed) {
+          if (removed.url && removed.url.startsWith("blob:")) URL.revokeObjectURL(removed.url);
+          if (removed.field) files.delete(removed.field);
+        }
+        renderLogos();
+      };
     });
   });
   updateDraftPreview();
@@ -2116,15 +2189,18 @@ $("#logoFInput").onchange = e => { addLogos(e.target.files, logosF, slots().foot
 /* ---------- Seções e Imagens Específicas ---------- */
 function renderSections() {
   const el = $("#sections");
-  el.innerHTML = sections.map((s, i) => `
+  el.innerHTML = sections.map((s, i) => {
+    const safeTitle = escapeHtml(s.title || secLabel(s.id));
+    const safeContent = escapeHtml(s.content || "");
+    return `
     <div class="sec" data-i="${i}">
       <div class="sec-header">
-        <input type="text" data-f="title" value="${(s.title || secLabel(s.id)).replace(/"/g, "&quot;")}" placeholder="${t("sec_title")}">
+        <input type="text" data-f="title" value="${safeTitle}" placeholder="${t("sec_title")}">
         <button class="sm" type="button" data-act="up" ${i === 0 ? "disabled" : ""} title="Mover acima">↑</button>
         <button class="sm" type="button" data-act="down" ${i === sections.length - 1 ? "disabled" : ""} title="Mover abaixo">↓</button>
         <button class="sm" type="button" data-act="del" title="${t("remove")}">✕</button>
       </div>
-      <textarea data-f="content" placeholder="${t("sec_text")}">${(s.content || "").replace(/&/g, "&amp;").replace(/</g, "&lt;")}</textarea>
+      <textarea data-f="content" placeholder="${t("sec_text")}">${safeContent}</textarea>
       <div style="margin-top:6px;">
         <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;color:var(--amber);font-weight:600;font-family:var(--font-mono);font-size:11px;">
           [+ 📎 ${t("add_img")}]
@@ -2133,7 +2209,8 @@ function renderSections() {
       </div>
       <div class="thumbs">${s.images.map((im, j) => thumbHTML(im, true, "sec" + i, j)).join("")}</div>
     </div>
-  `).join("");
+  `;
+  }).join("");
 
   el.querySelectorAll(".sec").forEach(div => {
     const i = +div.dataset.i, s = sections[i];
@@ -2152,8 +2229,15 @@ function renderSections() {
     div.querySelectorAll("[data-act]").forEach(b => {
       b.onclick = () => {
         const a = b.dataset.act;
-        if (a === "del") sections.splice(i, 1);
-        else {
+        if (a === "del") {
+          const removedSec = sections.splice(i, 1)[0];
+          if (removedSec && removedSec.images) {
+            removedSec.images.forEach(im => {
+              if (im.url && im.url.startsWith("blob:")) URL.revokeObjectURL(im.url);
+              if (im.field) files.delete(im.field);
+            });
+          }
+        } else {
           const j = a === "up" ? i - 1 : i + 1;
           [sections[i], sections[j]] = [sections[j], sections[i]];
         }
@@ -2161,7 +2245,14 @@ function renderSections() {
       };
     });
     div.querySelectorAll("[data-rm]").forEach(b => {
-      b.onclick = () => { s.images.splice(+b.dataset.idx, 1); renderSections(); };
+      b.onclick = () => {
+        const removed = s.images.splice(+b.dataset.idx, 1)[0];
+        if (removed) {
+          if (removed.url && removed.url.startsWith("blob:")) URL.revokeObjectURL(removed.url);
+          if (removed.field) files.delete(removed.field);
+        }
+        renderSections();
+      };
     });
     div.querySelectorAll("[data-cap]").forEach(inp => {
       inp.oninput = () => { s.images[+inp.dataset.idx].caption = inp.value; };
@@ -2387,8 +2478,13 @@ function updateDraftPreview() {
 }
 
 function escapeHtml(str) {
-  if (!str) return "";
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  if (str == null) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 // Ouvintes para atualização automática da pré-visualização

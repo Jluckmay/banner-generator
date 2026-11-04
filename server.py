@@ -33,9 +33,10 @@ def _err(msg: str, code: int = 400) -> Tuple[Response, int]:
 @app.after_request
 def _headers(resp: Response) -> Response:
     resp.headers["X-Content-Type-Options"] = "nosniff"
-    resp.headers["Referrer-Policy"] = "no-referrer"
+    resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     resp.headers["Cache-Control"] = "no-store"
     resp.headers["X-Frame-Options"] = "SAMEORIGIN"
+    resp.headers["Permissions-Policy"] = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
     resp.headers["Content-Security-Policy"] = (
         "default-src 'self' data: blob:; "
         "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
