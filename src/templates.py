@@ -38,7 +38,7 @@ TEMPLATES: Dict[str, Dict[str, Any]] = {
     "bold": {
         "name": {"pt-BR": "Ousado", "en-US": "Bold"},
         "engine": "tikzposter",
-        "block": "Envelope", "title": "Envelope", "background": "Default",
+        "block": "Envelope", "title": "Filled", "background": "Default",
         "colors": ("7C2D12", "EA580C", "FED7AA"), "bg": "FFF7ED", "sans": True,
         "logos": {"header": MAX_LOGOS_HEADER, "footer": 0},
     },
