@@ -385,6 +385,19 @@ button.sm {
   border: 1px solid rgba(255,255,255,0.06);
 }
 .tpl .sw i { flex: 1; }
+.tpl .tpl-name {
+  line-height: 1.25;
+}
+.tpl .tpl-tag {
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--fg-muted);
+  margin-top: 3px;
+  opacity: 0.85;
+}
+.tpl.sel .tpl-tag {
+  color: #ff8591;
+}
 
 /* Seções e Upload de Imagens */
 .sec {
@@ -805,6 +818,287 @@ button.sm {
   justify-content: center;
   gap: 10px;
   margin-top: 4px;
+}
+
+/* ── Estilos Específicos por Template na Pré-visualização ── */
+/* 1. Clássico (Conferência Tradicional) */
+.draft-poster.tpl-classic {
+  font-family: 'Cambria', 'Georgia', 'Times New Roman', serif;
+}
+.draft-poster.tpl-classic .draft-header {
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(31,58,95,0.15);
+}
+.draft-poster.tpl-classic .draft-block {
+  border: 1.5px solid var(--tpl-accent, #1F3A5F);
+  border-radius: 6px;
+  box-shadow: 0 3px 8px rgba(31,58,95,0.06);
+  background: #ffffff;
+}
+.draft-poster.tpl-classic .draft-block-title {
+  background: rgba(31,58,95,0.06);
+  padding: 6px 10px;
+  margin: -10px -12px 6px -12px;
+  border-bottom: 2px solid var(--tpl-accent, #1F3A5F);
+  font-family: inherit;
+  font-weight: 700;
+  color: var(--tpl-accent, #1F3A5F);
+}
+
+/* 2. Moderno (Gradiente & Tech) */
+.draft-poster.tpl-modern {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: linear-gradient(180deg, #F0FDFA 0%, #FFFFFF 100%);
+}
+.draft-poster.tpl-modern .draft-header {
+  background: linear-gradient(135deg, var(--tpl-accent, #0F766E) 0%, var(--tpl-color2, #14B8A6) 100%) !important;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(15,118,110,0.18);
+  border: none !important;
+}
+.draft-poster.tpl-modern .draft-block {
+  border-radius: 12px;
+  border: 1px solid rgba(20,184,166,0.3);
+  box-shadow: 0 4px 16px rgba(15,118,110,0.06);
+  background: #ffffff;
+  padding: 12px 14px;
+}
+.draft-poster.tpl-modern .draft-block-title {
+  border-bottom: none;
+  border-left: 4px solid var(--tpl-accent, #0F766E);
+  padding: 2px 0 2px 10px;
+  color: var(--tpl-accent, #0F766E);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* 3. Minimalista (Editorial) */
+.draft-poster.tpl-minimal {
+  font-family: 'Georgia', 'Garamond', serif;
+  background: #FAFAFA;
+}
+.draft-poster.tpl-minimal .draft-header {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid #1E293B !important;
+  border-radius: 0;
+  padding: 10px 0 16px 0;
+}
+.draft-poster.tpl-minimal .draft-block {
+  background: transparent;
+  border: none;
+  border-top: 1.5px solid #334155;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 10px 2px;
+}
+.draft-poster.tpl-minimal .draft-block-title {
+  border: none;
+  color: #1E293B;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0 0 6px 0;
+}
+
+/* 4. Ousado (Envelope) */
+.draft-poster.tpl-bold {
+  font-family: 'Montserrat', 'Trebuchet MS', sans-serif;
+  background: #FFF7ED;
+}
+.draft-poster.tpl-bold .draft-header {
+  border: 2px solid var(--tpl-color2, #EA580C);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(124,45,18,0.22);
+}
+.draft-poster.tpl-bold .draft-block {
+  border: 2px solid var(--tpl-accent, #7C2D12);
+  border-radius: 8px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(124,45,18,0.1);
+  background: #ffffff;
+}
+.draft-poster.tpl-bold .draft-block-title {
+  background: var(--tpl-accent, #7C2D12);
+  color: #ffffff !important;
+  padding: 8px 12px;
+  margin: 0;
+  border: none;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+}
+.draft-poster.tpl-bold .draft-block-body {
+  padding: 10px 12px;
+}
+
+/* 5. Ondas Esmeralda (Corner Orgânico) */
+.draft-poster.tpl-corner {
+  font-family: 'Segoe UI', 'Nunito', sans-serif;
+  background: radial-gradient(ellipse at top left, #F0FDF4 0%, #FFFFFF 80%);
+}
+.draft-poster.tpl-corner .draft-header {
+  border-radius: 20px 4px 28px 4px;
+  background: linear-gradient(135deg, var(--tpl-accent, #064E3B) 0%, var(--tpl-color2, #059669) 100%) !important;
+  box-shadow: 0 6px 20px rgba(6,78,59,0.18);
+  border: none !important;
+}
+.draft-poster.tpl-corner .draft-block {
+  border: 1.5px solid var(--tpl-color3, #A7F3D0);
+  border-radius: 18px 4px 18px 4px;
+  box-shadow: 0 4px 14px rgba(6,78,59,0.06);
+  background: #ffffff;
+  padding: 12px 14px;
+}
+.draft-poster.tpl-corner .draft-block-title {
+  color: var(--tpl-accent, #064E3B);
+  border-bottom: 2px dashed var(--tpl-color2, #059669);
+  padding-bottom: 6px;
+  font-weight: 800;
+  font-size: 11px;
+}
+
+/* 6. DCC / UFMG (Institucional) */
+.draft-poster.tpl-dcc {
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+}
+.draft-poster.tpl-dcc .draft-block {
+  border: 1px solid #E5E7EB;
+  border-top: 3.5px solid #CC0000;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  background: #ffffff;
+  padding: 10px 12px;
+}
+.draft-poster.tpl-dcc .draft-block-title {
+  color: #CC0000;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  border-bottom: 1px solid #F3F4F6;
+  padding-bottom: 4px;
+}
+
+/* 7. Mostra IC (UFOP Simpósio) */
+.draft-poster.tpl-mostra_ic {
+  font-family: 'Times New Roman', 'Palatino Linotype', serif;
+}
+.draft-poster.tpl-mostra_ic .draft-header {
+  background: #F8FAFC !important;
+  border-top: 3px double #0A3B75 !important;
+  border-bottom: 3px double #0A3B75 !important;
+  border-radius: 0;
+  padding: 14px 16px;
+}
+.draft-poster.tpl-mostra_ic .draft-block {
+  border: 1.5px solid #CBD5E1;
+  border-radius: 3px;
+  box-shadow: 0 2px 6px rgba(10,59,117,0.05);
+  padding: 0;
+  overflow: hidden;
+  background: #ffffff;
+}
+.draft-poster.tpl-mostra_ic .draft-block-title {
+  background: #0A3B75;
+  color: #ffffff !important;
+  padding: 6px 12px;
+  margin: 0;
+  border: none;
+  font-family: serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.draft-poster.tpl-mostra_ic .draft-block-body {
+  padding: 10px 12px;
+  font-size: 9.5px;
+}
+
+/* 8. UZH / LiRI (Zurique Suíço) */
+.draft-poster.tpl-uzh {
+  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+}
+.draft-poster.tpl-uzh .draft-header {
+  text-align: left;
+  align-items: flex-start;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 4.5px solid #0028A5 !important;
+  border-radius: 0;
+  padding: 10px 0 16px 0;
+}
+.draft-poster.tpl-uzh .draft-title {
+  text-align: left;
+  font-size: 17px;
+  font-weight: 900;
+  color: #0028A5;
+  letter-spacing: -0.03em;
+  margin: 0;
+  line-height: 1.15;
+}
+.draft-poster.tpl-uzh .draft-authors {
+  text-align: left;
+  color: #3353B7;
+  font-weight: 600;
+  font-size: 11px;
+  margin-top: 6px;
+}
+.draft-poster.tpl-uzh .draft-affil {
+  text-align: left;
+  color: #64748B;
+  font-size: 9.5px;
+  margin-top: 2px;
+}
+.draft-poster.tpl-uzh .draft-block {
+  background: #F8FAFC;
+  border: none;
+  border-left: 3.5px solid #0028A5;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 10px 12px;
+}
+.draft-poster.tpl-uzh .draft-block-title {
+  color: #0028A5;
+  font-size: 11px;
+  font-weight: 800;
+  border: none;
+  padding-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* 9. TU Delft (Beamer Holandês) */
+.draft-poster.tpl-tudelft {
+  font-family: 'Segoe UI', 'Inter', sans-serif;
+  background: #F8FAFC;
+}
+.draft-poster.tpl-tudelft .draft-header {
+  background: linear-gradient(90deg, #002B49 0%, #007396 55%, #00A6D6 100%) !important;
+  color: #ffffff;
+  border-radius: 0;
+  padding: 18px 20px;
+  box-shadow: 0 4px 14px rgba(0,43,73,0.22);
+  margin: -22px -22px 16px -22px;
+  width: calc(100% + 44px);
+  border: none !important;
+}
+.draft-poster.tpl-tudelft .draft-block {
+  background: #ffffff;
+  border: 1px solid #E2E8F0;
+  border-top: 4px solid #00A6D6;
+  border-radius: 4px;
+  box-shadow: 0 3px 8px rgba(0,43,73,0.06);
+  padding: 10px 12px;
+}
+.draft-poster.tpl-tudelft .draft-block-title {
+  color: #002B49;
+  font-weight: 800;
+  font-size: 11px;
+  border-bottom: 1.5px solid #E2E8F0;
+  padding-bottom: 4px;
 }
 
 /* ── Custom file input (styled) ── */
@@ -1412,7 +1706,7 @@ const DEFAULT_CFG = {
   },
   templates: {
     "classic": {
-      "name": { "pt-BR": "Clássico", "en-US": "Classic" },
+      "name": { "pt-BR": "Clássico (Conferência)", "en-US": "Classic (Conference)" },
       "bg": "EEF2F7",
       "colors": ["1F3A5F", "2E5C8A", "9DB9D8"],
       "papers": ["60x90", "90x120", "a0", "a1", "a2"],
@@ -1420,7 +1714,7 @@ const DEFAULT_CFG = {
       "logos": { "header": 2, "footer": 0 }
     },
     "modern": {
-      "name": { "pt-BR": "Moderno", "en-US": "Modern" },
+      "name": { "pt-BR": "Moderno (Gradiente)", "en-US": "Modern (Gradient)" },
       "bg": "F0FDFA",
       "colors": ["0F766E", "14B8A6", "99F6E4"],
       "papers": ["60x90", "90x120", "a0", "a1", "a2"],
@@ -1428,15 +1722,15 @@ const DEFAULT_CFG = {
       "logos": { "header": 2, "footer": 0 }
     },
     "minimal": {
-      "name": { "pt-BR": "Minimalista", "en-US": "Minimal" },
-      "bg": "FFFFFF",
-      "colors": ["374151", "6B7280", "D1D5DB"],
+      "name": { "pt-BR": "Minimalista (Editorial)", "en-US": "Minimal (Editorial)" },
+      "bg": "FAFAFA",
+      "colors": ["1E293B", "475569", "94A3B8"],
       "papers": ["60x90", "90x120", "a0", "a1", "a2"],
       "default_paper": "a0",
       "logos": { "header": 2, "footer": 0 }
     },
     "bold": {
-      "name": { "pt-BR": "Ousado", "en-US": "Bold" },
+      "name": { "pt-BR": "Ousado (Envelope)", "en-US": "Bold (Envelope)" },
       "bg": "FFF7ED",
       "colors": ["7C2D12", "EA580C", "FED7AA"],
       "papers": ["60x90", "90x120", "a0", "a1", "a2"],
@@ -1444,15 +1738,15 @@ const DEFAULT_CFG = {
       "logos": { "header": 2, "footer": 0 }
     },
     "corner": {
-      "name": { "pt-BR": "Esmeralda", "en-US": "Emerald" },
+      "name": { "pt-BR": "Ondas Esmeralda", "en-US": "Emerald Waves" },
       "bg": "F0FDF4",
-      "colors": ["14532D", "16A34A", "BBF7D0"],
+      "colors": ["064E3B", "059669", "A7F3D0"],
       "papers": ["60x90", "90x120", "a0", "a1", "a2"],
       "default_paper": "a0",
       "logos": { "header": 2, "footer": 0 }
     },
     "dcc": {
-      "name": { "pt-BR": "DCC/UFMG", "en-US": "DCC/UFMG" },
+      "name": { "pt-BR": "DCC / UFMG (Vermelho)", "en-US": "DCC / UFMG (Red)" },
       "bg": "FFFFFF",
       "colors": ["CC0000", "444444", "1A1A1A"],
       "papers": ["60x90", "90x120", "a0", "a1", "a2"],
@@ -1468,7 +1762,7 @@ const DEFAULT_CFG = {
       "logos": { "header": 2, "footer": 0 }
     },
     "uzh": {
-      "name": { "pt-BR": "UZH / LiRI", "en-US": "UZH / LiRI" },
+      "name": { "pt-BR": "UZH / LiRI (Zurique)", "en-US": "UZH / LiRI (Zurich)" },
       "bg": "FFFFFF",
       "colors": ["0028A5", "3353B7", "1F2937"],
       "papers": ["60x90", "90x120", "a0", "a1", "a2"],
@@ -1476,7 +1770,7 @@ const DEFAULT_CFG = {
       "logos": { "header": 2, "footer": 0 }
     },
     "tudelft": {
-      "name": { "pt-BR": "TU Delft", "en-US": "TU Delft" },
+      "name": { "pt-BR": "TU Delft (Beamer)", "en-US": "TU Delft (Beamer)" },
       "bg": "F8FAFC",
       "colors": ["00A6D6", "002B49", "007396"],
       "papers": ["60x90", "90x120", "a0", "a1", "a2"],
@@ -1695,12 +1989,25 @@ function fillFromExtract(p) {
 }
 
 /* ---------- Templates e Formato ---------- */
+const TPL_TAGS = {
+  classic: { "pt-BR": "Conferência / Clássico", "en-US": "Conference / Classic" },
+  modern: { "pt-BR": "Gradiente / Tech", "en-US": "Gradient / Tech" },
+  minimal: { "pt-BR": "Editorial / Linhas", "en-US": "Editorial / Lines" },
+  bold: { "pt-BR": "Alto Contraste / Envelope", "en-US": "High Contrast / Envelope" },
+  corner: { "pt-BR": "Ondas / Orgânico", "en-US": "Organic Leaf / Waves" },
+  dcc: { "pt-BR": "DCC UFMG / Artigo", "en-US": "DCC UFMG / Article" },
+  mostra_ic: { "pt-BR": "Simpósio / SciPoster", "en-US": "Symposium / SciPoster" },
+  uzh: { "pt-BR": "Suíço / A0 Typo", "en-US": "Swiss / A0 Poster" },
+  tudelft: { "pt-BR": "Delft / Beamer Banner", "en-US": "Delft / Beamer Banner" }
+};
+
 function renderTemplates() {
   if (!CFG || !CFG.templates) return;
   $("#tpls").innerHTML = Object.entries(CFG.templates).map(([id, tp]) => `
     <div class="tpl ${state.template === id ? "sel" : ""}" data-id="${id}" tabindex="0" role="button">
       <div class="sw" style="background:#${tp.bg}">${tp.colors.map(c => `<i style="background:#${c}"></i>`).join("")}</div>
-      ${(tp.name && tp.name[uiLang]) || id}
+      <div class="tpl-name">${(tp.name && tp.name[uiLang]) || id}</div>
+      <div class="tpl-tag">${(TPL_TAGS[id] && TPL_TAGS[id][uiLang]) || ""}</div>
     </div>
   `).join("");
 
@@ -1957,8 +2264,11 @@ function updateDraftPreview() {
   // Dimensões e Proporção (Aspect Ratio)
   const sizes = (CFG.sizes && CFG.sizes[paper]) || [84.1, 118.9];
   const isLandscape = orient === "landscape";
+  const allTplClasses = Object.keys(CFG.templates || {}).map(k => `tpl-${k}`);
+  poster.classList.remove(...allTplClasses);
   poster.classList.toggle("landscape", isLandscape);
   poster.classList.toggle("portrait", !isLandscape);
+  poster.classList.add(`tpl-${tplId}`);
   const aspect = isLandscape ? (sizes[1] / sizes[0]) : (sizes[0] / sizes[1]);
   poster.style.aspectRatio = `${aspect}`;
 
@@ -1966,11 +2276,16 @@ function updateDraftPreview() {
   const useColors = $("#useColors") && $("#useColors").checked;
   const defPalette = tpl.colors || ["1F3A5F", "2E5C8A", "9DB9D8"];
   const accent = useColors ? $("#accent").value : `#${defPalette[0]}`;
-  const titleColor = useColors ? $("#colorTitle").value : (tplId === "classic" || tplId === "bold" || tplId === "corner" ? "#ffffff" : `#${defPalette[0]}`);
-  const subtitleColor = useColors ? $("#colorSubtitle").value : (tplId === "classic" || tplId === "bold" || tplId === "corner" ? "rgba(255,255,255,0.85)" : "#4b5563");
+  const titleColor = useColors ? $("#colorTitle").value : (tplId === "classic" || tplId === "bold" || tplId === "corner" || tplId === "tudelft" ? "#ffffff" : `#${defPalette[0]}`);
+  const subtitleColor = useColors ? $("#colorSubtitle").value : (tplId === "classic" || tplId === "bold" || tplId === "corner" || tplId === "tudelft" ? "rgba(255,255,255,0.85)" : "#4b5563");
   const bodyColor = useColors ? $("#colorBody").value : "#1f2937";
   const bgColor = useColors ? $("#colorBg").value : `#${tpl.bg || "ffffff"}`;
 
+  poster.style.setProperty("--tpl-accent", accent);
+  poster.style.setProperty("--tpl-color2", `#${defPalette[1] || defPalette[0]}`);
+  poster.style.setProperty("--tpl-color3", `#${defPalette[2] || defPalette[0]}`);
+  poster.style.setProperty("--tpl-body", bodyColor);
+  poster.style.setProperty("--tpl-bg", bgColor);
   poster.style.backgroundColor = bgColor;
 
   // Header & Barra de Destaque
@@ -1980,6 +2295,12 @@ function updateDraftPreview() {
   const draftTitle = $("#draftTitle");
   const draftAuthors = $("#draftAuthors");
   const draftAffil = $("#draftAffil");
+
+  // Limpa estilos inline que seriam sobrescritos por classes CSS
+  header.removeAttribute("style");
+  draftTitle.removeAttribute("style");
+  draftAuthors.removeAttribute("style");
+  draftAffil.removeAttribute("style");
 
   // Top bar para DCC
   if (tplId === "dcc") {
@@ -1992,45 +2313,18 @@ function updateDraftPreview() {
     divider.classList.add("hidden");
   }
 
-  // Estilização do Header por template
-  if (tplId === "classic" || tplId === "bold" || tplId === "corner" || tplId === "tudelft") {
-    header.style.backgroundColor = accent;
-    header.style.border = "none";
-    header.style.borderRadius = "4px";
-    draftTitle.style.color = titleColor;
-    draftAuthors.style.color = subtitleColor;
-    draftAffil.style.color = subtitleColor;
-  } else if (tplId === "modern") {
-    header.style.backgroundColor = "#ffffff";
-    header.style.border = "none";
-    header.style.borderBottom = `3px solid ${accent}`;
-    header.style.borderRadius = "0";
-    draftTitle.style.color = titleColor;
-    draftAuthors.style.color = subtitleColor;
-    draftAffil.style.color = subtitleColor;
-  } else if (tplId === "dcc") {
-    header.style.backgroundColor = "transparent";
-    header.style.border = "none";
-    header.style.borderRadius = "0";
-    draftTitle.style.color = accent;
-    draftAuthors.style.color = "#333333";
-    draftAffil.style.color = "#666666";
-  } else if (tplId === "mostra_ic" || tplId === "uzh") {
-    header.style.backgroundColor = "transparent";
-    header.style.border = "none";
-    header.style.borderBottom = `4px solid ${accent}`;
-    header.style.borderRadius = "0";
-    draftTitle.style.color = accent;
-    draftAuthors.style.color = "#111827";
-    draftAffil.style.color = "#4b5563";
-  } else {
-    // minimal
-    header.style.backgroundColor = "transparent";
-    header.style.borderBottom = `2px solid ${accent}`;
-    header.style.borderRadius = "0";
-    draftTitle.style.color = titleColor;
-    draftAuthors.style.color = subtitleColor;
-    draftAffil.style.color = subtitleColor;
+  // Estilização do Header quando customização de cores ativada
+  if (useColors) {
+    if (tplId === "classic" || tplId === "bold" || tplId === "corner" || tplId === "tudelft") {
+      header.style.backgroundColor = accent;
+      draftTitle.style.color = titleColor;
+      draftAuthors.style.color = subtitleColor;
+      draftAffil.style.color = subtitleColor;
+    } else {
+      draftTitle.style.color = titleColor;
+      draftAuthors.style.color = subtitleColor;
+      draftAffil.style.color = subtitleColor;
+    }
   }
 
   // Textos Principais
@@ -2078,8 +2372,8 @@ function updateDraftPreview() {
         : "";
 
       return `
-        <div class="draft-block" style="border-top-color: ${accent};">
-          <div class="draft-block-title" style="color: ${accent}; border-bottom-color: ${accent};">
+        <div class="draft-block">
+          <div class="draft-block-title">
             ${escapeHtml(sTitle)}
           </div>
           <div class="draft-block-body" style="color: ${bodyColor};">
