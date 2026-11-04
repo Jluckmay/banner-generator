@@ -58,10 +58,11 @@ def build_sciposter_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
             counter += 1
             title = f"{counter}. {title}"
         text = references_to_latex(sec["content"], small=True) if sec["id"] == "references" else text_to_latex(sec["content"])
+        img_tex = _images_to_latex(sec["images"], labels["figure"], fig, r"\small")
         body.append(
             f"\\section{{{title}}}\n"
             f"{text}\n"
-            f"{_images_to_latex(sec['images'], labels['figure'], fig, '\\small')}\n"
+            f"{img_tex}\n"
         )
 
     contact_bits = []

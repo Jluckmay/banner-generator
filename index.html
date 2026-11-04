@@ -1452,7 +1452,7 @@ button.sm {
     </div>
     <div class="header-right">
       <div class="brand-tagline">
-        <span class="brand-tagline-text">01 / ACADEMIC POSTER &amp; LATEX COMPILER</span>
+        <span class="brand-tagline-text" data-i18n="tagline">01 / PÔSTER ACADÊMICO &amp; COMPILADOR LATEX</span>
       </div>
       <div class="header-controls">
         <button id="uiLangToggle" class="btn-toggle" type="button" title="Alternar idioma da interface (pt-BR / en-US)" aria-label="Alternar idioma da interface">
@@ -1640,7 +1640,7 @@ button.sm {
       <h2><span class="card-sec-number">04 //</span> <span data-i18n="s_info">INFORMAÇÕES PRINCIPAIS</span></h2>
       <span class="card-icon-badge">📄</span>
     </div>
-    <label data-i18n="title">Título do Trabalho</label>
+    <label data-i18n="title">Título do Pôster</label>
     <input type="text" id="title" data-i18n-ph="ph_title" maxlength="500" placeholder="Ex: Otimização de Algoritmos em Redes Complexas">
     
     <label data-i18n="authors">Autores</label>
@@ -1700,7 +1700,7 @@ button.sm {
     </div>
     <div class="row">
       <button class="pri" id="genBtn" style="flex:2;" data-i18n="generate">⚡ Gerar / Atualizar Pôster</button>
-      <button id="dlPdf" disabled data-i18n="dl_pdf">⬇ Baixar PDF</button>
+      <button id="dlPdf" disabled data-i18n="dl_pdf">⬇ Baixar Pôster (PDF)</button>
       <button id="dlZip" data-i18n="dl_zip">📦 Código LaTeX (.zip)</button>
     </div>
     <div id="genMsg"></div>
@@ -1729,7 +1729,7 @@ button.sm {
         <button id="btnViewPdf" class="hidden" type="button" data-i18n="view_pdf">📄 PDF</button>
       </div>
       <a id="openTabBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-toggle hidden" style="text-decoration:none;" data-i18n="open_tab">↗ Nova Aba</a>
-      <button id="prevDlBtn" class="btn-toggle hidden" data-i18n="dl_quick">⬇ Baixar PDF</button>
+      <button id="prevDlBtn" class="btn-toggle hidden" data-i18n="dl_quick">⬇ Baixar Pôster (PDF)</button>
     </div>
   </div>
 
@@ -1793,6 +1793,7 @@ button.sm {
 const T = {
   "pt-BR": {
     app_title: "banner-generator",
+    tagline: "01 / PÔSTER ACADÊMICO & COMPILADOR LATEX",
     s_mode: "MODO DE PREENCHIMENTO",
     mode_manual: "Preencher manualmente",
     mode_upload: "Enviar meu trabalho",
@@ -1813,7 +1814,7 @@ const T = {
     columns: "Colunas",
     accent: "Cor de destaque personalizada:",
     s_info: "INFORMAÇÕES PRINCIPAIS",
-    title: "Título do Trabalho",
+    title: "Título do Pôster",
     authors: "Autores",
     affiliations: "Afiliações Institucionais (uma por linha)",
     email: "E-mail de contato",
@@ -1831,13 +1832,13 @@ const T = {
     remove: "Remover",
     s_generate: "GERAR E EXPORTAR",
     generate: "⚡ Gerar / Atualizar Pôster",
-    dl_pdf: "⬇ Baixar PDF",
+    dl_pdf: "⬇ Baixar Pôster (PDF)",
     dl_zip: "📦 Código LaTeX (.zip)",
     preview_title: "Visualização do Pôster",
     preview_empty: "A pré-visualização interativa do seu pôster aparecerá aqui após clicar em 'Gerar Pôster'.",
     load_sample: "Carregar Exemplo de Demonstração",
     open_tab: "↗ Nova Aba",
-    dl_quick: "⬇ Baixar PDF",
+    dl_quick: "⬇ Baixar Pôster (PDF)",
     fit_width: "Ajustar Largura",
     fit_page: "Página Inteira",
     working: "Compilando pôster LaTeX em alta resolução...",
@@ -1858,7 +1859,7 @@ const T = {
     custom_tex_hint: "O arquivo .tex será compilado diretamente com pdflatex. Certifique-se de que é autocontido (todos os pacotes e conteúdo incluídos).",
     view_draft: "📐 Rascunho",
     view_pdf: "📄 PDF Compilado",
-    draft_badge: "Pré-visualização em tempo real",
+    draft_badge: "Pré-visualização em tempo real do pôster",
     backend_config: "Configuração do Servidor Backend (API)",
     backend_url_label: "URL do Servidor Backend:",
     backend_url_hint: "Deixe vazio para detecção automática (Render/Local).",
@@ -1873,27 +1874,28 @@ const T = {
   },
   "en-US": {
     app_title: "banner-generator",
+    tagline: "01 / ACADEMIC BANNER & LATEX COMPILER",
     s_mode: "INPUT MODE",
     mode_manual: "Fill manually",
     mode_upload: "Upload paper",
     drop_work: "Click or drag your paper here (PDF, DOCX, TXT, MD, TEX)",
-    use_ai: "Use AI to condense and structure paper into poster format",
+    use_ai: "Use AI to condense and structure paper into banner format",
     provider: "AI Provider",
     model: "Model (optional)",
     api_key: "API Key",
     key_hint: "Key is used solely for this request and never persisted to disk. Without key, heuristic extraction is used.",
     extract: "Extract paper content",
-    s_lang: "POSTER LANGUAGE",
+    s_lang: "BANNER LANGUAGE",
     lang_hint: "Sets the default section headings and corresponding LaTeX babel package.",
     s_template: "TEMPLATE AND FORMAT",
-    paper: "Poster Dimensions",
+    paper: "Banner Dimensions",
     orientation: "Orientation",
     portrait: "Portrait (Vertical)",
     landscape: "Landscape (Horizontal)",
     columns: "Columns",
     accent: "Custom accent color:",
     s_info: "MAIN INFORMATION",
-    title: "Paper Title",
+    title: "Banner Title",
     authors: "Authors",
     affiliations: "Institutional Affiliations (one per line)",
     email: "Contact E-mail",
@@ -1910,20 +1912,20 @@ const T = {
     caption: "Figure caption",
     remove: "Remove",
     s_generate: "GENERATE & EXPORT",
-    generate: "⚡ Generate / Refresh Poster",
-    dl_pdf: "⬇ Download PDF",
+    generate: "⚡ Generate / Refresh Banner",
+    dl_pdf: "⬇ Download Banner (PDF)",
     dl_zip: "📦 LaTeX Source (.zip)",
-    preview_title: "Poster Preview",
-    preview_empty: "The interactive preview of your academic poster will appear here after clicking 'Generate Poster'.",
+    preview_title: "Banner Preview",
+    preview_empty: "The interactive preview of your academic banner will appear here after clicking 'Generate Banner'.",
     load_sample: "Load Demo Sample",
     open_tab: "↗ New Tab",
-    dl_quick: "⬇ Download PDF",
+    dl_quick: "⬇ Download Banner (PDF)",
     fit_width: "Fit Width",
     fit_page: "Fit Page",
-    working: "Compiling high-resolution LaTeX poster...",
+    working: "Compiling high-resolution LaTeX banner...",
     extracted: "Content successfully extracted! Review and edit the fields below.",
     no_file: "Please select a paper file before extracting.",
-    overflow: "Warning: content exceeded page boundaries at selected paper size. Please shorten text/images for ideal fit.",
+    overflow: "Warning: content exceeded banner boundaries at selected banner size. Please shorten text/images for ideal fit.",
     custom: "New Section",
     custom_colors: "Custom color palette",
     color_accent: "Accent",
@@ -1938,7 +1940,7 @@ const T = {
     custom_tex_hint: "The .tex file will be compiled directly with pdflatex. Ensure it is self-contained with all required packages and content.",
     view_draft: "📐 Live Draft",
     view_pdf: "📄 Compiled PDF",
-    draft_badge: "Live Real-Time Preview",
+    draft_badge: "Live Real-Time Banner Preview",
     backend_config: "Backend Server (API) Settings",
     backend_url_label: "Backend Server URL:",
     backend_url_hint: "Leave empty for auto-detection (Render/Local).",
@@ -2277,7 +2279,7 @@ const TPL_TAGS = {
   corner: { "pt-BR": "Ondas / Orgânico", "en-US": "Organic Leaf / Waves" },
   dcc: { "pt-BR": "Artigo / Duas Colunas", "en-US": "Article / Two Columns" },
   mostra_ic: { "pt-BR": "Simpósio / SciPoster", "en-US": "Symposium / SciPoster" },
-  uzh: { "pt-BR": "Suíço / A0 Typo", "en-US": "Swiss / A0 Poster" },
+  uzh: { "pt-BR": "Suíço / Pôster A0", "en-US": "Swiss / A0 Banner" },
   tudelft: { "pt-BR": "Delft / Beamer Banner", "en-US": "Delft / Beamer Banner" }
 };
 
@@ -2659,15 +2661,15 @@ function updateDraftPreview() {
   // Textos Principais
   const draftFallbacks = {
     "pt-BR": {
-      title: "Título do Trabalho",
-      authors: "Autores do Trabalho",
+      title: "Título do Pôster",
+      authors: "Autores do Pôster",
       affil: "Afiliação Institucional",
       section: "Seção",
       content: "Conteúdo descritivo da seção de pesquisa."
     },
     "en-US": {
-      title: "Research Poster Title",
-      authors: "Authors of the Paper",
+      title: "Research Banner Title",
+      authors: "Authors of the Banner",
       affil: "Institutional Affiliation",
       section: "Section",
       content: "Descriptive content of the research section."
