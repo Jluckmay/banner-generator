@@ -129,6 +129,24 @@ st.markdown(
     font-size: 11px;
     margin-bottom: 6px;
   }
+
+  @media (max-width: 768px) {
+    .terminal-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+    }
+    .brand-title {
+      font-size: 16px;
+    }
+    .terminal-card {
+      padding: 12px 14px;
+    }
+    div.stButton > button:first-child {
+      min-height: 42px;
+    }
+  }
 </style>
 """,
     unsafe_allow_html=True,

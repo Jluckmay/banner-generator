@@ -63,6 +63,10 @@
 }
 
 * { box-sizing: border-box; }
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
 body {
   margin: 0;
   font: 13.5px/1.55 var(--font-sans);
@@ -71,6 +75,9 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
 
 /* Header no estilo terminal da imagem (~/ soft-and-skills) */
@@ -110,6 +117,11 @@ header {
   color: var(--red);
   font-weight: 800;
 }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 .brand-tagline {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -119,7 +131,6 @@ header {
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 16px;
 }
 .header-controls {
   display: flex;
@@ -288,18 +299,27 @@ button.sm {
   border-radius: var(--btn-radius);
   overflow: hidden;
   background: var(--bg-input);
+  width: 100%;
 }
 .seg label {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   margin: 0;
-  padding: 8px 12px;
+  padding: 8px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   cursor: pointer;
   color: var(--muted);
   font-family: var(--font-mono);
   font-size: 11.5px;
   font-weight: 600;
+  line-height: 1.25;
   transition: all 0.15s ease;
+  word-break: break-word;
+  white-space: normal;
+  min-height: 40px;
 }
 .seg input { display: none; }
 .seg label:has(input:checked) {
@@ -346,6 +366,9 @@ button.sm {
   font-weight: 600;
   background: var(--bg-input);
   transition: all 0.15s ease;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 .tpl:hover { border-color: var(--line-strong); }
 .tpl.sel {
@@ -1203,8 +1226,8 @@ button.sm {
 .lang-toggle input[type=radio] { display: none; }
 .lang-toggle label:has(input:checked) { background: var(--red); color: #fff; font-weight: 700; }
 .lang-toggle-sep { width: 1px; background: var(--line-strong); }
-.lang-section-inner { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-.lang-section-inner .hint { margin: 0; flex: 1; min-width: 160px; }
+.lang-section-inner { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; width: 100%; }
+.lang-section-inner .hint { margin: 0; flex: 1 1 180px; min-width: 0; }
 
 /* ── Color palette pickers ── */
 .color-pickers-row {
@@ -1302,7 +1325,7 @@ button.sm {
   #preview {
     order: 4;
     position: static !important;
-    height: clamp(480px, 75vh, 640px) !important;
+    height: clamp(480px, 72vh, 640px) !important;
     margin-top: 0;
     margin-bottom: 18px;
     width: 100% !important;
@@ -1320,18 +1343,29 @@ button.sm {
     flex-wrap: wrap;
     gap: 8px;
     justify-content: space-between;
+    width: 100%;
   }
-  .brand-terminal-title { font-size: 16px; flex-wrap: wrap; gap: 6px; }
-  .header-actions { gap: 6px; flex-wrap: wrap; }
-  .btn-toggle { padding: 5px 8px; font-size: 11px; }
+  .brand { max-width: calc(100% - 110px); min-width: 0; }
+  .brand-terminal-title {
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .brand-tagline-text { display: none !important; }
+  .header-right { gap: 8px; }
+  .btn-toggle { padding: 5px 8px; font-size: 11px; min-height: 38px; }
 
-  main { padding: 10px; }
-  .card { padding: 14px 12px; margin-bottom: 14px; }
+  main { padding: 10px; width: 100%; box-sizing: border-box; }
+  .card { padding: 14px 12px; margin-bottom: 14px; width: 100%; box-sizing: border-box; }
   .card h2 { font-size: 13px; }
 
   #preview {
-    height: clamp(400px, 70vh, 560px) !important;
+    height: clamp(420px, 70vh, 560px) !important;
     margin-bottom: 14px;
+    width: 100%;
+    box-sizing: border-box;
   }
   #pdf-viewport-container { padding: 10px; }
   .draft-poster { padding: 14px 10px; }
@@ -1340,7 +1374,7 @@ button.sm {
   .draft-block-title { font-size: 9.5px; }
 
   .tpls {
-    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)) !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 8px;
   }
   .tpl { padding: 6px; font-size: 11px; }
@@ -1348,34 +1382,60 @@ button.sm {
 
   .row { gap: 8px; }
   .row > * { min-width: 100% !important; flex: 1 1 100%; }
-  button, .btn-terminal { min-height: 38px; }
-  button.pri { min-height: 42px; font-size: 13px; }
-  input[type="text"], input[type="password"], select, textarea {
-    min-height: 38px;
-    font-size: 13px;
+  button, .btn-terminal { min-height: 40px; touch-action: manipulation; }
+  button.pri { min-height: 44px; font-size: 13.5px; }
+  input[type="text"], input[type="password"], input[type="email"], input[type="url"], select, textarea {
+    min-height: 40px;
+    font-size: 14px; /* Evita auto-zoom no Safari iOS */
   }
-  .file-btn { min-height: 38px; }
+  .file-btn { min-height: 40px; }
   .sec-header { flex-wrap: wrap; }
   .sec-header input[data-f="title"] { min-width: 100%; margin-bottom: 6px; }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 520px) {
+  header { padding: 8px 10px; }
+  .header-top { gap: 6px; }
+  .brand { max-width: calc(100% - 95px); }
   .brand-terminal-title { font-size: 14px; }
-  .brand-prompt { font-size: 12px; }
-  .brand-tagline { display: none !important; }
-  .card { padding: 12px 10px; }
-  .seg label { padding: 6px 4px; font-size: 10.5px; }
-  .preview-mode-toggle button { padding: 4px 8px; font-size: 10px; }
-  #preview-header { padding: 8px 10px; }
-  #pdf-toolbar { padding: 4px 6px; font-size: 11px; }
-  .tpls { grid-template-columns: repeat(2, 1fr) !important; }
-  .draft-poster.portrait { min-height: 360px; }
-  .draft-poster.landscape { min-height: 280px; }
+  .header-controls .btn-toggle { padding: 4px 7px; min-height: 34px; font-size: 11px; }
+  .card { padding: 12px 10px; margin-bottom: 12px; }
+  .lang-section-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .lang-section-inner .hint {
+    width: 100%;
+    min-width: 0;
+  }
+  .seg label { padding: 6px 4px; font-size: 10.5px; min-height: 38px; }
+  .preview-mode-toggle button { padding: 4px 8px; font-size: 10px; min-height: 32px; }
+  #preview-header { padding: 8px 10px; gap: 6px; }
+  #pdf-toolbar { padding: 4px 6px; font-size: 11px; gap: 4px; }
+  .tpls { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+  .tpl { padding: 6px 4px; font-size: 10.5px; }
+  .tpl .sw { height: 26px; }
+  .tpl .tpl-tag { font-size: 8.5px; }
+  #preview { height: clamp(400px, 68vh, 520px) !important; margin-bottom: 12px; }
+  .draft-poster.portrait { min-height: 340px; }
+  .draft-poster.landscape { min-height: 260px; }
   .draft-title { font-size: 13px; }
   .draft-authors { font-size: 9.5px; }
   .draft-affil { font-size: 8.5px; }
   .draft-actions { flex-direction: column; width: 100%; }
   .draft-actions button { width: 100%; }
+}
+
+@media (max-width: 360px) {
+  .brand-terminal-title { font-size: 13px; }
+  .seg { flex-direction: column; }
+  .seg label { border-bottom: 1px solid var(--line); width: 100%; }
+  .seg label:last-child { border-bottom: none; }
+  .tpls { grid-template-columns: repeat(2, 1fr) !important; gap: 6px; }
+  .tpl { padding: 5px 3px; font-size: 9.5px; }
+  .tpl .sw { height: 22px; }
+  .tpl .tpl-tag { font-size: 7.5px; }
 }
 </style>
 
@@ -1390,8 +1450,10 @@ button.sm {
         <span id="brandName">banner-generator</span>
       </div>
     </div>
-    <div class="brand-tagline">
-      <span>01 / ACADEMIC POSTER & LATEX COMPILER</span>
+    <div class="header-right">
+      <div class="brand-tagline">
+        <span class="brand-tagline-text">01 / ACADEMIC POSTER &amp; LATEX COMPILER</span>
+      </div>
       <div class="header-controls">
         <button id="uiLangToggle" class="btn-toggle" type="button" title="Alternar idioma da interface (pt-BR / en-US)" aria-label="Alternar idioma da interface">
           <span id="uiLangFlag">🇧🇷</span>
@@ -2733,6 +2795,11 @@ async function generate(fmt) {
   $("#genBtn").disabled = true;
   $("#loadingOverlay").classList.remove("hidden");
   $("#loadingText").textContent = t("working");
+
+  if (window.innerWidth <= 900) {
+    const p = $("#preview");
+    if (p) p.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   try {
     const r = await fetch(getApiBase() + "/api/generate?format=" + fmt, { method: "POST", body: buildForm() });
