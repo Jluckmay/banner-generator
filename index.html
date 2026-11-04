@@ -1493,10 +1493,10 @@ button.sm {
       <div id="aiBox" style="margin-top:10px;">
         <div class="row">
           <div><label data-i18n="provider">Provedor de IA</label><select id="provider"></select></div>
-          <div><label data-i18n="model">Modelo (opcional)</label><input type="text" id="model" autocomplete="off"></div>
+          <div><label data-i18n="model">Modelo (opcional)</label><input type="text" id="model" data-i18n-ph="ph_model" autocomplete="off" placeholder="Ex: gemini-2.0-flash ou gpt-4o-mini"></div>
         </div>
         <label data-i18n="api_key">Chave de API</label>
-        <input type="password" id="apiKey" autocomplete="new-password" spellcheck="false" data-lpignore="true" autocapitalize="off" placeholder="Cole sua chave aqui ou use a do servidor">
+        <input type="password" id="apiKey" data-i18n-ph="ph_api_key" autocomplete="new-password" spellcheck="false" data-lpignore="true" autocapitalize="off" placeholder="Cole sua chave aqui ou use a do servidor">
         <div class="hint" data-i18n="key_hint">A chave é utilizada unicamente nesta chamada e jamais é persistida em disco.</div>
       </div>
       <p style="margin:12px 0 0;"><button class="pri" id="extractBtn" data-i18n="extract">Extrair conteúdo do trabalho</button></p>
@@ -1641,22 +1641,22 @@ button.sm {
       <span class="card-icon-badge">📄</span>
     </div>
     <label data-i18n="title">Título do Trabalho</label>
-    <input type="text" id="title" maxlength="500" placeholder="Ex: Otimização de Algoritmos em Redes Complexas">
+    <input type="text" id="title" data-i18n-ph="ph_title" maxlength="500" placeholder="Ex: Otimização de Algoritmos em Redes Complexas">
     
     <label data-i18n="authors">Autores</label>
-    <input type="text" id="authors" maxlength="1500" placeholder="Ex: Ana Silva, Carlos Santos, Orientador: Prof. Dr. João Souza">
+    <input type="text" id="authors" data-i18n-ph="ph_authors" maxlength="1500" placeholder="Ex: Ana Silva, Carlos Santos, Orientador: Prof. Dr. João Souza">
     
     <label data-i18n="affiliations">Afiliações Institucionais (uma por linha)</label>
-    <textarea id="affiliations" style="min-height:65px;" placeholder="Ex: Departamento de Ciência da Computação - Universidade Federal"></textarea>
+    <textarea id="affiliations" data-i18n-ph="ph_affiliations" style="min-height:65px;" placeholder="Ex: Departamento de Ciência da Computação - Universidade Federal"></textarea>
     
     <div class="row">
       <div>
         <label data-i18n="email">E-mail de contato</label>
-        <input type="text" id="email" placeholder="contato@universidade.edu.br">
+        <input type="text" id="email" data-i18n-ph="ph_email" placeholder="contato@universidade.edu.br">
       </div>
       <div>
         <label data-i18n="url">Link do projeto / artigo (gera QR Code)</label>
-        <input type="url" id="url" placeholder="https://github.com/usuario/projeto">
+        <input type="url" id="url" data-i18n-ph="ph_url" placeholder="https://github.com/usuario/projeto">
       </div>
     </div>
 
@@ -1708,7 +1708,7 @@ button.sm {
       <summary style="cursor:pointer;font-family:var(--font-mono);user-select:none;">⚙️ <span data-i18n="backend_config">Configuração do Servidor Backend (API)</span></summary>
       <div style="margin-top:8px;">
         <label for="backendUrlInput" style="font-size:11px;" data-i18n="backend_url_label">URL do Servidor Backend:</label>
-        <input type="text" id="backendUrlInput" placeholder="http://127.0.0.1:5000 ou https://banner-generator.onrender.com" style="margin-top:4px;font-size:12px;font-family:var(--font-mono);" autocomplete="off">
+        <input type="text" id="backendUrlInput" data-i18n-ph="ph_backend_url" placeholder="http://127.0.0.1:5000 ou https://banner-generator.onrender.com" style="margin-top:4px;font-size:12px;font-family:var(--font-mono);" autocomplete="off">
         <div class="hint" data-i18n="backend_url_hint">Deixe vazio para detecção automática (Render/Local).</div>
       </div>
     </details>
@@ -1861,7 +1861,15 @@ const T = {
     draft_badge: "Pré-visualização em tempo real",
     backend_config: "Configuração do Servidor Backend (API)",
     backend_url_label: "URL do Servidor Backend:",
-    backend_url_hint: "Deixe vazio para detecção automática (Render/Local)."
+    backend_url_hint: "Deixe vazio para detecção automática (Render/Local).",
+    ph_api_key: "Cole sua chave aqui ou use a do servidor",
+    ph_model: "Ex: gemini-2.0-flash ou gpt-4o-mini",
+    ph_title: "Ex: Otimização de Algoritmos em Redes Complexas",
+    ph_authors: "Ex: Ana Silva, Carlos Santos, Orientador: Prof. Dr. João Souza",
+    ph_affiliations: "Ex: Departamento de Ciência da Computação - Universidade Federal",
+    ph_email: "contato@universidade.edu.br",
+    ph_url: "https://github.com/usuario/projeto",
+    ph_backend_url: "http://127.0.0.1:5000 ou https://banner-generator.onrender.com"
   },
   "en-US": {
     app_title: "banner-generator",
@@ -1933,7 +1941,15 @@ const T = {
     draft_badge: "Live Real-Time Preview",
     backend_config: "Backend Server (API) Settings",
     backend_url_label: "Backend Server URL:",
-    backend_url_hint: "Leave empty for auto-detection (Render/Local)."
+    backend_url_hint: "Leave empty for auto-detection (Render/Local).",
+    ph_api_key: "Paste your API key here or use server key",
+    ph_model: "e.g. gemini-2.0-flash or gpt-4o-mini",
+    ph_title: "e.g. Optimizing Deep Neural Networks for Edge Devices",
+    ph_authors: "e.g. Jane Doe, John Smith, Advisor: Prof. Dr. Alan Turing",
+    ph_affiliations: "e.g. Department of Computer Science - Stanford University",
+    ph_email: "contact@university.edu",
+    ph_url: "https://github.com/username/project",
+    ph_backend_url: "http://127.0.0.1:5000 or https://banner-generator.onrender.com"
   }
 };
 
@@ -2079,6 +2095,9 @@ function applyI18n() {
   document.querySelectorAll("[data-i18n]").forEach(e => {
     if (e.id === "customTexName" && e.classList.contains("has-file")) return;
     e.textContent = t(e.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-ph]").forEach(e => {
+    e.placeholder = t(e.dataset.i18nPh);
   });
   if (CFG) {
     renderTemplates();

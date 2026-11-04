@@ -202,6 +202,16 @@ UI_TEXT = {
         "overflow": "⚠️ Atenção: O conteúdo ultrapassou o espaço ideal. A fonte foi reduzida automaticamente.",
         "err_title": "Informe o título do pôster.",
         "err_sec": "Adicione conteúdo em pelo menos uma seção.",
+        "ph_title": "Ex: Otimização de Algoritmos em Redes Complexas",
+        "ph_authors": "Ex: Ana Silva, Carlos Santos, Orientador: Prof. Dr. João Souza",
+        "ph_affiliations": "Ex: Departamento de Ciência da Computação - Universidade Federal",
+        "ph_email": "contato@universidade.edu.br",
+        "ph_url": "https://github.com/usuario/projeto",
+        "ph_model": "Ex: gemini-2.0-flash ou gpt-4o-mini",
+        "ph_api_key": "Cole sua chave aqui ou use a do ambiente",
+        "ph_sec_title": "Título da seção",
+        "ph_sec_content": "Texto ou tópicos...",
+        "ph_caption": "Legenda da figura",
     },
     "en-US": {
         "title": "banner-generator",
@@ -250,6 +260,16 @@ UI_TEXT = {
         "overflow": "⚠️ Warning: Content exceeded space. Font size reduced automatically.",
         "err_title": "Please provide the poster title.",
         "err_sec": "Please add content to at least one section.",
+        "ph_title": "e.g. Optimizing Deep Neural Networks for Edge Devices",
+        "ph_authors": "e.g. Jane Doe, John Smith, Advisor: Prof. Dr. Alan Turing",
+        "ph_affiliations": "e.g. Department of Computer Science - Stanford University",
+        "ph_email": "contact@university.edu",
+        "ph_url": "https://github.com/username/project",
+        "ph_model": "e.g. gemini-2.0-flash or gpt-4o-mini",
+        "ph_api_key": "Paste your key here or use environment variable",
+        "ph_sec_title": "Section title",
+        "ph_sec_content": "Text or bullet points...",
+        "ph_caption": "Figure caption",
     },
 }
 
@@ -379,8 +399,8 @@ with col_form:
                     format_func=lambda x: config.PROVIDERS[x]["name"],
                 )
             with ai_mod_col:
-                model_input = st.text_input(t("model"), placeholder="Ex: gemini-2.0-flash")
-            api_key_input = st.text_input(t("api_key"), type="password")
+                model_input = st.text_input(t("model"), placeholder=t("ph_model"))
+            api_key_input = st.text_input(t("api_key"), type="password", placeholder=t("ph_api_key"))
 
         if uploaded_doc and st.button(t("extract_btn")):
             with st.spinner(t("extracting")):
@@ -488,15 +508,15 @@ with col_form:
 
     # 4. Informações Principais
     st.markdown(f'<div class="card-sec-badge">{t("s_info")}</div>', unsafe_allow_html=True)
-    st.session_state.title = st.text_input(t("work_title"), value=st.session_state.title)
-    st.session_state.authors = st.text_input(t("authors"), value=st.session_state.authors)
-    st.session_state.affiliations = st.text_area(t("affiliations"), value=st.session_state.affiliations, height=70)
+    st.session_state.title = st.text_input(t("work_title"), value=st.session_state.title, placeholder=t("ph_title"))
+    st.session_state.authors = st.text_input(t("authors"), value=st.session_state.authors, placeholder=t("ph_authors"))
+    st.session_state.affiliations = st.text_area(t("affiliations"), value=st.session_state.affiliations, placeholder=t("ph_affiliations"), height=70)
 
     info_col1, info_col2 = st.columns(2)
     with info_col1:
-        st.session_state.email = st.text_input(t("email"), value=st.session_state.email)
+        st.session_state.email = st.text_input(t("email"), value=st.session_state.email, placeholder=t("ph_email"))
     with info_col2:
-        st.session_state.url = st.text_input(t("url"), value=st.session_state.url)
+        st.session_state.url = st.text_input(t("url"), value=st.session_state.url, placeholder=t("ph_url"))
 
     # Upload de Logos
     slots = TEMPLATES[st.session_state.template]["logos"]
@@ -525,7 +545,7 @@ with col_form:
         with st.expander(f"📌 {sec.get('title') or sec.get('id', f'Seção {idx+1}')}", expanded=(idx < 2)):
             sec_col_t, sec_col_del = st.columns([4, 1])
             with sec_col_t:
-                sec["title"] = st.text_input(t("sec_title"), value=sec.get("title", ""), key=f"sec_title_{idx}")
+                sec["title"] = st.text_input(t("sec_title"), value=sec.get("title", ""), placeholder=t("ph_sec_title"), key=f"sec_title_{idx}")
             with sec_col_del:
                 st.write("")
                 if st.button("🗑️", key=f"del_sec_{idx}", help="Remover esta seção"):
@@ -535,6 +555,7 @@ with col_form:
             sec["content"] = st.text_area(
                 t("sec_content"),
                 value=sec.get("content", ""),
+                placeholder=t("ph_sec_content"),
                 key=f"sec_content_{idx}",
                 height=100,
             )
@@ -547,7 +568,7 @@ with col_form:
             )
             if sec_img:
                 sec["image_file"] = sec_img
-                sec["caption"] = st.text_input(t("sec_caption"), value=sec.get("caption", ""), key=f"sec_cap_{idx}")
+                sec["caption"] = st.text_input(t("sec_caption"), value=sec.get("caption", ""), placeholder=t("ph_caption"), key=f"sec_cap_{idx}")
             else:
                 sec.pop("image_file", None)
 
