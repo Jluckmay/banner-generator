@@ -890,8 +890,24 @@ button.sm {
   font-family: 'Cambria', 'Georgia', 'Times New Roman', serif;
 }
 .draft-poster.tpl-classic .draft-header {
+  background: var(--tpl-accent, #1F3A5F) !important;
+  color: #ffffff !important;
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(31,58,95,0.15);
+  padding: 18px 20px;
+  border: none !important;
+}
+.draft-poster.tpl-classic .draft-title {
+  color: #ffffff !important;
+  font-family: 'Cambria', 'Georgia', serif;
+}
+.draft-poster.tpl-classic .draft-authors {
+  color: rgba(255, 255, 255, 0.92) !important;
+  font-family: 'Cambria', 'Georgia', serif;
+}
+.draft-poster.tpl-classic .draft-affil {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-family: 'Cambria', 'Georgia', serif;
 }
 .draft-poster.tpl-classic .draft-block {
   border: 1.5px solid var(--tpl-accent, #1F3A5F);
@@ -1027,6 +1043,42 @@ button.sm {
 /* 6. DCC / UFMG (Institucional) */
 .draft-poster.tpl-dcc {
   font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+}
+.draft-poster.tpl-dcc .draft-header {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+  padding: 10px 14px 14px 14px;
+  text-align: center;
+}
+.draft-poster.tpl-dcc .draft-title {
+  color: #111827 !important;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  border-bottom: 3.5px solid var(--tpl-accent, #CC0000);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+.draft-poster.tpl-dcc .draft-authors {
+  color: #111827 !important;
+  font-weight: 700;
+  font-size: 11px;
+  margin-top: 4px;
+}
+.draft-poster.tpl-dcc .draft-affil {
+  color: #4B5563 !important;
+  font-size: 9.5px;
+  margin-top: 2px;
+}
+.draft-poster.tpl-dcc .draft-top-bar {
+  background: var(--tpl-accent, #CC0000) !important;
+}
+.draft-poster.tpl-dcc .draft-divider {
+  background: var(--tpl-accent, #CC0000) !important;
+  height: 3.5px;
+  margin: 4px 0 14px 0;
 }
 .draft-poster.tpl-dcc .draft-block {
   border: 1px solid #E5E7EB;
@@ -2411,6 +2463,11 @@ function updateDraftPreview() {
       draftTitle.style.color = titleColor;
       draftAuthors.style.color = subtitleColor;
       draftAffil.style.color = subtitleColor;
+    } else if (tplId === "dcc") {
+      draftTitle.style.color = titleColor;
+      draftTitle.style.borderBottomColor = accent;
+      topBar.style.backgroundColor = accent;
+      divider.style.backgroundColor = accent;
     } else {
       draftTitle.style.color = titleColor;
       draftAuthors.style.color = subtitleColor;

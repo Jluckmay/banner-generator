@@ -140,16 +140,16 @@ def build_article_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
 {_fs(28, s)}
 {_logo_row(header_logos, 6 * s, True)}\\vspace{{{cm(1)}}}
 \\begin{{center}}
-  {{{_fs(54, s, 1.2)}\\textbf{{\\MakeUppercase{{{_inline(poster['title']) or '~'}}}}}}}\\\\
-  \\vspace{{{cm(1.5)}}}
-  {rule8}\\\\
-  \\vspace{{{cm(0.5)}}}
-  {{{_fs(36, s, 1.2)}\\textbf{{{authors}}}}}\\\\
-  \\vspace{{{cm(0.8)}}}
-  {{{_fs(30, s, 1.2)}\\textcolor{{darkgray}}{{{affil}}}}}\\\\
-\\end{{center}}
-\\vspace{{{cm(0.5)}}}
-{rule8}\\par
+  {{{_fs(54, s, 1.2)}\\textbf{{\\MakeUppercase{{{_inline(poster['title']) or '~'}}}}}}}\\par
+  \\vspace{{{cm(1.2)}}}
+  \\noindent\\textcolor{{accent}}{{\\rule{{\\textwidth}}{{{_pt(8 * s)}pt}}}}\\par
+  \\vspace{{{cm(0.6)}}}
+  {{{_fs(36, s, 1.2)}\\textbf{{{authors}}}}}\\par
+  \\vspace{{{cm(0.6)}}}
+  {{{_fs(30, s, 1.2)}\\textcolor{{darkgray}}{{{affil}}}}}\\par
+\end{{center}}
+\\vspace{{{cm(0.4)}}}
+\\noindent\\textcolor{{accent}}{{\\rule{{\\textwidth}}{{{_pt(8 * s)}pt}}}}\\par
 \\vspace{{{cm(0.8)}}}
 {open_cols}
 {chr(10).join(body)}
