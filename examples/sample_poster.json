@@ -1,0 +1,44 @@
+{
+  "title": "Efeito da Luz no Crescimento Vegetal: Análise Comparativa",
+  "authors": "Maria Silva, Carlos Santos, Orientadora: Profa. Dra. Elena Rostova",
+  "affiliations": "Departamento de Botânica e Computação Aplicada\nUniversidade Federal de Pesquisa",
+  "email": "contato.pesquisa@universidade.edu.br",
+  "url": "https://github.com/Jluckmay/banner-generator",
+  "language": "pt-BR",
+  "template": "classic",
+  "paper": "a0",
+  "orientation": "portrait",
+  "columns": 2,
+  "sections": [
+    {
+      "id": "intro",
+      "title": "Introdução",
+      "content": "A iluminação controlada em estufas agrícolas otimiza o ciclo de cultivo de espécies de alta demanda.\n\nEste trabalho investiga o impacto de diferentes espectros de iluminação LED comparados à luz solar padrão na taxa de fotossíntese.",
+      "images": []
+    },
+    {
+      "id": "methodology",
+      "title": "Metodologia",
+      "content": "- Grupo A: LED vermelho e azul (razão 4:1).\n- Grupo B: Luz solar filtrada controlada.\n- Monitoramento diário de biomassa e altura foliar por 60 dias com sensores automatizados.",
+      "images": []
+    },
+    {
+      "id": "results",
+      "title": "Resultados e Discussão",
+      "content": "O grupo exposto ao espectro ajustado (LED 4:1) apresentou um ganho de biomassa seca **32% superior** ao grupo controle, com maior densidade clorofiliana.\n\nA variabilidade temporal foi reduzida significativamente com a estabilização luminosa contínua.",
+      "images": []
+    },
+    {
+      "id": "conclusions",
+      "title": "Conclusões",
+      "content": "O uso direcionado de espectros LED representa alternativa viável e energeticamente eficiente para estufas urbanas e verticais em larga escala.",
+      "images": []
+    },
+    {
+      "id": "references",
+      "title": "Referências",
+      "content": "[1] Smith, J. et al. Photobiology & Plant Physiology, 2023.\n[2] Oliveira, R. & Rostova, E. Engenharia Agrícola Moderna, 2024.",
+      "images": []
+    }
+  ]
+}

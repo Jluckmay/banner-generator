@@ -1,6 +1,6 @@
 # 🎨 Identidade Visual & Ícones Oficiais / Brand Assets
 
-Este diretório armazena todos os arquivos oficiais da identidade visual do projeto **LaTeX Resume Generator**:
+Este diretório armazena todos os arquivos oficiais da identidade visual do projeto **Academic Banner Generator**:
 
 ```
 assets/
@@ -22,17 +22,10 @@ assets/
   - `Azul Clássico LaTeX`: `#0F4C81` (acento e gradiente)
   - `Azul Royal / Deep Blue`: `#1E3A8A` (profundidade)
   - `Ciano Neon Tech`: `#38BDF8` (brilho e realces)
-  - `Branco Puro`: `#FFFFFF` (página do documento)
+  - `Branco Puro`: `#FFFFFF` (página do pôster)
   - `Dourado Sparkle`: `#FBBF24` (estrela de IA)
 - **Elementos Visuais**:
   - *Squircle* com borda gradiente suave e cantos arredondados.
-  - Folha de currículo com dobra superior direita tridimensional.
+  - Pôster científico acadêmico com layout multi-colunas.
   - Tipografia LaTeX central (`L`, `A`, `T`, `E`, `X` com deslocamento tipográfico tradicional).
   - Estrela de 4 pontas no topo simbolizando síntese inteligente por IA.
-
-## 🔄 Como Regerar os Ícones
-Para regerar ou atualizar todos os formatos a partir do código vetorial, execute:
-```powershell
-python scripts/generate_icons.py
-```
-*(Os arquivos são gerados e organizados exclusivamente em `assets/icons/`, mantendo a raiz do projeto e diretórios de código completamente limpos).*
