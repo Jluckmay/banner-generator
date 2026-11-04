@@ -117,6 +117,12 @@ export DEEPSEEK_API_KEY="sua-chave"
 export NVIDIA_API_KEY="sua-chave"
 ```
 
+### Hospedagem no GitHub Pages
+O projeto está pronto para publicação estática no GitHub Pages:
+- **Deploy Automático via GitHub Actions**: No repositório, acesse **Settings > Pages** e selecione `Source: GitHub Actions`. O workflow `.github/workflows/deploy-pages.yml` fará o build e publicação a cada push na branch `main`.
+- **Deploy via Branch**: Alternativamente, selecione `Deploy from a branch > main / (root)` (o arquivo `.nojekyll` e `index.html` na raiz garantem o carregamento correto dos assets).
+- **Backend API**: A interface estática no GitHub Pages permite conectar-se ao backend (ex: serviço implantado no Render conforme `render.yaml`) através do campo de configuração de API embutido na seção 06.
+
 ---
 
 ## English Summary

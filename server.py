@@ -30,8 +30,21 @@ def _err(msg: str, code: int = 400) -> Tuple[Response, int]:
     return jsonify({"error": msg}), code
 
 
+@app.route("/api/<path:path>", methods=["OPTIONS"])
+def api_options(path: str) -> Response:
+    resp = Response(status=204)
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return resp
+
+
 @app.after_request
 def _headers(resp: Response) -> Response:
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    resp.headers["Access-Control-Expose-Headers"] = "X-Poster-Overflow, Content-Disposition"
     resp.headers["X-Content-Type-Options"] = "nosniff"
     resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     resp.headers["Cache-Control"] = "no-store"
@@ -46,7 +59,7 @@ def _headers(resp: Response) -> Response:
         "img-src 'self' blob: data:; "
         "frame-src 'self' blob: data: chrome-extension:; "
         "object-src 'self' blob: data:; "
-        "connect-src 'self' https://cdnjs.cloudflare.com; "
+        "connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://*.onrender.com https://cdnjs.cloudflare.com; "
         "base-uri 'none'; form-action 'self'; frame-ancestors 'self'"
     )
     return resp
@@ -54,7 +67,9 @@ def _headers(resp: Response) -> Response:
 
 @app.get("/")
 def index() -> Response:
-    return send_from_directory(ROOT / "web", "index.html")
+    if (ROOT / "web" / "index.html").exists():
+        return send_from_directory(ROOT / "web", "index.html")
+    return send_from_directory(ROOT, "index.html")
 
 
 @app.get("/assets/<path:name>")

@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; worker-src 'self' blob: data: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' blob: data:; frame-src 'self' blob: data: chrome-extension:; object-src 'self' blob: data:; connect-src 'self' https://cdnjs.cloudflare.com; base-uri 'none'; form-action 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; worker-src 'self' blob: data: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' blob: data:; frame-src 'self' blob: data: chrome-extension:; object-src 'self' blob: data:; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://*.onrender.com https://cdnjs.cloudflare.com; base-uri 'none'; form-action 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>banner-generator | Gerador de Pôsteres Acadêmicos</title>
-<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="/assets/icons/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="/assets/icons/favicon-16.png" sizes="16x16" type="image/png">
-<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" href="./assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="./assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="./assets/icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1591,6 +1591,14 @@ button.sm {
       <button id="dlZip" data-i18n="dl_zip">📦 Código LaTeX (.zip)</button>
     </div>
     <div id="genMsg"></div>
+    <details id="backendSettingsDetails" style="margin-top:14px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--line);padding-top:10px;">
+      <summary style="cursor:pointer;font-family:var(--font-mono);user-select:none;">⚙️ <span data-i18n="backend_config">Configuração do Servidor Backend (API)</span></summary>
+      <div style="margin-top:8px;">
+        <label for="backendUrlInput" style="font-size:11px;" data-i18n="backend_url_label">URL do Servidor Backend:</label>
+        <input type="text" id="backendUrlInput" placeholder="http://127.0.0.1:5000 ou https://banner-generator.onrender.com" style="margin-top:4px;font-size:12px;font-family:var(--font-mono);" autocomplete="off">
+        <div class="hint" data-i18n="backend_url_hint">Deixe vazio para detecção automática (Render/Local).</div>
+      </div>
+    </details>
   </section>
 
 </div>
@@ -1737,7 +1745,10 @@ const T = {
     custom_tex_hint: "O arquivo .tex será compilado diretamente com pdflatex. Certifique-se de que é autocontido (todos os pacotes e conteúdo incluídos).",
     view_draft: "📐 Rascunho",
     view_pdf: "📄 PDF Compilado",
-    draft_badge: "Pré-visualização em tempo real"
+    draft_badge: "Pré-visualização em tempo real",
+    backend_config: "Configuração do Servidor Backend (API)",
+    backend_url_label: "URL do Servidor Backend:",
+    backend_url_hint: "Deixe vazio para detecção automática (Render/Local)."
   },
   "en-US": {
     app_title: "banner-generator",
@@ -1806,7 +1817,10 @@ const T = {
     custom_tex_hint: "The .tex file will be compiled directly with pdflatex. Ensure it is self-contained with all required packages and content.",
     view_draft: "📐 Live Draft",
     view_pdf: "📄 Compiled PDF",
-    draft_badge: "Live Real-Time Preview"
+    draft_badge: "Live Real-Time Preview",
+    backend_config: "Backend Server (API) Settings",
+    backend_url_label: "Backend Server URL:",
+    backend_url_hint: "Leave empty for auto-detection (Render/Local)."
   }
 };
 
@@ -1972,10 +1986,27 @@ function newSec(id, title = "", content = "") {
   return { key: "s" + (++uid), id: id || ("custom" + uid), title, content, images: [] };
 }
 
+function getApiBase() {
+  const custom = localStorage.getItem("banner_api_base");
+  if (custom !== null && custom.trim() !== "") return custom.trim().replace(/\/+$/, "");
+  if (window.location.hostname.endsWith("github.io")) {
+    return "https://banner-generator.onrender.com";
+  }
+  return "";
+}
+
 /* ---------- Inicialização ---------- */
 (async function init() {
+  const beInput = $("#backendUrlInput");
+  if (beInput) {
+    beInput.value = localStorage.getItem("banner_api_base") || "";
+    beInput.oninput = () => {
+      localStorage.setItem("banner_api_base", beInput.value.trim());
+    };
+  }
+
   try {
-    const res = await fetch("/api/config");
+    const res = await fetch(getApiBase() + "/api/config");
     if (res.ok) {
       const data = await res.json();
       CFG = data;
@@ -2074,7 +2105,7 @@ $("#extractBtn").onclick = async () => {
   $("#extractBtn").disabled = true;
   showMsg(msg, t("working"), "ok");
   try {
-    const r = await fetch("/api/extract", { method: "POST", body: fd });
+    const r = await fetch(getApiBase() + "/api/extract", { method: "POST", body: fd });
     const j = await r.json();
     if (!r.ok) return showMsg(msg, j.error || "Erro na extração", "err");
     fillFromExtract(j.poster);
@@ -2653,7 +2684,7 @@ async function generate(fmt) {
   $("#loadingText").textContent = t("working");
 
   try {
-    const r = await fetch("/api/generate?format=" + fmt, { method: "POST", body: buildForm() });
+    const r = await fetch(getApiBase() + "/api/generate?format=" + fmt, { method: "POST", body: buildForm() });
     if (!r.ok) {
       const j = await r.json().catch(() => ({ error: "HTTP " + r.status }));
       showMsg(msg, j.error || "Erro ao compilar pôster", "err");
