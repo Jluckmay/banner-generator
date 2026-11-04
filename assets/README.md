@@ -18,14 +18,15 @@ assets/
 ## 📐 Especificações Técnicas de Design
 
 - **Cores Oficiais**:
-  - `Azul Noturno`: `#0B192C` (fundo principal)
-  - `Azul Clássico LaTeX`: `#0F4C81` (acento e gradiente)
-  - `Azul Royal / Deep Blue`: `#1E3A8A` (profundidade)
-  - `Ciano Neon Tech`: `#38BDF8` (brilho e realces)
-  - `Branco Puro`: `#FFFFFF` (página do pôster)
-  - `Dourado Sparkle`: `#FBBF24` (estrela de IA)
-- **Elementos Visuais**:
-  - *Squircle* com borda gradiente suave e cantos arredondados.
-  - Pôster científico acadêmico com layout multi-colunas.
-  - Tipografia LaTeX central (`L`, `A`, `T`, `E`, `X` com deslocamento tipográfico tradicional).
-  - Estrela de 4 pontas no topo simbolizando síntese inteligente por IA.
+  - `Obsidiana Profundo`: `#08090D` / `#141824` (fundo squircle com gradiente sutil)
+  - `Borda Tátil`: `#252D42` (contorno sutil com acabamento moderno)
+  - `Vermelho Carmesim Neon`: `#FF2A40` (destaque primário)
+  - `Coral / Tangerina`: `#FF5E36` (transição gradiente suave)
+  - `Âmbar Dourado`: `#FBBF24` (destaque secundário e compilação)
+  - `Branco Puro`: `#FFFFFF` (cartão de conteúdo e alto contraste em abas compactas)
+- **Conceito & Geometria Minimalista**:
+  - *Squircle* escuro com proporção perfeitamente balanceada para abas de 16px a 512px.
+  - Silhueta arquitetural de **Pôster / Banner Acadêmico**:
+    - Barra de título/cabeçalho superior em gradiente neon contínuo (`#FF2A40` → `#FBBF24`).
+    - Estrutura de colunas paralelas (duas colunas estruturadas em contraste claro e escuro) representando o layout científico e a divisão em blocos.
+    - Máxima legibilidade e reconhecimento instantâneo mesmo nas menores resoluções (16×16 e 32×32).
