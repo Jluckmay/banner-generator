@@ -318,7 +318,10 @@ def t(key: str) -> str:
 
 
 def load_demo_sample():
-    sample_file = Path("examples/sample_poster.json")
+    lang = st.session_state.get("poster_lang", "pt-BR")
+    sample_file = Path("examples/sample_poster_en.json" if lang == "en-US" else "examples/sample_poster.json")
+    if not sample_file.exists():
+        sample_file = Path("examples/sample_poster.json")
     if sample_file.exists():
         try:
             data = json.loads(sample_file.read_text(encoding="utf-8"))
@@ -332,8 +335,9 @@ def load_demo_sample():
             st.session_state.orientation = data.get("orientation", "portrait")
             st.session_state.columns = data.get("columns", 2)
             st.session_state.sections = data.get("sections", [])
-            st.session_state.poster_lang = data.get("language", "pt-BR")
-            st.success("Exemplo de demonstração carregado com sucesso!")
+            st.session_state.poster_lang = data.get("language", lang)
+            msg = "Demo sample loaded successfully!" if st.session_state.get("ui_lang") == "en-US" else "Exemplo de demonstração carregado com sucesso!"
+            st.success(msg)
         except Exception as e:
             st.error(f"Erro ao carregar exemplo: {e}")
 

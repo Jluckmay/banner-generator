@@ -1,0 +1,44 @@
+{
+  "title": "Effect of Light Spectrum on Plant Growth: A Comparative Analysis",
+  "authors": "Jane Doe, John Smith, Advisor: Prof. Dr. Alan Turing",
+  "affiliations": "Department of Applied Botany and Computing\nFederal Research Institute",
+  "email": "research.contact@university.edu",
+  "url": "https://github.com/Jluckmay/banner-generator",
+  "language": "en-US",
+  "template": "classic",
+  "paper": "60x90",
+  "orientation": "portrait",
+  "columns": 2,
+  "sections": [
+    {
+      "id": "intro",
+      "title": "Introduction",
+      "content": "Controlled illumination in agricultural greenhouses optimizes the growth cycle of high-demand crop species.\n\nThis study investigates the impact of specific LED spectra compared with natural sunlight baseline on photosynthetic efficiency.",
+      "images": []
+    },
+    {
+      "id": "methodology",
+      "title": "Methodology",
+      "content": "- Group A: Red and Blue LED mix (4:1 ratio).\n- Group B: Standard filtered natural sunlight.\n- Daily monitoring of dry biomass and leaf area over 60 days using automated IoT sensors.",
+      "images": []
+    },
+    {
+      "id": "results",
+      "title": "Results and Discussion",
+      "content": "The targeted spectrum cohort (LED 4:1) achieved **32% higher** dry biomass accumulation compared to the control group, along with superior chlorophyll density.\n\nTemporal growth variance was substantially reduced under continuous stabilized lighting regimes.",
+      "images": []
+    },
+    {
+      "id": "conclusions",
+      "title": "Conclusions",
+      "content": "Targeted narrow-band LED spectra provide an energy-efficient, scalable cultivation strategy for modern urban and vertical greenhouse installations.",
+      "images": []
+    },
+    {
+      "id": "references",
+      "title": "References",
+      "content": "[1] Smith, J. et al. Photobiology & Plant Physiology, 2023.\n[2] Doe, J. & Turing, A. Modern Agricultural Systems, 2024.",
+      "images": []
+    }
+  ]
+}

@@ -2192,6 +2192,7 @@ document.querySelectorAll("input[name=posterLang]").forEach(r => {
     if (r.checked) {
       posterLang = r.value;
       renderSections();
+      updateDraftPreview();
     }
   };
 });
@@ -2484,13 +2485,30 @@ $("#addSec").onclick = () => {
 
 /* ---------- Exemplo de Demonstração Rápido ---------- */
 $("#quickSampleBtn").onclick = () => {
-  $("#title").value = "Efeito da Luz no Crescimento Vegetal: Análise Comparativa";
-  $("#authors").value = "Maria Silva, Carlos Santos, Orientadora: Profa. Dra. Elena Rostova";
-  $("#affiliations").value = "Departamento de Botânica e Computação Aplicada\nUniversidade Federal de Pesquisa";
-  $("#email").value = "contato.pesquisa@universidade.edu.br";
-  $("#url").value = "https://github.com/exemplo/banner-pesquisa";
-  
-  const sampleTexts = {
+  const isEn = posterLang === "en-US";
+  if (isEn) {
+    $("#title").value = "Effect of Light Spectrum on Plant Growth: A Comparative Analysis";
+    $("#authors").value = "Jane Doe, John Smith, Advisor: Prof. Dr. Alan Turing";
+    $("#affiliations").value = "Department of Applied Botany and Computing\nFederal Research Institute";
+    $("#email").value = "research.contact@university.edu";
+    $("#url").value = "https://github.com/example/research-poster";
+  } else {
+    $("#title").value = "Efeito da Luz no Crescimento Vegetal: Análise Comparativa";
+    $("#authors").value = "Maria Silva, Carlos Santos, Orientadora: Profa. Dra. Elena Rostova";
+    $("#affiliations").value = "Departamento de Botânica e Computação Aplicada\nUniversidade Federal de Pesquisa";
+    $("#email").value = "contato.pesquisa@universidade.edu.br";
+    $("#url").value = "https://github.com/exemplo/banner-pesquisa";
+  }
+
+  const sampleTexts = isEn ? {
+    abstract: "This study evaluates the effects of distinct light wavelengths on plant development and dry biomass accumulation over 45 controlled days.",
+    introduction: "Electromagnetic spectrum modulation is critical for photosynthetic efficiency and physiological regulation.\n- Blue spectrum enhances chlorophyll synthesis\n- Red spectrum maximizes photon absorption",
+    objectives: "1. Quantify dry matter accumulation under selective LED spectra.\n2. Develop a predictive growth model for controlled indoor agriculture.",
+    methods: "Factorial trial with 80 seedlings distributed across 4 climate chambers automated via IoT sensors.",
+    results: "Biomass increased by 34% under combined spectrum (blue + red) with a 12-day reduction in cycle duration.",
+    conclusions: "Precision lighting demonstrates superior technical and energy efficiency for sustainable indoor vertical farming.",
+    references: "[1] Smith, J. et al. (2024). Photobiology & Plant Physiology.\n[2] Doe, J. & Turing, A. (2023). Precision Agricultural Systems."
+  } : {
     abstract: "Este estudo avalia os efeitos de diferentes comprimentos de onda luminosa no desenvolvimento e biomassa vegetal ao longo de 45 dias controlados.",
     introduction: "A modulação do espectro eletromagnético é determinante para a eficiência fotossintética e regulação fisiológica.\n- Espectro azul estimula clorofila\n- Espectro vermelho maximiza absorção",
     objectives: "1. Quantificar acúmulo de matéria seca sob radiação seletiva.\n2. Propor modelo preditivo de crescimento acelerado em ambientes fechados.",
@@ -2499,11 +2517,12 @@ $("#quickSampleBtn").onclick = () => {
     conclusions: "A iluminação de precisão demonstra viabilidade técnica e energética superior para cultivo protegido.",
     references: "[1] Silva, M. et al. (2024). Fotobiologia Aplicada. Journal of Plant Science.\n[2] Santos, C. (2023). Sistemas Agrícolas de Precisão."
   };
-  
+
   sections.forEach(s => {
     if (sampleTexts[s.id]) s.content = sampleTexts[s.id];
   });
   renderSections();
+  updateDraftPreview();
   generate("pdf");
 };
 
@@ -2638,9 +2657,27 @@ function updateDraftPreview() {
   }
 
   // Textos Principais
-  const titleVal = ($("#title") && $("#title").value.trim()) || "Título do Trabalho";
-  const authorsVal = ($("#authors") && $("#authors").value.trim()) || "Autores do Trabalho";
-  const affilVal = ($("#affiliations") && $("#affiliations").value.trim()) || "Afiliação Institucional";
+  const draftFallbacks = {
+    "pt-BR": {
+      title: "Título do Trabalho",
+      authors: "Autores do Trabalho",
+      affil: "Afiliação Institucional",
+      section: "Seção",
+      content: "Conteúdo descritivo da seção de pesquisa."
+    },
+    "en-US": {
+      title: "Research Poster Title",
+      authors: "Authors of the Paper",
+      affil: "Institutional Affiliation",
+      section: "Section",
+      content: "Descriptive content of the research section."
+    }
+  };
+  const dFb = draftFallbacks[posterLang] || draftFallbacks["pt-BR"];
+
+  const titleVal = ($("#title") && $("#title").value.trim()) || dFb.title;
+  const authorsVal = ($("#authors") && $("#authors").value.trim()) || dFb.authors;
+  const affilVal = ($("#affiliations") && $("#affiliations").value.trim()) || dFb.affil;
   draftTitle.textContent = titleVal;
   draftAuthors.textContent = authorsVal;
   draftAffil.textContent = affilVal;
@@ -2674,8 +2711,8 @@ function updateDraftPreview() {
     const activeSections = renderedSections.length > 0 ? renderedSections : sections;
 
     grid.innerHTML = activeSections.map(s => {
-      const sTitle = (s.title && s.title.trim()) || secLabel(s.id) || "Seção";
-      const sBody = (s.content && s.content.trim()) || "Conteúdo descritivo da seção de pesquisa.";
+      const sTitle = (s.title && s.title.trim()) || secLabel(s.id) || dFb.section;
+      const sBody = (s.content && s.content.trim()) || dFb.content;
       const paragraphs = sBody.split("\n\n").slice(0, 3).map(p => `<p>${escapeHtml(p)}</p>`).join("");
       const imgHtml = (s.images && s.images.length > 0)
         ? `<div class="draft-block-imgs">${s.images.slice(0, 2).map(im => `<img class="draft-block-img" src="${im.preview}" alt="Figura">`).join("")}</div>`
