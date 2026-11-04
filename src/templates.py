@@ -15,28 +15,28 @@ TIKZ_PAPERS = list(POSTER_SIZES)
 # logos: vagas de logotipos por região do template (cabeçalho/rodapé)
 TEMPLATES: Dict[str, Dict[str, Any]] = {
     "classic": {
-        "name": {"pt-BR": "Clássico (Conferência)", "en-US": "Classic (Conference)"},
+        "name": {"pt-BR": "Clássico", "en-US": "Classic"},
         "engine": "tikzposter",
         "block": "Default", "title": "Filled", "background": "Default",
         "colors": ("1F3A5F", "2E5C8A", "9DB9D8"), "bg": "EEF2F7", "sans": False,
         "logos": {"header": MAX_LOGOS_HEADER, "footer": 0},
     },
     "modern": {
-        "name": {"pt-BR": "Moderno (Gradiente)", "en-US": "Modern (Gradient)"},
+        "name": {"pt-BR": "Moderno", "en-US": "Modern"},
         "engine": "tikzposter",
         "block": "Basic", "title": "Basic", "background": "VerticalGradient",
         "colors": ("0F766E", "14B8A6", "99F6E4"), "bg": "F0FDFA", "sans": True,
         "logos": {"header": MAX_LOGOS_HEADER, "footer": 0},
     },
     "minimal": {
-        "name": {"pt-BR": "Minimalista (Editorial)", "en-US": "Minimal (Editorial)"},
+        "name": {"pt-BR": "Minimalista", "en-US": "Minimal"},
         "engine": "tikzposter",
         "block": "Minimal", "title": "Empty", "background": "Default",
         "colors": ("1E293B", "475569", "94A3B8"), "bg": "FAFAFA", "sans": True,
         "logos": {"header": MAX_LOGOS_HEADER, "footer": 0},
     },
     "bold": {
-        "name": {"pt-BR": "Ousado (Envelope)", "en-US": "Bold (Envelope)"},
+        "name": {"pt-BR": "Ousado", "en-US": "Bold"},
         "engine": "tikzposter",
         "block": "Envelope", "title": "Envelope", "background": "Default",
         "colors": ("7C2D12", "EA580C", "FED7AA"), "bg": "FFF7ED", "sans": True,
@@ -58,7 +58,7 @@ TEMPLATES: Dict[str, Dict[str, Any]] = {
         "logos": {"header": MAX_LOGOS_HEADER, "footer": MAX_LOGOS_FOOTER},
     },
     "mostra_ic": {
-        "name": {"pt-BR": "Mostra IC (UFOP)", "en-US": "Mostra IC (UFOP)"},
+        "name": {"pt-BR": "Mostra IC", "en-US": "Mostra IC"},
         "engine": "sciposter",
         "colors": ("0A3B75", "1F2937", "4B5563"), "bg": "FFFFFF", "sans": False,
         "default_columns": 2,
@@ -66,7 +66,7 @@ TEMPLATES: Dict[str, Dict[str, Any]] = {
         "logos": {"header": MAX_LOGOS_HEADER, "footer": 0},
     },
     "uzh": {
-        "name": {"pt-BR": "UZH / LiRI (Zurique)", "en-US": "UZH / LiRI (Zurich)"},
+        "name": {"pt-BR": "UZH / LiRI", "en-US": "UZH / LiRI"},
         "engine": "a0poster",
         "colors": ("0028A5", "3353B7", "1F2937"), "bg": "FFFFFF", "sans": True,
         "default_columns": 2,
@@ -74,7 +74,7 @@ TEMPLATES: Dict[str, Dict[str, Any]] = {
         "logos": {"header": MAX_LOGOS_HEADER, "footer": 0},
     },
     "tudelft": {
-        "name": {"pt-BR": "TU Delft (Beamer)", "en-US": "TU Delft (Beamer)"},
+        "name": {"pt-BR": "TU Delft", "en-US": "TU Delft"},
         "engine": "beamer",
         "colors": ("00A6D6", "002B49", "007396"), "bg": "F8FAFC", "sans": True,
         "default_columns": 2,
