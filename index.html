@@ -2980,7 +2980,7 @@ function updateDraftPreview() {
   const headerLogosEl = $("#draftHeaderLogos");
   if (logosH && logosH.length > 0) {
     headerLogosEl.classList.remove("hidden");
-    headerLogosEl.innerHTML = logosH.map(l => `<img class="draft-logo-img" src="${l.preview}" alt="Logo">`).join("");
+    headerLogosEl.innerHTML = logosH.map(l => `<img class="draft-logo-img" src="${escapeHtml(l.url || l.preview || "")}" alt="Logo">`).join("");
   } else {
     headerLogosEl.classList.add("hidden");
     headerLogosEl.innerHTML = "";
@@ -2991,7 +2991,7 @@ function updateDraftPreview() {
   const footerLogosEl = $("#draftFooterLogos");
   if (logosF && logosF.length > 0) {
     footerEl.classList.remove("hidden");
-    footerLogosEl.innerHTML = logosF.map(l => `<img class="draft-logo-img" src="${l.preview}" alt="Logo Footer">`).join("");
+    footerLogosEl.innerHTML = logosF.map(l => `<img class="draft-logo-img" src="${escapeHtml(l.url || l.preview || "")}" alt="Logo Footer">`).join("");
   } else {
     footerEl.classList.add("hidden");
     footerLogosEl.innerHTML = "";
@@ -3009,7 +3009,7 @@ function updateDraftPreview() {
       const sBody = (s.content && s.content.trim()) || dFb.content;
       const paragraphs = sBody.split("\n\n").slice(0, 3).map(p => `<p>${escapeHtml(p)}</p>`).join("");
       const imgHtml = (s.images && s.images.length > 0)
-        ? `<div class="draft-block-imgs">${s.images.slice(0, 2).map(im => `<img class="draft-block-img" src="${im.preview}" alt="Figura">`).join("")}</div>`
+        ? `<div class="draft-block-imgs">${s.images.slice(0, 2).map(im => `<img class="draft-block-img" src="${escapeHtml(im.url || im.preview || "")}" alt="Figura">`).join("")}</div>`
         : "";
 
       return `
