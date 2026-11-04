@@ -118,6 +118,8 @@ def build_beamer_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
 \\usepackage{{graphicx}}
 \\usepackage{{qrcode}}
 \\usepackage{{xcolor}}
+\\usepackage{{booktabs,array,tikz}}
+\\usetikzlibrary{{arrows.meta,positioning,shapes.geometric,fit}}
 
 \\usetheme{{Madrid}}
 {_hex_to_latex('tudBlue', c1)}

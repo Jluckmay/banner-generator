@@ -59,6 +59,37 @@ def test_bold_italic_and_lists():
     assert "\\begin{itemize}" in tex and "\\begin{enumerate}" in tex
 
 
+
+
+def test_markdown_and_latex_tables_and_diagrams():
+    md_tbl = "| Algoritmo | Acuracia |\n|---|---|\n| Random Forest | 88.5% |\n| Proposto | 96.2% |"
+    tex_tbl = text_to_latex(md_tbl)
+    assert r"\begin{tabular}" in tex_tbl
+    assert r"\textbf{Algoritmo}" in tex_tbl
+    assert "88.5" in tex_tbl
+    assert r"\end{tabular}" in tex_tbl
+
+    raw_tex = "\\begin{tabular}{cc}\n\\hline\nA & B \\\\\n\\hline\n\\end{tabular}"
+    tex_out = text_to_latex(raw_tex)
+    assert r"\begin{tabular}{cc}" in tex_out
+    assert r"\begin{center}" in tex_out
+
+    tikz_raw = "\\begin{tikzpicture}\n\\node (a) {Passo 1};\n\\end{tikzpicture}"
+    tikz_out = text_to_latex(tikz_raw)
+    assert r"\begin{tikzpicture}" in tikz_out
+    assert r"\node (a)" in tikz_out
+
+    injected = "\\begin{tabular}{c}\n\\input{/etc/passwd}\n\\end{tabular}"
+    safe_out = text_to_latex(injected)
+    assert r"\input" not in safe_out.replace(r"\textbackslash{}input", "")
+
+
+def test_json_object_repairs_latex_escapes():
+    from src.llm import parse_json_object
+    raw_json = '{"title": "Teste", "sections": {"results": "\\begin{tabular}\\hline\\alpha & \\textbf{1}\\end{tabular}"}}'
+    parsed = parse_json_object(raw_json)
+    assert parsed["title"] == "Teste"
+    assert r"\hline" in parsed["sections"]["results"]
 def test_heuristic_parse():
     r = heuristic_parse(PAPER)
     ids = {s["id"] for s in r["sections"]}

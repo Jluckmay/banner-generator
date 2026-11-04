@@ -105,6 +105,8 @@ def build_a0poster_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
 \\usepackage{{qrcode}}
 \\usepackage{{xcolor}}
 \\usepackage{{titlesec}}
+\\usepackage{{booktabs,array,tikz}}
+\\usetikzlibrary{{arrows.meta,positioning,shapes.geometric,fit}}
 
 {_hex_to_latex('uzhAccent', c1)}
 {_hex_to_latex('uzhDark', c2)}

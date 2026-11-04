@@ -94,16 +94,92 @@ def _inline(text: str) -> str:
     return re.sub(r"\x00M(\d+)\x00", lambda m: maths[int(m.group(1))], esc)
 
 
+_DANGEROUS_LATEX_CMD = re.compile(
+    r"\\(?:"
+    r"input|include|write18|immediate|openin|openout|newwrite|newread|read|catcode"
+    r"|def|gdef|edef|xdef|let|futurelet|chardef|dimendef|skipdef|muskipdef|countdef"
+    r"|toksdef|everyeof|everypar|everymath|everydisplay|loop|repeat|afterassignment"
+    r"|aftergroup|expandafter|noexpand|special|directlua|luaexec|font|primitive"
+    r"|shipout|batchmode|errorstopmode"
+    r")\b",
+    re.IGNORECASE,
+)
+_LATEX_ENV_PAT = re.compile(
+    r"\\begin\{(?:tabular\*?|tabularx|tikzpicture|table|center)\}",
+    re.IGNORECASE,
+)
+
+
+def _safe_latex_env(block: str) -> str | None:
+    """Verifica se o bloco é um ambiente LaTeX estruturado seguro (tabular, tikzpicture, etc.)."""
+    s = block.strip()
+    if not _LATEX_ENV_PAT.search(s):
+        return None
+    if _DANGEROUS_LATEX_CMD.search(s):
+        return None
+    # Protege símbolos de porcentagem não escapados para não truncar linhas como comentário TeX
+    safe = re.sub(r"(?<!\\)%", r"\%", s)
+    if not safe.startswith(r"\begin{center}") and (r"\begin{tabular" in safe or r"\begin{tikzpicture" in safe):
+        return f"\\begin{{center}}\n{safe}\n\\end{{center}}"
+    return safe
+
+
+def _is_markdown_table(lines: List[str]) -> bool:
+    if len(lines) < 2:
+        return False
+    l0 = lines[0].strip()
+    l1 = lines[1].strip()
+    if not (l0.startswith("|") or "|" in l0):
+        return False
+    return bool(re.match(r"^\s*\|?\s*:?-+:?\s*(\|:?-+:?\s*)+\|?\s*$", l1))
+
+
+def _markdown_table_to_latex(lines: List[str]) -> str:
+    header_cells = [c.strip() for c in lines[0].strip().strip("|").split("|")]
+    col_count = len(header_cells)
+    if col_count == 0:
+        return ""
+    col_spec = "|" + "c|" * col_count
+    header_tex = " & ".join(f"\\textbf{{{_inline(c)}}}" for c in header_cells) + r" \\ \hline"
+    rows: List[str] = []
+    for ln in lines[2:]:
+        if not ln.strip():
+            continue
+        cells = [c.strip() for c in ln.strip().strip("|").split("|")]
+        while len(cells) < col_count:
+            cells.append("")
+        cells = cells[:col_count]
+        rows.append(" & ".join(_inline(c) for c in cells) + r" \\ \hline")
+    body = "\n".join(rows)
+    return (
+        f"\\begin{{center}}\n"
+        f"\\small\n"
+        f"\\begin{{tabular}}{{{col_spec}}}\n"
+        f"\\hline\n"
+        f"{header_tex}\n"
+        f"{body}\n"
+        f"\\end{{tabular}}\n"
+        f"\\end{{center}}"
+    )
+
+
 _BULLET = re.compile(r"^\s*(?:[-*•–]\s+)(.*)$")
 _NUMBERED = re.compile(r"^\s*\d{1,2}[.)]\s+(.*)$")
 
 
 def text_to_latex(text: str) -> str:
-    """Converte texto simples (parágrafos, listas com '- ' ou '1. ') em LaTeX."""
+    """Converte texto simples, listas, tabelas e diagramas em LaTeX."""
     blocks = re.split(r"\n\s*\n", text.strip())
     out: List[str] = []
     for block in blocks:
+        raw_env = _safe_latex_env(block)
+        if raw_env:
+            out.append(raw_env + "\n")
+            continue
         lines = [ln for ln in block.split("\n") if ln.strip()]
+        if _is_markdown_table(lines):
+            out.append(_markdown_table_to_latex(lines) + "\n")
+            continue
         i = 0
         while i < len(lines):
             kind = "ul" if _BULLET.match(lines[i]) else "ol" if _NUMBERED.match(lines[i]) else None
@@ -287,6 +363,8 @@ def build_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
 \\usepackage{{amsmath,amssymb}}
 \\usepackage{{graphicx}}
 \\usepackage{{qrcode}}
+\\usepackage{{booktabs,array}}
+\\usetikzlibrary{{arrows.meta,positioning,shapes.geometric,fit}}
 {font}\\definecolorstyle{{PosterColors}}{{
   {_hex_to_latex('colorOne', c1)}
   {_hex_to_latex('colorTwo', c2)}

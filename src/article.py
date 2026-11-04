@@ -126,6 +126,8 @@ def build_article_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
 \\usepackage{{amsmath,amssymb}}
 \\usepackage{{graphicx}}
 \\usepackage{{qrcode}}
+\\usepackage{{booktabs,array,tikz}}
+\\usetikzlibrary{{arrows.meta,positioning,shapes.geometric,fit}}
 \\pagestyle{{empty}}
 {_hex_to_latex('accent', c1)}
 {_hex_to_latex('darkgray', c2)}

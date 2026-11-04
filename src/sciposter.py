@@ -104,6 +104,8 @@ def build_sciposter_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
 \\usepackage{{graphicx}}
 \\usepackage{{qrcode}}
 \\usepackage{{xcolor}}
+\\usepackage{{booktabs,array,tikz}}
+\\usetikzlibrary{{arrows.meta,positioning,shapes.geometric,fit}}
 
 {_hex_to_latex('mainCol', c1)}
 {_hex_to_latex('titleCol', c2)}
