@@ -5,7 +5,7 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     texlive-latex-base texlive-latex-recommended texlive-latex-extra \
-    texlive-lang-portuguese texlive-fonts-recommended lmodern ca-certificates \
+    texlive-lang-portuguese texlive-fonts-recommended lmodern cm-super ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
@@ -16,8 +16,11 @@ COPY index.html ./
 COPY assets/ ./assets/
 COPY server.py ./
 
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+RUN mkdir -p /app/output /app/.cache && \
+    useradd -m -u 1000 appuser && \
+    chown -R appuser:appuser /app
+
 USER appuser
 EXPOSE 10000
 
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 2 --threads 4 --timeout 300 server:app"]
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 2 --threads 4 --timeout 180 server:app"]
