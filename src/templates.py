@@ -50,7 +50,7 @@ TEMPLATES: Dict[str, Dict[str, Any]] = {
         "logos": {"header": MAX_LOGOS_HEADER, "footer": 0},
     },
     "dcc": {
-        "name": {"pt-BR": "DCC / UFMG (Vermelho)", "en-US": "DCC / UFMG (Red)"},
+        "name": {"pt-BR": "Academic Red", "en-US": "Academic Red"},
         "engine": "article",
         "colors": ("CC0000", "444444", "1A1A1A"), "bg": "FFFFFF", "sans": True,
         "default_columns": 2,
