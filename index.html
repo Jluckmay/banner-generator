@@ -2515,6 +2515,12 @@ function applyI18n() {
     applyTemplateOptions(false);
     if ($("#provider") && $("#provider").onchange) $("#provider").onchange();
   }
+  const statusBadge = $("#serverStatusBadge");
+  if (statusBadge) {
+    if (statusBadge.classList.contains("status-online")) updateServerBadge("online");
+    else if (statusBadge.classList.contains("status-offline")) updateServerBadge("offline");
+    else updateServerBadge("connecting");
+  }
 }
 
 function showMsg(el, text, cls) {
@@ -2540,6 +2546,16 @@ function getApiBase() {
   return DEFAULT_API_BASE;
 }
 
+
+
+function timeoutSignal(ms) {
+  if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+    return AbortSignal.timeout(ms);
+  }
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), ms);
+  return controller.signal;
+}
 
 /* ---------- Status do Servidor, Conexão e Tolerância a Falhas (Render Wakeup) ---------- */
 function updateServerBadge(status, label) {
@@ -2606,13 +2622,16 @@ async function wakeUpServer() {
   const maxWakeAttempts = 25; // Até ~100 segundos cobrindo boot do Render
   for (let attempt = 1; attempt <= maxWakeAttempts; attempt++) {
     try {
-      const res = await fetch(apiBase + "/healthz", { signal: AbortSignal.timeout(12000) });
+      const res = await fetch(apiBase + "/healthz", { signal: timeoutSignal(12000) });
       if (res.ok) {
         // Servidor ativo! Carrega configuração viva do servidor
         try {
-          const cfgRes = await fetch(apiBase + "/api/config", { signal: AbortSignal.timeout(8000) });
+          const cfgRes = await fetch(apiBase + "/api/config", { signal: timeoutSignal(8000) });
           if (cfgRes.ok) {
             const data = await cfgRes.json();
+            if (data && data.providers && data.providers.nvidia && data.providers.nvidia.default_model === "meta/llama-3.3-70b-instruct") {
+              data.providers.nvidia.default_model = "nvidia/llama-3.1-nemotron-70b-instruct";
+            }
             CFG = data;
             populateProviders();
           }
@@ -2623,7 +2642,7 @@ async function wakeUpServer() {
         // Configura keep-alive a cada 8 minutos para evitar spin-down enquanto usuário edita
         if (keepAliveTimer) clearInterval(keepAliveTimer);
         keepAliveTimer = setInterval(() => {
-          fetch(apiBase + "/healthz", { signal: AbortSignal.timeout(5000) }).catch(() => {});
+          fetch(apiBase + "/healthz", { signal: timeoutSignal(5000) }).catch(() => {});
         }, 8 * 60 * 1000);
         return;
       }
@@ -2786,8 +2805,15 @@ $("#extractBtn").onclick = async () => {
   fd.append("file", docFile);
   fd.append("language", posterLang);
   fd.append("mode", $("#useAI").checked ? "ai" : "basic");
-  fd.append("provider", $("#provider").value);
-  fd.append("model", $("#model").value);
+  const selectedProvider = $("#provider").value;
+  let modelVal = $("#model").value.trim();
+  if (!modelVal && selectedProvider === "nvidia") {
+    modelVal = "nvidia/llama-3.1-nemotron-70b-instruct";
+  } else if (!modelVal && CFG.providers && CFG.providers[selectedProvider]) {
+    modelVal = CFG.providers[selectedProvider].default_model;
+  }
+  fd.append("provider", selectedProvider);
+  fd.append("model", modelVal);
   fd.append("api_key", $("#apiKey").value);
 
   $("#extractBtn").disabled = true;
