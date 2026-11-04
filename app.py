@@ -177,6 +177,12 @@ UI_TEXT = {
         "landscape": "Paisagem (Horizontal)",
         "columns": "Colunas",
         "custom_colors": "Paleta de cores personalizada",
+        "color_accent": "Destaque",
+        "color_title": "Título",
+        "color_subtitle": "Autores",
+        "color_body": "Texto",
+        "color_caption": "Legenda",
+        "color_bg": "Fundo",
         "use_custom_tex": "Usar template LaTeX próprio (.tex)",
         "s_info": "04 // INFORMAÇÕES PRINCIPAIS",
         "work_title": "Título do Pôster",
@@ -235,6 +241,12 @@ UI_TEXT = {
         "landscape": "Landscape (Horizontal)",
         "columns": "Columns",
         "custom_colors": "Custom color palette",
+        "color_accent": "Accent",
+        "color_title": "Title",
+        "color_subtitle": "Authors",
+        "color_body": "Body",
+        "color_caption": "Caption",
+        "color_bg": "Background",
         "use_custom_tex": "Use custom LaTeX template (.tex)",
         "s_info": "04 // MAIN INFORMATION",
         "work_title": "Banner Title",
@@ -494,15 +506,20 @@ with col_form:
     use_custom_colors = st.checkbox(t("custom_colors"), value=False)
     custom_colors = {}
     if use_custom_colors:
-        c_acc, c_title, c_sub, c_bg = st.columns(4)
-        with c_acc:
-            custom_colors["accent"] = st.color_picker("Destaque", value=f"#{TEMPLATES[st.session_state.template]['colors'][0]}").lstrip("#")
-        with c_title:
-            custom_colors["title"] = st.color_picker("Título", value="#FFFFFF").lstrip("#")
-        with c_sub:
-            custom_colors["subtitle"] = st.color_picker("Subtítulo", value=f"#{TEMPLATES[st.session_state.template]['colors'][1]}").lstrip("#")
-        with c_bg:
-            custom_colors["bg"] = st.color_picker("Fundo", value=f"#{TEMPLATES[st.session_state.template]['bg']}").lstrip("#")
+        c1, c2, c3 = st.columns(3)
+        c4, c5, c6 = st.columns(3)
+        with c1:
+            custom_colors["accent"] = st.color_picker(t("color_accent"), value=f"#{TEMPLATES[st.session_state.template]['colors'][0]}").lstrip("#")
+        with c2:
+            custom_colors["title"] = st.color_picker(t("color_title"), value="#FFFFFF").lstrip("#")
+        with c3:
+            custom_colors["subtitle"] = st.color_picker(t("color_subtitle"), value=f"#{TEMPLATES[st.session_state.template]['colors'][1]}").lstrip("#")
+        with c4:
+            custom_colors["body"] = st.color_picker(t("color_body"), value="#1A1A1A").lstrip("#")
+        with c5:
+            custom_colors["caption"] = st.color_picker(t("color_caption"), value="#374151").lstrip("#")
+        with c6:
+            custom_colors["bg"] = st.color_picker(t("color_bg"), value=f"#{TEMPLATES[st.session_state.template]['bg']}").lstrip("#")
 
     # Template Customizado (.tex)
     use_custom_tex = st.checkbox(t("use_custom_tex"), value=False)

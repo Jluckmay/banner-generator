@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; worker-src 'self' blob: data: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' blob: data:; frame-src 'self' blob: data: chrome-extension:; object-src 'self' blob: data:; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://*.onrender.com https://cdnjs.cloudflare.com; base-uri 'none'; form-action 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -17,6 +18,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 :root {
+  color-scheme: dark;
   --font-mono: "Fira Code", "JetBrains Mono", Consolas, "Courier New", monospace;
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --bg: #090a0d;
@@ -1231,11 +1233,11 @@ button.sm {
 
 /* ── Color palette pickers ── */
 .color-pickers-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
   margin-top: 12px;
-  padding: 12px 14px;
+  padding: 12px;
   background: var(--bg-subtle);
   border: 1px solid var(--line);
   border-radius: var(--btn-radius);
@@ -1243,9 +1245,7 @@ button.sm {
 .color-picker-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
+  gap: 4px;
 }
 .color-picker-item label {
   margin: 0;
@@ -1256,17 +1256,255 @@ button.sm {
   font-weight: 600;
   white-space: nowrap;
 }
-.color-picker-item input[type=color] {
-  width: 34px;
-  height: 28px;
-  padding: 2px;
-  border: 2px solid var(--line);
-  border-radius: 4px;
-  cursor: pointer;
-  background: transparent;
-  transition: border-color 0.15s;
+.color-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--line);
+  border-radius: var(--btn-radius);
+  padding: 3px 6px;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.color-picker-item input[type=color]:hover { border-color: var(--red); }
+.color-field:focus-within {
+  border-color: var(--red);
+  box-shadow: 0 0 0 1px var(--red-glow);
+}
+.color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  transition: transform 0.1s, border-color 0.15s;
+}
+.color-swatch:hover {
+  transform: scale(1.1);
+  border-color: #ffffff;
+}
+.color-hex-text {
+  width: 100%;
+  border: none !important;
+  background: transparent !important;
+  color: var(--fg) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  text-transform: uppercase !important;
+  outline: none !important;
+  box-shadow: none !important;
+  height: auto !important;
+  letter-spacing: 0.05em;
+}
+.color-native-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Dark Custom Color Popover ── */
+.dark-color-popover {
+  position: fixed;
+  z-index: 10000;
+  width: 250px;
+  padding: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 42, 64, 0.2);
+  font-family: var(--font-mono);
+  color: var(--fg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  user-select: none;
+}
+.dark-color-popover.hidden {
+  display: none;
+}
+.dcp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 6px;
+}
+.dcp-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--amber);
+  text-transform: uppercase;
+}
+.dcp-target-label {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-left: 6px;
+}
+.dcp-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  line-height: 1;
+}
+.dcp-close:hover {
+  color: var(--red);
+}
+.dcp-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  border-radius: 4px;
+  cursor: crosshair;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.dcp-canvas-bg {
+  position: absolute;
+  inset: 0;
+  background: #ff0000;
+}
+.dcp-canvas-white {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, #fff, rgba(255,255,255,0));
+}
+.dcp-canvas-black {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, #000, rgba(0,0,0,0));
+}
+.dcp-cursor {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #000000, 0 2px 4px rgba(0,0,0,0.5);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.dcp-hue-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+  outline: none;
+  cursor: pointer;
+  margin: 2px 0;
+  border: 1px solid var(--line);
+}
+.dcp-hue-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #111;
+  box-shadow: 0 0 2px rgba(0,0,0,0.8);
+  cursor: pointer;
+}
+.dcp-hue-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #111;
+  box-shadow: 0 0 2px rgba(0,0,0,0.8);
+  cursor: pointer;
+}
+.dcp-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dcp-preview-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid var(--line-strong);
+  flex-shrink: 0;
+}
+.dcp-hex-input-wrap {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--line);
+  border-radius: var(--btn-radius);
+  padding: 4px 8px;
+}
+.dcp-hex-input-wrap:focus-within {
+  border-color: var(--red);
+}
+.dcp-hex-input {
+  width: 100%;
+  background: transparent !important;
+  border: none !important;
+  color: var(--fg) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+.dcp-eyedropper-btn {
+  background: var(--bg-subtle);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  border-radius: var(--btn-radius);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+.dcp-eyedropper-btn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.dcp-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+.dcp-preset-chip {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s, border-color 0.15s;
+}
+.dcp-preset-chip:hover {
+  transform: scale(1.2);
+  border-color: #ffffff;
+}
 
 /* ── Custom LaTeX template ── */
 .custom-tpl-box {
@@ -1587,29 +1825,53 @@ button.sm {
         <span data-i18n="custom_colors">Paleta de cores personalizada</span>
       </label>
       <div id="colorPickersBox" class="color-pickers-row hidden">
-        <div class="color-picker-item">
+        <div class="color-picker-item" data-color-id="accent">
           <label data-i18n="color_accent">Destaque</label>
-          <input type="color" id="accent" value="#2e5c8a">
+          <div class="color-field">
+            <button type="button" class="color-swatch" id="swatch_accent" style="background:#2e5c8a;" aria-label="Alterar cor de destaque" title="Abrir seletor hexadecimal"></button>
+            <input type="text" class="color-hex-text" id="hex_accent" value="#2E5C8A" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Hexadecimal destaque">
+            <input type="color" id="accent" value="#2e5c8a" class="color-native-hidden" tabindex="-1" aria-hidden="true">
+          </div>
         </div>
-        <div class="color-picker-item">
+        <div class="color-picker-item" data-color-id="colorTitle">
           <label data-i18n="color_title">Título</label>
-          <input type="color" id="colorTitle" value="#ffffff">
+          <div class="color-field">
+            <button type="button" class="color-swatch" id="swatch_colorTitle" style="background:#ffffff;" aria-label="Alterar cor do título" title="Abrir seletor hexadecimal"></button>
+            <input type="text" class="color-hex-text" id="hex_colorTitle" value="#FFFFFF" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Hexadecimal título">
+            <input type="color" id="colorTitle" value="#ffffff" class="color-native-hidden" tabindex="-1" aria-hidden="true">
+          </div>
         </div>
-        <div class="color-picker-item">
+        <div class="color-picker-item" data-color-id="colorSubtitle">
           <label data-i18n="color_subtitle">Autores</label>
-          <input type="color" id="colorSubtitle" value="#e6edf8">
+          <div class="color-field">
+            <button type="button" class="color-swatch" id="swatch_colorSubtitle" style="background:#e6edf8;" aria-label="Alterar cor dos autores" title="Abrir seletor hexadecimal"></button>
+            <input type="text" class="color-hex-text" id="hex_colorSubtitle" value="#E6EDF8" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Hexadecimal autores">
+            <input type="color" id="colorSubtitle" value="#e6edf8" class="color-native-hidden" tabindex="-1" aria-hidden="true">
+          </div>
         </div>
-        <div class="color-picker-item">
+        <div class="color-picker-item" data-color-id="colorBody">
           <label data-i18n="color_body">Texto</label>
-          <input type="color" id="colorBody" value="#1a1a1a">
+          <div class="color-field">
+            <button type="button" class="color-swatch" id="swatch_colorBody" style="background:#1a1a1a;" aria-label="Alterar cor do texto" title="Abrir seletor hexadecimal"></button>
+            <input type="text" class="color-hex-text" id="hex_colorBody" value="#1A1A1A" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Hexadecimal texto">
+            <input type="color" id="colorBody" value="#1a1a1a" class="color-native-hidden" tabindex="-1" aria-hidden="true">
+          </div>
         </div>
-        <div class="color-picker-item">
+        <div class="color-picker-item" data-color-id="colorCaption">
           <label data-i18n="color_caption">Legenda</label>
-          <input type="color" id="colorCaption" value="#374151">
+          <div class="color-field">
+            <button type="button" class="color-swatch" id="swatch_colorCaption" style="background:#374151;" aria-label="Alterar cor da legenda" title="Abrir seletor hexadecimal"></button>
+            <input type="text" class="color-hex-text" id="hex_colorCaption" value="#374151" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Hexadecimal legenda">
+            <input type="color" id="colorCaption" value="#374151" class="color-native-hidden" tabindex="-1" aria-hidden="true">
+          </div>
         </div>
-        <div class="color-picker-item">
+        <div class="color-picker-item" data-color-id="colorBg">
           <label data-i18n="color_bg">Fundo</label>
-          <input type="color" id="colorBg" value="#eef2f7">
+          <div class="color-field">
+            <button type="button" class="color-swatch" id="swatch_colorBg" style="background:#eef2f7;" aria-label="Alterar cor do fundo" title="Abrir seletor hexadecimal"></button>
+            <input type="text" class="color-hex-text" id="hex_colorBg" value="#EEF2F7" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Hexadecimal fundo">
+            <input type="color" id="colorBg" value="#eef2f7" class="color-native-hidden" tabindex="-1" aria-hidden="true">
+          </div>
         </div>
       </div>
     </div>
@@ -1786,6 +2048,34 @@ button.sm {
     <iframe id="pdf-iframe" title="PDF Preview"></iframe>
   </div>
 </aside>
+
+<!-- Popover Flutuante de Cor Hexadecimal (Dark Theme) -->
+<div id="darkColorPopover" class="dark-color-popover hidden" role="dialog" aria-modal="true" aria-label="Seletor de cores hexadecimal">
+  <div class="dcp-header">
+    <div>
+      <span class="dcp-title">PALETA HEXADECIMAL</span>
+      <span id="dcpTargetLabel" class="dcp-target-label"></span>
+    </div>
+    <button type="button" class="dcp-close" id="dcpCloseBtn" aria-label="Fechar">&times;</button>
+  </div>
+  <div class="dcp-canvas-wrap" id="dcpCanvasWrap">
+    <div class="dcp-canvas-bg" id="dcpCanvasBg"></div>
+    <div class="dcp-canvas-white"></div>
+    <div class="dcp-canvas-black"></div>
+    <div class="dcp-cursor" id="dcpCursor" style="left: 100%; top: 0%;"></div>
+  </div>
+  <input type="range" class="dcp-hue-slider" id="dcpHueSlider" min="0" max="360" step="0.5" value="0">
+  <div class="dcp-controls-row">
+    <div class="dcp-preview-swatch" id="dcpPreviewSwatch"></div>
+    <div class="dcp-hex-input-wrap">
+      <input type="text" class="dcp-hex-input" id="dcpHexInput" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Valor hexadecimal">
+    </div>
+    <button type="button" class="dcp-eyedropper-btn" id="dcpEyeDropperBtn" title="Conta-gotas (capturar da tela)" aria-label="Conta-gotas">
+      <svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px;"><path d="M13.354.646a1.207 1.207 0 0 0-1.708 0L8.5 3.793l-.646-.647a.5.5 0 1 0-.708.708l.647.646L1.146 11.146a.5.5 0 0 0-.146.354v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .354-.146l6.646-6.647.646.647a.5.5 0 0 0 .708-.708l-.647-.646 3.147-3.146a1.207 1.207 0 0 0 0-1.708l-2-2zM2 14v-2.293l6.5-6.5 2.293 2.293-6.5 6.5H2z"/></svg>
+    </button>
+  </div>
+  <div class="dcp-presets" id="dcpPresets"></div>
+</div>
 
 </main>
 
@@ -2761,19 +3051,362 @@ function escapeHtml(str) {
   });
 });
 
-["useColors", "accent", "colorTitle", "colorSubtitle", "colorBody", "colorCaption", "colorBg"].forEach(id => {
-  const el = $("#" + id);
-  if (el) {
-    el.addEventListener("input", updateDraftPreview);
-    el.addEventListener("change", updateDraftPreview);
+/* ---------- Seletor de Cores Hexadecimal Customizado (Dark Popover) ---------- */
+const COLOR_IDS = ["accent", "colorTitle", "colorSubtitle", "colorBody", "colorCaption", "colorBg"];
+
+let activeColorTarget = null;
+let activeH = 210, activeS = 0.5, activeV = 0.8;
+let isDraggingCanvas = false;
+
+function hexToRgb(hex) {
+  let h = String(hex || "").replace(/^#/, "").trim();
+  if (h.length === 3) h = h.split("").map(c => c + c).join("");
+  if (h.length !== 6) return { r: 46, g: 92, b: 138 };
+  const num = parseInt(h, 16);
+  if (isNaN(num)) return { r: 46, g: 92, b: 138 };
+  return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+}
+
+function rgbToHex(r, g, b) {
+  const clamp = v => Math.max(0, Math.min(255, Math.round(v)));
+  const toHex = v => clamp(v).toString(16).padStart(2, "0").toUpperCase();
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function rgbToHsv(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const d = max - min;
+  let h = 0;
+  const s = max === 0 ? 0 : d / max;
+  const v = max;
+  if (d !== 0) {
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h *= 60;
+  }
+  return { h, s, v };
+}
+
+function hsvToRgb(h, s, v) {
+  h = ((h % 360) + 360) % 360;
+  const c = v * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = v - c;
+  let r = 0, g = 0, b = 0;
+  if (h < 60) { r = c; g = x; }
+  else if (h < 120) { r = x; g = c; }
+  else if (h < 180) { g = c; b = x; }
+  else if (h < 240) { g = x; b = c; }
+  else if (h < 300) { r = x; b = c; }
+  else { r = c; b = x; }
+  return {
+    r: Math.round((r + m) * 255),
+    g: Math.round((g + m) * 255),
+    b: Math.round((b + m) * 255)
+  };
+}
+
+function normalizeHex(val) {
+  let s = String(val || "").trim().toUpperCase();
+  if (!s.startsWith("#")) s = "#" + s;
+  if (/^#[0-9A-F]{6}$/i.test(s)) return s;
+  if (/^#[0-9A-F]{3}$/i.test(s)) {
+    return "#" + s[1] + s[1] + s[2] + s[2] + s[3] + s[3];
+  }
+  return null;
+}
+
+function syncColorField(id, hexVal, updatePop) {
+  const norm = normalizeHex(hexVal);
+  if (!norm) return;
+  const nativeInput = $("#" + id);
+  const hexInput = $("#hex_" + id);
+  const swatchBtn = $("#swatch_" + id);
+  if (nativeInput) nativeInput.value = norm.toLowerCase();
+  if (hexInput && hexInput.value.toUpperCase() !== norm) hexInput.value = norm;
+  if (swatchBtn) swatchBtn.style.backgroundColor = norm;
+
+  if (updatePop && activeColorTarget === id) {
+    const popHexInput = $("#dcpHexInput");
+    const popSwatch = $("#dcpPreviewSwatch");
+    if (popHexInput && popHexInput.value.toUpperCase() !== norm) popHexInput.value = norm;
+    if (popSwatch) popSwatch.style.backgroundColor = norm;
+    const rgb = hexToRgb(norm);
+    const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+    activeH = hsv.h; activeS = hsv.s; activeV = hsv.v;
+    renderPopoverHsvUI();
+  }
+
+  updateDraftPreview();
+}
+
+function renderPopoverHsvUI() {
+  const canvasBg = $("#dcpCanvasBg");
+  const cursor = $("#dcpCursor");
+  const slider = $("#dcpHueSlider");
+  const popSwatch = $("#dcpPreviewSwatch");
+  const popHex = $("#dcpHexInput");
+
+  if (canvasBg) canvasBg.style.backgroundColor = `hsl(${activeH}, 100%, 50%)`;
+  if (cursor) {
+    cursor.style.left = `${activeS * 100}%`;
+    cursor.style.top = `${(1 - activeV) * 100}%`;
+  }
+  if (slider) slider.value = activeH;
+
+  const rgb = hsvToRgb(activeH, activeS, activeV);
+  const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+  if (popSwatch) popSwatch.style.backgroundColor = hex;
+  if (popHex && document.activeElement !== popHex) popHex.value = hex;
+
+  if (activeColorTarget) {
+    const nativeInput = $("#" + activeColorTarget);
+    const hexInput = $("#hex_" + activeColorTarget);
+    const swatchBtn = $("#swatch_" + activeColorTarget);
+    if (nativeInput) nativeInput.value = hex.toLowerCase();
+    if (hexInput && document.activeElement !== hexInput) hexInput.value = hex;
+    if (swatchBtn) swatchBtn.style.backgroundColor = hex;
+    updateDraftPreview();
+  }
+}
+
+function renderPopoverPresets() {
+  const container = $("#dcpPresets");
+  if (!container) return;
+  const tpl = (CFG && CFG.templates[state.template]) || {};
+  const tplColors = (tpl.colors || []).map(c => "#" + c.toUpperCase());
+  const tplBg = tpl.bg ? ["#" + tpl.bg.toUpperCase()] : [];
+
+  const coreColors = [
+    "#1F3A5F", "#2E5C8A", "#0F766E", "#14B8A6", "#7C2D12", "#EA580C",
+    "#064E3B", "#16A34A", "#0028A5", "#00A6D6", "#1E293B", "#374151",
+    "#FFFFFF", "#F3F4F6", "#E6EDF8", "#1A1A1A", "#090A0D", "#FF2A40"
+  ];
+
+  const allPresets = Array.from(new Set([...tplColors, ...tplBg, ...coreColors]));
+  container.innerHTML = allPresets.map(c => `
+    <button type="button" class="dcp-preset-chip" style="background-color: ${c};" data-color="${c}" title="${c}" aria-label="Cor ${c}"></button>
+  `).join("");
+
+  container.querySelectorAll(".dcp-preset-chip").forEach(chip => {
+    chip.onclick = () => {
+      const hex = chip.getAttribute("data-color");
+      const rgb = hexToRgb(hex);
+      const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+      activeH = hsv.h; activeS = hsv.s; activeV = hsv.v;
+      renderPopoverHsvUI();
+    };
+  });
+}
+
+function openDarkColorPopover(id, anchorEl) {
+  activeColorTarget = id;
+  const popover = $("#darkColorPopover");
+  if (!popover) return;
+
+  const nativeInput = $("#" + id);
+  const currentHex = (nativeInput && nativeInput.value) || "#2E5C8A";
+  const rgb = hexToRgb(currentHex);
+  const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+  activeH = hsv.h; activeS = hsv.s; activeV = hsv.v;
+
+  const targetLabel = $(`[data-color-id="${id}"] label`);
+  $("#dcpTargetLabel").textContent = targetLabel ? `// ${targetLabel.textContent}` : "";
+
+  renderPopoverPresets();
+  renderPopoverHsvUI();
+
+  popover.classList.remove("hidden");
+
+  // Posicionamento inteligente
+  const rect = anchorEl.getBoundingClientRect();
+  const popWidth = 250;
+  const popHeight = 310;
+  let top = rect.bottom + 8;
+  let left = rect.left;
+
+  if (left + popWidth > window.innerWidth - 12) {
+    left = Math.max(12, window.innerWidth - popWidth - 12);
+  }
+  if (top + popHeight > window.innerHeight - 12) {
+    top = Math.max(12, rect.top - popHeight - 8);
+  }
+
+  popover.style.top = `${top}px`;
+  popover.style.left = `${left}px`;
+}
+
+function closeDarkColorPopover() {
+  const popover = $("#darkColorPopover");
+  if (popover) popover.classList.add("hidden");
+  activeColorTarget = null;
+}
+
+// Configura interações de arrasto no canvas 2D
+const dcpCanvasWrap = $("#dcpCanvasWrap");
+function onCanvasPointer(e) {
+  if (!dcpCanvasWrap) return;
+  const rect = dcpCanvasWrap.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+  const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+  activeS = x / rect.width;
+  activeV = 1 - (y / rect.height);
+  renderPopoverHsvUI();
+}
+
+if (dcpCanvasWrap) {
+  dcpCanvasWrap.addEventListener("pointerdown", e => {
+    isDraggingCanvas = true;
+    dcpCanvasWrap.setPointerCapture(e.pointerId);
+    onCanvasPointer(e);
+  });
+  dcpCanvasWrap.addEventListener("pointermove", e => {
+    if (isDraggingCanvas) onCanvasPointer(e);
+  });
+  dcpCanvasWrap.addEventListener("pointerup", e => {
+    if (isDraggingCanvas) {
+      isDraggingCanvas = false;
+      dcpCanvasWrap.releasePointerCapture(e.pointerId);
+    }
+  });
+}
+
+// Slider de Matiz (Hue)
+const dcpHueSlider = $("#dcpHueSlider");
+if (dcpHueSlider) {
+  dcpHueSlider.addEventListener("input", () => {
+    activeH = parseFloat(dcpHueSlider.value);
+    renderPopoverHsvUI();
+  });
+}
+
+// Input Hex dentro do Popover
+const dcpHexInput = $("#dcpHexInput");
+if (dcpHexInput) {
+  dcpHexInput.addEventListener("input", e => {
+    const norm = normalizeHex(e.target.value);
+    if (norm) {
+      const rgb = hexToRgb(norm);
+      const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+      activeH = hsv.h; activeS = hsv.s; activeV = hsv.v;
+      renderPopoverHsvUI();
+    }
+  });
+}
+
+// Ferramenta Conta-gotas (EyeDropper)
+const dcpEyeDropperBtn = $("#dcpEyeDropperBtn");
+if (dcpEyeDropperBtn) {
+  if (!window.EyeDropper) {
+    dcpEyeDropperBtn.style.display = "none";
+  } else {
+    dcpEyeDropperBtn.onclick = async () => {
+      try {
+        const ed = new window.EyeDropper();
+        const res = await ed.open();
+        if (res && res.sRGBHex) {
+          const rgb = hexToRgb(res.sRGBHex);
+          const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+          activeH = hsv.h; activeS = hsv.s; activeV = hsv.v;
+          renderPopoverHsvUI();
+        }
+      } catch (err) {
+        // Usuário cancelou
+      }
+    };
+  }
+}
+
+// Botão Fechar
+const dcpCloseBtn = $("#dcpCloseBtn");
+if (dcpCloseBtn) dcpCloseBtn.onclick = closeDarkColorPopover;
+
+// Fechar ao clicar fora
+document.addEventListener("pointerdown", e => {
+  const popover = $("#darkColorPopover");
+  if (!popover || popover.classList.contains("hidden")) return;
+  if (popover.contains(e.target) || e.target.closest(".color-swatch") || e.target.closest(".color-field")) {
+    return;
+  }
+  closeDarkColorPopover();
+});
+
+// Vincula cada um dos 6 campos de cores com o popover e os inputs hexadecimais
+COLOR_IDS.forEach(id => {
+  const swatchBtn = $("#swatch_" + id);
+  const hexInput = $("#hex_" + id);
+  const nativeInput = $("#" + id);
+
+  if (swatchBtn) {
+    swatchBtn.onclick = () => openDarkColorPopover(id, swatchBtn);
+  }
+
+  if (hexInput) {
+    hexInput.addEventListener("input", e => {
+      const norm = normalizeHex(e.target.value);
+      if (norm) {
+        syncColorField(id, norm, true);
+      }
+    });
+    hexInput.addEventListener("blur", e => {
+      const norm = normalizeHex(e.target.value);
+      if (norm) {
+        e.target.value = norm;
+        syncColorField(id, norm, true);
+      } else if (nativeInput) {
+        e.target.value = nativeInput.value.toUpperCase();
+      }
+    });
+    hexInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.target.blur();
+        openDarkColorPopover(id, swatchBtn || hexInput);
+      }
+    });
+  }
+
+  if (nativeInput) {
+    nativeInput.addEventListener("input", e => {
+      syncColorField(id, e.target.value, true);
+    });
+    nativeInput.addEventListener("change", e => {
+      syncColorField(id, e.target.value, true);
+    });
   }
 });
+
+function syncPaletteWithTemplate() {
+  if (!CFG || !CFG.templates || !CFG.templates[state.template]) return;
+  const tpl = CFG.templates[state.template];
+  const tplColors = tpl.colors || ["1F3A5F", "2E5C8A", "9DB9D8"];
+  const tplBg = tpl.bg || "ffffff";
+  const isDarkTpl = state.template === "classic" || state.template === "bold" || state.template === "corner" || state.template === "tudelft";
+
+  syncColorField("accent", "#" + tplColors[0], false);
+  syncColorField("colorTitle", isDarkTpl ? "#FFFFFF" : "#" + tplColors[0], false);
+  syncColorField("colorSubtitle", isDarkTpl ? "#E6EDF8" : "#4B5563", false);
+  syncColorField("colorBody", "#1A1A1A", false);
+  syncColorField("colorCaption", "#374151", false);
+  syncColorField("colorBg", "#" + tplBg, false);
+}
 
 /* ---------- Toggles de Cores e Template Customizado ---------- */
 const useColorsEl = $("#useColors");
 if (useColorsEl) {
   useColorsEl.onchange = e => {
     $("#colorPickersBox").classList.toggle("hidden", !e.target.checked);
+    if (!e.target.checked) {
+      closeDarkColorPopover();
+    } else {
+      syncPaletteWithTemplate();
+    }
+    updateDraftPreview();
   };
 }
 
