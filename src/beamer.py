@@ -37,7 +37,14 @@ def build_beamer_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
     paper_key = poster.get("paper", "a0")
     orient = poster.get("orientation", "portrait")
     cols_count = max(1, poster.get("columns", 2))
-    beamer_size = paper_key if paper_key in ("a0", "a1", "a2") else "a0"
+    w, h = POSTER_SIZES.get(paper_key, POSTER_SIZES["a0"])["cm"]
+    if orient == "landscape":
+        w, h = h, w
+
+    if paper_key in ("a0", "a1", "a2"):
+        beamer_opts = f"orientation={orient},size={paper_key},scale=1.0"
+    else:
+        beamer_opts = f"orientation={orient},size=custom,width={w:.1f},height={h:.1f},scale=1.0"
 
     sections = [
         {**sec, "images": [{"file": images[i["path"]], "caption": i["caption"]} for i in sec["images"] if i["path"] in images]}
@@ -103,7 +110,7 @@ def build_beamer_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
         logo_boxes = "\\\\ \\vspace{0.5cm} " + " \\qquad ".join(cells)
 
     return f"""\\documentclass{{beamer}}
-\\usepackage[orientation={orient},size={beamer_size},scale=1.0]{{beamerposter}}
+\\usepackage[{beamer_opts}]{{beamerposter}}
 \\usepackage[utf8]{{inputenc}}
 \\usepackage[T1]{{fontenc}}
 \\usepackage[{labels['babel']}]{{babel}}

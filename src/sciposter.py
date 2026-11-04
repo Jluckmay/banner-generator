@@ -41,6 +41,9 @@ def build_sciposter_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
     paper_key = poster.get("paper", "a0")
     orient = poster.get("orientation", "portrait")
     cols = max(1, poster.get("columns", 2))
+    w, h = POSTER_SIZES.get(paper_key, POSTER_SIZES["a0"])["cm"]
+    if orient == "landscape":
+        w, h = h, w
 
     sections = [
         {**sec, "images": [{"file": images[i["path"]], "caption": i["caption"]} for i in sec["images"] if i["path"] in images]}
@@ -89,6 +92,9 @@ def build_sciposter_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
     col_str = "2" if cols == 2 else str(cols)
 
     return f"""\\documentclass[{sciposter_size},{orient}]{{sciposter}}
+\\setlength{{\\paperwidth}}{{{w:.1f}cm}}
+\\setlength{{\\paperheight}}{{{h:.1f}cm}}
+\\special{{papersize={w:.1f}cm,{h:.1f}cm}}
 \\usepackage[utf8]{{inputenc}}
 \\usepackage[T1]{{fontenc}}
 \\usepackage[{labels['babel']}]{{babel}}

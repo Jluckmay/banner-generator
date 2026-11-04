@@ -41,6 +41,9 @@ def build_a0poster_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
     paper_key = poster.get("paper", "a0")
     orient = poster.get("orientation", "portrait")
     cols = max(1, poster.get("columns", 2))
+    w, h = POSTER_SIZES.get(paper_key, POSTER_SIZES["a0"])["cm"]
+    if orient == "landscape":
+        w, h = h, w
     a0_paper_opt = paper_key if paper_key in ("a0", "a1", "a2") else "a0"
 
     sections = [
@@ -94,7 +97,7 @@ def build_a0poster_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
 \\usepackage[T1]{{fontenc}}
 \\usepackage[{labels['babel']}]{{babel}}
 \\usepackage{{geometry}}
-\\geometry{{{a0_paper_opt}paper, left=4cm, top=4cm, right=4cm, bottom=4cm}}
+\\geometry{{paperwidth={w:.1f}cm, paperheight={h:.1f}cm, left=4cm, top=4cm, right=4cm, bottom=4cm}}
 \\usepackage{{multicol}}
 \\usepackage{{amsmath,amssymb}}
 \\usepackage{{graphicx}}

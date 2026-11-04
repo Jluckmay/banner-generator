@@ -1866,7 +1866,7 @@ const DEFAULT_CFG = {
       "bg": "FFFFFF",
       "colors": ["CC0000", "444444", "1A1A1A"],
       "papers": ["60x90", "90x120", "a0", "a1", "a2"],
-      "default_paper": "60x90",
+      "default_paper": "a0",
       "logos": { "header": 2, "footer": 5 }
     },
     "mostra_ic": {
@@ -2131,7 +2131,7 @@ function renderTemplates() {
     el.onclick = () => {
       state.template = el.dataset.id;
       renderTemplates();
-      applyTemplateOptions(true);
+      applyTemplateOptions(false);
       updateDraftPreview();
     };
     el.onkeydown = e => { if (e.key === "Enter") el.click(); };
@@ -2142,14 +2142,13 @@ const slots = () => (CFG && CFG.templates[state.template] && CFG.templates[state
 
 function updatePaperOptions() {
   if (!CFG) return;
-  const tp = CFG.templates[state.template];
-  if (!tp || !tp.papers) return;
   const paperSelect = $("#paper");
   if (!paperSelect) return;
-  const prev = paperSelect.value;
+  const prev = paperSelect.value || "a0";
   const isLandscape = $("#orientation") && $("#orientation").value === "landscape";
+  const papers = CFG.papers || (CFG.templates[state.template] && CFG.templates[state.template].papers) || ["a0", "60x90", "90x120", "a1", "a2"];
 
-  paperSelect.innerHTML = tp.papers.map(p => {
+  paperSelect.innerHTML = papers.map(p => {
     const dim = CFG.sizes[p];
     if (!dim) return `<option value="${p}">${p}</option>`;
     const w = isLandscape ? dim[1] : dim[0];
@@ -2158,23 +2157,23 @@ function updatePaperOptions() {
     return `<option value="${p}">${label}</option>`;
   }).join("");
 
-  if (tp.papers.includes(prev)) {
+  if (papers.includes(prev)) {
     paperSelect.value = prev;
   } else {
-    paperSelect.value = tp.default_paper || tp.papers[0];
+    paperSelect.value = papers[0];
   }
 }
 
 function applyTemplateOptions(reset) {
   if (!CFG) return;
-  const tp = CFG.templates[state.template];
-  const prev = $("#paper").value;
+  const prev = $("#paper") ? $("#paper").value : "a0";
   updatePaperOptions();
-  if (reset) {
-    $("#paper").value = tp.default_paper || tp.papers[0];
-    $("#columns").value = state.template === "dcc" ? "2" : $("#columns").value;
-  } else if (tp.papers.includes(prev)) {
+  // As dimensões do poster são preservadas; o template adapta-se ao tamanho selecionado
+  if ($("#paper") && prev) {
     $("#paper").value = prev;
+  }
+  if (reset) {
+    $("#columns").value = state.template === "dcc" ? "2" : $("#columns").value;
   }
 
   const s = slots();

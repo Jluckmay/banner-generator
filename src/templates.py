@@ -54,7 +54,7 @@ TEMPLATES: Dict[str, Dict[str, Any]] = {
         "engine": "article",
         "colors": ("CC0000", "444444", "1A1A1A"), "bg": "FFFFFF", "sans": True,
         "default_columns": 2,
-        "papers": None, "default_paper": "60x90",
+        "papers": None, "default_paper": "a0",
         "logos": {"header": MAX_LOGOS_HEADER, "footer": MAX_LOGOS_FOOTER},
     },
     "mostra_ic": {

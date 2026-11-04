@@ -172,7 +172,9 @@ def test_fit_reduces_font_and_flags_overflow(client):
 
 def test_logo_limits_per_template():
     p = normalize_poster({"template": "dcc", "logos_header": list("abc"), "logos_footer": list("abcdefg"), "sections": []})
-    assert len(p["logos_header"]) == 2 and len(p["logos_footer"]) == 5 and p["paper"] == "60x90"
+    assert len(p["logos_header"]) == 2 and len(p["logos_footer"]) == 5 and p["paper"] == "a0"
+    p_custom = normalize_poster({"template": "dcc", "paper": "60x90", "sections": []})
+    assert p_custom["paper"] == "60x90"
     c = normalize_poster({"template": "classic", "logos_header": list("abc"), "logos_footer": ["x"], "paper": "a3", "sections": []})
     assert len(c["logos_header"]) == 2 and c["logos_footer"] == [] and c["paper"] == "a0"
 
@@ -317,3 +319,11 @@ def test_custom_tex_upload(client):
     r = client.post("/api/generate?format=tex", data={"custom_tex": (io.BytesIO(tex_data), "custom.tex")})
     assert r.status_code == 200
     assert "Custom Poster" in r.text
+
+def test_all_templates_adapt_to_selected_paper():
+    from src.templates import TEMPLATES
+    from src.config import POSTER_SIZES
+    for tid in TEMPLATES:
+        for p in POSTER_SIZES:
+            res = normalize_poster({"template": tid, "paper": p, "sections": []})
+            assert res["paper"] == p, f"Template {tid} failed to adapt to paper {p}"
