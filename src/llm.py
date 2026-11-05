@@ -89,8 +89,6 @@ def chat(provider: str, api_key: str, model: str | None, system: str, user: str)
     if not cfg:
         raise LLMError("Provedor desconhecido.")
     model = model or cfg["default_model"]
-    if model in ("nvidia/llama-3.1-nemotron-70b-instruct", "meta/llama-3.1-70b-instruct"):
-        model = "meta/llama-3.3-70b-instruct"
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,79}", model) or ".." in model or model.startswith("/") or (provider == "google" and "/" in model):
         raise LLMError("Nome de modelo inválido.")
     try:
@@ -119,17 +117,35 @@ def chat(provider: str, api_key: str, model: str | None, system: str, user: str)
             )
             r.raise_for_status()
             return r.json()["content"][0]["text"]
-        r = requests.post(
-            cfg["url"],
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={
-                "model": model, "temperature": 0.2, "max_tokens": 4096,
-                "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
-            },
-            timeout=TIMEOUT_S,
-        )
-        r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
+        # Provedores OpenAI / NVIDIA / DeepSeek com fallback resiliente de modelos para NVIDIA NIM
+        models_to_try = [model]
+        if provider == "nvidia":
+            for fb in ("nvidia/nemotron-3.5-super-vl-120b-a12b", "meta/llama-3.1-70b-instruct", "meta/llama-3.1-8b-instruct", "meta/llama-3.3-70b-instruct"):
+                if fb not in models_to_try:
+                    models_to_try.append(fb)
+
+        last_exc: Exception | None = None
+        for m_name in models_to_try:
+            try:
+                r = requests.post(
+                    cfg["url"],
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    json={
+                        "model": m_name, "temperature": 0.2, "max_tokens": 4096,
+                        "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
+                    },
+                    timeout=TIMEOUT_S,
+                )
+                r.raise_for_status()
+                return r.json()["choices"][0]["message"]["content"]
+            except requests.HTTPError as exc:
+                last_exc = exc
+                if exc.response.status_code in (404, 410) and len(models_to_try) > 1:
+                    continue
+                raise
+        if last_exc:
+            raise last_exc
+        raise LLMError("Nenhum modelo disponível para o provedor.")
     except requests.HTTPError as exc:  # nunca expõe cabeçalhos/chave
         raise LLMError(f"Provedor retornou HTTP {exc.response.status_code}.") from None
     except (requests.RequestException, KeyError, IndexError, ValueError):

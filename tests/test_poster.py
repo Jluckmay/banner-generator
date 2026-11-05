@@ -438,9 +438,9 @@ References
     assert "\n[2]" in ref_sec["content"]
 
 
-def test_nvidia_default_model_is_llama_33():
+def test_nvidia_default_model_is_nemotron():
     from src.config import PROVIDERS
-    assert PROVIDERS["nvidia"]["default_model"] == "meta/llama-3.3-70b-instruct"
+    assert PROVIDERS["nvidia"]["default_model"] == "nvidia/nemotron-3.5-super-vl-120b-a12b"
 
 
 def test_sbc_paper_format_parsing():
@@ -470,6 +470,7 @@ Al Nuaimi, T., Al Zaabi, S., Alyilieli, M., AlMaskari, M. (2023). A comparative 
     assert "João Lucas Mayrinck" in parsed["authors"]
     assert "Brendo Gético Eugênio" in parsed["authors"]
     assert "Luiz Filipe Menezes Vieira" in parsed["authors"]
+    assert "Department of Computer Science" not in parsed["authors"]
     assert "Department of Computer Science" in parsed["affiliations"]
     assert "lucas.mayrinck@dcc.ufmg.br" in parsed["email"] or "lfvieira@dcc.ufmg.br" in parsed["email"]
 

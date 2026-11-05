@@ -112,7 +112,7 @@ def _format_references(raw: str, max_refs: int = 4) -> str:
     text = clean_hyphens(raw)
     text = re.sub(r"\s*(\[\d{1,3}\])\s*", r"\n\1 ", text)
     text = re.sub(r"(?<=[.\s])(\d{1,2}\.\s+[A-ZÀ-ÿ])", r"\n\1", text)
-    text = re.sub(r"(?<=[.\n])\s+([A-ZÀ-ÿ][a-zA-ZÀ-ÿ'-]+,\s+[A-ZÀ-ÿ]\.)", r"\n\1", text)
+    text = re.sub(r"(?<=[.\d\n])\s+([A-ZÀ-ÿ][a-zA-ZÀ-ÿ'-]+,\s+[A-ZÀ-ÿ]\.)", r"\n\1", text)
 
     lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
     if not lines:
@@ -331,7 +331,9 @@ def heuristic_parse(text: str) -> Dict[str, Any]:
             if t_part:
                 title_parts.append(t_part)
             if a_part:
-                authors_list.append(a_part)
+                auths, affs = _classify_header_line(a_part)
+                authors_list.extend(auths)
+                affiliations_list.extend(affs)
             idx += 1
             break
         else:
@@ -353,8 +355,17 @@ def heuristic_parse(text: str) -> Dict[str, Any]:
     for a in authors_list:
         for sub_a in re.split(r",|\s+e\s+|\s+and\s+", a):
             sub_a = sub_a.strip()
-            if sub_a and sub_a not in unique_authors:
-                unique_authors.append(sub_a)
+            if not sub_a:
+                continue
+            sub_clean = re.sub(r"^[\d*†‡^]+\s*", "", sub_a).strip()
+            sub_norm = _norm(sub_clean)
+            if any(k in sub_norm.split() for k in _AFFIL_KEYWORDS) or any(k in sub_norm.split() for k in _GEO_KEYWORDS):
+                if sub_clean not in affiliations_list:
+                    affiliations_list.append(sub_clean)
+            else:
+                cleaned_name = re.sub(r"[\d*†‡^]+$", "", sub_clean).strip()
+                if cleaned_name and cleaned_name not in unique_authors:
+                    unique_authors.append(cleaned_name)
 
     authors = ", ".join(unique_authors)
     affiliations = "\n".join(dict.fromkeys([af.strip() for af in affiliations_list if af.strip()]))
