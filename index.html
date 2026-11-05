@@ -191,6 +191,15 @@ header {
   background-color: #ef4444;
   box-shadow: 0 0 8px #ef4444;
 }
+.server-status-badge.status-blocked {
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+}
+.server-status-badge.status-blocked .status-dot {
+  background-color: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
 @keyframes statusPulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.35; transform: scale(0.85); }
@@ -2590,8 +2599,8 @@ function updateServerBadge(status, label) {
   const txt = $("#serverStatusText");
   if (!badge || !txt) return;
 
-  badge.classList.remove("status-connecting", "status-online", "status-offline");
-  badge.classList.add("status-" + status);
+  badge.classList.remove("status-connecting", "status-online", "status-offline", "status-blocked");
+  badge.classList.add("status-" + (status === "blocked" ? "blocked" : status));
 
   const serverName = getServerDisplayName();
   if (label) {
@@ -2601,14 +2610,22 @@ function updateServerBadge(status, label) {
       txt.textContent = `${serverName}: Online`;
     } else if (status === "connecting") {
       txt.textContent = (uiLang === "en-US") ? `${serverName}: Connecting...` : `${serverName}: Conectando...`;
+    } else if (status === "blocked") {
+      txt.textContent = (uiLang === "en-US") ? `${serverName}: Blocked (AdBlock)` : `${serverName}: Bloqueado (AdBlock)`;
     } else {
       txt.textContent = `${serverName}: Offline`;
     }
   }
 
-  badge.title = (uiLang === "en-US")
-    ? `Backend: ${serverName} (${status}). Interface is fully functional while connection is established.`
-    : `Backend: ${serverName} (${status}). A interface está totalmente liberada para edição enquanto a conexão é estabelecida.`;
+  if (status === "blocked") {
+    badge.title = (uiLang === "en-US")
+      ? `Backend: ${serverName} was blocked by your browser (AdBlock / Brave Shields). Disable blocking for this site or use local backend.`
+      : `Backend: ${serverName} foi bloqueado pelo navegador (AdBlock / Brave Shields / Extensão). Desative o bloqueador nesta página para conectar ao Render.`;
+  } else {
+    badge.title = (uiLang === "en-US")
+      ? `Backend: ${serverName} (${status}). Interface is fully functional while connection is established.`
+      : `Backend: ${serverName} (${status}). A interface está totalmente liberada para edição enquanto a conexão é estabelecida.`;
+  }
 }
 
 async function robustFetch(url, options = {}, { maxRetries = 6, retryDelay = 4000, onStatusUpdate = null, timeout = 120000 } = {}) {
@@ -2661,6 +2678,7 @@ async function wakeUpServer() {
 
   const maxWakeAttempts = isLocalEnvironment() ? 4 : 25;
   for (let attempt = 1; attempt <= maxWakeAttempts; attempt++) {
+    const t0 = Date.now();
     try {
       const res = await fetch((apiBase || "") + "/healthz", { signal: timeoutSignal(6000) });
       if (res.ok) {
@@ -2668,9 +2686,6 @@ async function wakeUpServer() {
           const cfgRes = await fetch((apiBase || "") + "/api/config", { signal: timeoutSignal(5000) });
           if (cfgRes.ok) {
             const data = await cfgRes.json();
-            if (data && data.providers && data.providers.nvidia && data.providers.nvidia.default_model === "meta/llama-3.3-70b-instruct") {
-              data.providers.nvidia.default_model = "nvidia/llama-3.1-nemotron-70b-instruct";
-            }
             CFG = data;
             populateProviders();
           }
@@ -2684,7 +2699,16 @@ async function wakeUpServer() {
         }, 8 * 60 * 1000);
         return;
       }
-    } catch (_) {}
+    } catch (err) {
+      const elapsed = Date.now() - t0;
+      // Quando bloqueado por extensão (ex: AdBlock, uBlock, Brave Shields bloqueando .onrender.com),
+      // a requisição é rejeitada pelo navegador quase instantaneamente (<80ms) com ERR_BLOCKED_BY_CLIENT
+      if (elapsed < 80) {
+        updateServerBadge("blocked", (uiLang === "en-US") ? `${serverName}: Blocked (AdBlock)` : `${serverName}: Bloqueado (AdBlock)`);
+        console.warn("[BannerGenerator] Conexão bloqueada no navegador (ERR_BLOCKED_BY_CLIENT). AdBlockers ou Brave Shields frequentemente bloqueiam URLs com 'banner' ou domínios onrender.com.");
+        return;
+      }
+    }
 
     updateServerBadge("connecting", (uiLang === "en-US") ? `${serverName}: Waking up (${attempt}/${maxWakeAttempts})...` : `${serverName}: Conectando (${attempt}/${maxWakeAttempts})...`);
     await new Promise(r => setTimeout(r, isLocalEnvironment() ? 1500 : 4000));

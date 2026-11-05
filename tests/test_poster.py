@@ -384,3 +384,58 @@ def test_cors_options_preflight(client):
 
     r_bad = client.options("/api/generate", headers={"Origin": "https://attacker.com"})
     assert r_bad.status_code == 403
+
+
+def test_clean_hyphens_and_formatting():
+    from src.extractors import clean_hyphens, _format_references
+
+    text = "We observe proper- ties and differ- ences with agree- ment. Fit- ted instances with benchmark- representation and reg- ularization."
+    cleaned = clean_hyphens(text)
+    assert "properties" in cleaned
+    assert "differences" in cleaned
+    assert "agreement" in cleaned
+    assert "Fitted" in cleaned
+    assert "regularization" in cleaned
+    assert "benchmark-representation" in cleaned
+
+    refs = "[1] First reference paper 2020. [2] Second reference paper 2021. [3] Third reference 2022."
+    f_refs = _format_references(refs)
+    lines = [ln for ln in f_refs.split("\n") if ln.strip()]
+    assert len(lines) == 3
+    assert lines[0].startswith("[1]")
+    assert lines[1].startswith("[2]")
+    assert lines[2].startswith("[3]")
+
+
+def test_heuristic_parse_separates_author_from_title():
+    from src.extractors import heuristic_parse
+
+    paper_raw = """CONDITIONAL CAPABILITY AND MEASUREMENT VALIDITY IN IOT INTRUSION-DETECTION
+BENCHMARKS JOÃO LUCAS MAYRINCK
+UFMG
+lucas.mayrinck@dcc.ufmg.br Brendo Gético Eugênio UFMG brendo.eugenio@dcc.ufmg.br
+
+Abstract
+We investigate measurement proper- ties.
+
+Introduction
+An intrusion-detection benchmark with differ- ences.
+
+References
+[1] Author A. 2023. [2] Author B. 2024."""
+
+    parsed = heuristic_parse(paper_raw)
+    assert "JOÃO LUCAS MAYRINCK" not in parsed["title"]
+    assert "BENCHMARKS" in parsed["title"]
+    assert "JOÃO LUCAS MAYRINCK" in parsed["authors"]
+    assert "Brendo Gético Eugênio" in parsed["authors"]
+    assert "UFMG" in parsed["affiliations"]
+    assert parsed["email"] == "lucas.mayrinck@dcc.ufmg.br"
+
+    ref_sec = next(s for s in parsed["sections"] if s["id"] == "references")
+    assert "\n[2]" in ref_sec["content"]
+
+
+def test_nvidia_default_model_is_llama_33():
+    from src.config import PROVIDERS
+    assert PROVIDERS["nvidia"]["default_model"] == "meta/llama-3.3-70b-instruct"
