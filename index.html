@@ -1849,7 +1849,7 @@ button.sm {
       <div id="aiBox" style="margin-top:10px;">
         <div class="row">
           <div><label data-i18n="provider">Provedor de IA</label><select id="provider"></select></div>
-          <div><label data-i18n="model">Modelo (opcional)</label><input type="text" id="model" autocomplete="off" placeholder="nvidia/llama-3.1-nemotron-70b-instruct"></div>
+          <div><label data-i18n="model">Modelo (opcional)</label><input type="text" id="model" autocomplete="off" placeholder="meta/llama-3.3-70b-instruct"></div>
         </div>
         <label data-i18n="api_key">Chave de API</label>
         <input type="password" id="apiKey" data-i18n-ph="ph_api_key" autocomplete="new-password" spellcheck="false" data-lpignore="true" autocapitalize="off" placeholder="Cole sua chave aqui ou use a do servidor">
@@ -2457,7 +2457,7 @@ const DEFAULT_CFG = {
   },
   default_provider: "nvidia",
   providers: {
-    "nvidia": { "name": "NVIDIA NIM", "default_model": "nvidia/llama-3.1-nemotron-70b-instruct", "server_key": true },
+    "nvidia": { "name": "NVIDIA NIM", "default_model": "meta/llama-3.3-70b-instruct", "server_key": true },
     "google": { "name": "Google Gemini", "default_model": "gemini-2.0-flash", "server_key": false },
     "openai": { "name": "OpenAI", "default_model": "gpt-4o-mini", "server_key": false },
     "anthropic": { "name": "Anthropic Claude", "default_model": "claude-3-5-haiku-latest", "server_key": false },
@@ -2830,7 +2830,7 @@ $("#extractBtn").onclick = async () => {
   const selectedProvider = $("#provider").value;
   let modelVal = $("#model").value.trim();
   if (!modelVal && selectedProvider === "nvidia") {
-    modelVal = "nvidia/llama-3.1-nemotron-70b-instruct";
+    modelVal = "meta/llama-3.3-70b-instruct";
   } else if (!modelVal && CFG.providers && CFG.providers[selectedProvider]) {
     modelVal = CFG.providers[selectedProvider].default_model;
   }
