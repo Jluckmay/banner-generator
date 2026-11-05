@@ -97,7 +97,7 @@ def _headers(resp: Response) -> Response:
         "img-src 'self' blob: data:; "
         "frame-src 'self' blob: data: chrome-extension:; "
         "object-src 'self' blob: data:; "
-        "connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://banner-generator-t5p4.onrender.com https://cdnjs.cloudflare.com; "
+        "connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://poster-generator-nkqh.onrender.com https://cdnjs.cloudflare.com; "
         "base-uri 'none'; form-action 'self'; frame-ancestors 'self' https://jluckmay.github.io"
     )
     return resp

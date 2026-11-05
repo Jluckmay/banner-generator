@@ -173,11 +173,11 @@ export NVIDIA_API_KEY="sua-chave"
 
 - **Página HTML no GitHub Pages (`https://jluckmay.github.io/banner-generator/`)**:
   - Frontend SPA estático hospedado no GitHub Pages com deploy contínuo via `.github/workflows/deploy-pages.yml`.
-  - **Restrição Estrita de Conexão (CSP)**: A diretiva `connect-src` autoriza conexões exclusivamente com o backend oficial Render (`https://banner-generator-t5p4.onrender.com`), cdnjs e servidores locais.
+  - **Restrição Estrita de Conexão (CSP)**: A diretiva `connect-src` autoriza conexões exclusivamente com o backend oficial Render (`https://poster-generator-nkqh.onrender.com`), cdnjs e servidores locais.
   - **Detecção Automática de Backend (`getApiBase`)**: Quando acessada a partir de `jluckmay.github.io`, a página utiliza automaticamente a conexão com o Render. Quando executada localmente (`localhost`, `127.0.0.1` ou `file:`), conecta-se ao servidor local (`http://127.0.0.1:5000`).
   - **Usabilidade Contínua (Sem Travamentos)**: A verificação de conexão com o servidor roda em segundo plano. O usuário pode alternar templates, editar dados, configurar paleta de cores e visualizar o rascunho sem nenhum atraso ou travamento enquanto a conexão é estabelecida.
 
-- **Servidor Backend no Render (`https://banner-generator-t5p4.onrender.com`)**:
+- **Servidor Backend no Render (`https://poster-generator-nkqh.onrender.com`)**:
   - Container Docker provisionado via `render.yaml` com TeX Live e Gunicorn.
   - **Restrição Estrita de Origens (CORS)**: O servidor backend no Render permite conexões vindas exclusivamente do domínio `https://jluckmay.github.io` (além de origens locais para desenvolvimento). Requisições com origens não autorizadas são bloqueadas com HTTP 403 Forbidden.
   - **Tolerância a Inatividade & Cold-Start**: Mecanismo `robustFetch` com retentativas automáticas e heartbeat periódico para manter o servidor ativo durante o uso.
@@ -292,11 +292,11 @@ export NVIDIA_API_KEY="your-api-key"
 
 - **GitHub Pages Frontend (`https://jluckmay.github.io/banner-generator/`)**:
   - Static SPA frontend deployed via GitHub Actions (`.github/workflows/deploy-pages.yml`).
-  - **Strict CSP Connect-Src**: Content Security Policy allows network connections exclusively to the Render production server (`https://banner-generator-t5p4.onrender.com`), CDN libraries, and local development backends.
+  - **Strict CSP Connect-Src**: Content Security Policy allows network connections exclusively to the Render production server (`https://poster-generator-nkqh.onrender.com`), CDN libraries, and local development backends.
   - **Dynamic Backend Resolution**: Automatically targets the Render production server on GitHub Pages, while seamlessly routing to the local server (`http://127.0.0.1:5000`) in local environments.
   - **Zero Interface Blocking**: Background wake-up pings never block or freeze UI interactivity; template selection, color customizing, and section editing remain 100% active and responsive while the server establishes connection.
 
-- **Render Production Backend (`https://banner-generator-t5p4.onrender.com`)**:
+- **Render Production Backend (`https://poster-generator-nkqh.onrender.com`)**:
   - Dockerized TeX Live and Gunicorn backend configured in `render.yaml`.
   - **Strict Origin Whitelist (CORS)**: In production, the Render backend strictly permits requests coming from `https://jluckmay.github.io` (and local development hosts). Disallowed origins are rejected with HTTP 403 Forbidden.
   - **Fault Tolerance**: Automatic retries with exponential backoff (`robustFetch`) to endure Render's cold-starts, supported by keep-alive heartbeats during active sessions.
