@@ -310,10 +310,11 @@ if "columns" not in st.session_state:
     st.session_state.columns = 2
 if "sections" not in st.session_state:
     st.session_state.sections = [
-        {"id": "intro", "title": "Introdução", "content": ""},
+        {"id": "introduction", "title": "Introdução", "content": ""},
         {"id": "methods", "title": "Metodologia", "content": ""},
         {"id": "results", "title": "Resultados", "content": ""},
         {"id": "conclusions", "title": "Conclusões", "content": ""},
+        {"id": "references", "title": "Referências", "content": ""},
     ]
 if "compiled_pdf" not in st.session_state:
     st.session_state.compiled_pdf = None
@@ -442,7 +443,7 @@ with col_form:
                         st.session_state.affiliations = result.get("affiliations", st.session_state.affiliations)
                         st.session_state.email = result.get("email", st.session_state.email)
                         if result.get("sections"):
-                            st.session_state.sections = result["sections"]
+                            st.session_state.sections = [s for s in result["sections"] if s.get("id") != "abstract"]
                         if warning:
                             st.warning(warning)
                         else:
@@ -580,6 +581,20 @@ with col_form:
                 key=f"sec_content_{idx}",
                 height=100,
             )
+
+            c_snip1, c_snip2, c_snip3 = st.columns(3)
+            with c_snip1:
+                if st.button("📊 + Tabela", key=f"btn_tbl_{idx}", help="Inserir modelo de tabela quantitativa"):
+                    sec["content"] = (sec.get("content", "") + "\n\n| Parâmetro / Métrica | Baseline | Proposto | Variação |\n| :--- | :---: | :---: | :---: |\n| Acurácia (%) | 84.2 | 96.5 | +12.3% |\n| Macro F1 | 0.81 | 0.94 | +16.0% |\n| Latência (ms) | 48.0 | 19.5 | -59.4% |\n").strip()
+                    st.rerun()
+            with c_snip2:
+                if st.button("🔀 + TikZ", key=f"btn_tikz_{idx}", help="Inserir modelo de fluxograma TikZ"):
+                    sec["content"] = (sec.get("content", "") + "\n\n\\begin{tikzpicture}\n\\node[draw, rounded corners, fill=blue!10] (A) {Entrada / Dados};\n\\node[draw, rounded corners, fill=green!10, right=of A] (B) {Processamento & Extração};\n\\node[draw, rounded corners, fill=red!10, right=of B] (C) {Resultados & Classificação};\n\\draw[->, thick] (A) -- (B);\n\\draw[->, thick] (B) -- (C);\n\\end{tikzpicture}\n").strip()
+                    st.rerun()
+            with c_snip3:
+                if st.button("📋 + Tópicos", key=f"btn_top_{idx}", help="Inserir tópicos formatados com citação"):
+                    sec["content"] = (sec.get("content", "") + "\n\n- **Objetivo Central:** Descrição sintética da meta da pesquisa.\n- **Destaque Metodológico:** Abordagem técnica e parâmetros chave.\n- **Impacto Principal:** Resultado quantitativo comprovado [1].\n").strip()
+                    st.rerun()
 
             # Upload de imagem na seção
             sec_img = st.file_uploader(
