@@ -414,6 +414,7 @@ def test_heuristic_parse_separates_author_from_title():
 BENCHMARKS JOÃO LUCAS MAYRINCK
 UFMG
 lucas.mayrinck@dcc.ufmg.br Brendo Gético Eugênio UFMG brendo.eugenio@dcc.ufmg.br
+UFMG Luiz Filipe Menezes Vieira
 
 Abstract
 We investigate measurement proper- ties.
@@ -429,7 +430,8 @@ References
     assert "BENCHMARKS" in parsed["title"]
     assert "JOÃO LUCAS MAYRINCK" in parsed["authors"]
     assert "Brendo Gético Eugênio" in parsed["authors"]
-    assert "UFMG" in parsed["affiliations"]
+    assert "Luiz Filipe Menezes Vieira" in parsed["authors"]
+    assert parsed["affiliations"] == "UFMG"
     assert parsed["email"] == "lucas.mayrinck@dcc.ufmg.br"
 
     ref_sec = next(s for s in parsed["sections"] if s["id"] == "references")

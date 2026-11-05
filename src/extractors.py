@@ -77,12 +77,20 @@ _SUFFIX_FRAGMENTS = {
     "ated", "ating", "ates", "ance", "ances", "ism", "isms", "ist", "ists"
 }
 
-_AFFIL_KEYWORDS = {
-    "universidade", "university", "dept", "department", "departamento",
-    "instituto", "institute", "laboratorio", "laboratory", "ufmg", "usp",
-    "unicamp", "ufrj", "unesp", "puc", "faculdade", "faculty", "college",
-    "school", "center", "centro", "federal", "campus"
+_INST_PREFIXES = {
+    "universidade", "university", "departamento", "department", "instituto",
+    "institute", "laboratorio", "laboratory", "faculdade", "faculty",
+    "escola", "school", "centro", "center", "hospital", "campus", "dept",
+    "college", "program", "programa"
 }
+
+_INST_ACRONYMS = {
+    "ufmg", "usp", "unicamp", "ufrj", "unesp", "puc", "ufpe", "ufrgs",
+    "ufba", "ufsc", "ufscar", "uff", "unb", "ufc", "mit", "cmu", "stanford",
+    "berkeley", "oxford", "cambridge", "inria", "cnrs", "embrapa"
+}
+
+_AFFIL_KEYWORDS = _INST_PREFIXES | _INST_ACRONYMS | {"federal", "estadual", "nacional"}
 
 
 def clean_hyphens(text: str) -> str:
@@ -138,6 +146,34 @@ def _condense(text: str, limit: int) -> str:
     cut = text[:limit]
     end = max(cut.rfind(". "), cut.rfind(".\n"))
     return (cut[: end + 1] if end > limit * 0.5 else cut.rstrip() + "…").strip()
+
+
+def _classify_header_line(line: str) -> tuple[List[str], List[str]]:
+    """Separa autores e afiliações de uma linha do cabeçalho do artigo."""
+    clean = re.sub(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", " ", line).strip()
+    if not clean:
+        return [], []
+    tokens = clean.split()
+    norm_tokens = [_norm(t) for t in tokens]
+
+    # Linha iniciada por prefixo institucional claro (ex: "Universidade Federal...", "Department of...")
+    if any(norm_tokens[0] == p for p in _INST_PREFIXES) or (len(norm_tokens) > 1 and norm_tokens[1] in _INST_PREFIXES):
+        return [], [clean]
+
+    # Linha contendo apenas siglas ou termos institucionais puros (ex: "UFMG", "DCC / UFMG")
+    if all(t in _INST_ACRONYMS or t in _INST_PREFIXES or t in {"de", "da", "do", "e", "of", "and", "/", "-", "dcc"} for t in norm_tokens):
+        return [], [clean]
+
+    # Linha mista com sigla institucional e nome de pessoa (ex: "UFMG Luiz Filipe Menezes Vieira" ou "Brendo Gético Eugênio UFMG")
+    acronym_tokens = [w for w, nt in zip(tokens, norm_tokens) if nt in _INST_ACRONYMS or nt in _INST_PREFIXES]
+    name_tokens = [w for w, nt in zip(tokens, norm_tokens) if nt not in _INST_ACRONYMS and nt not in _INST_PREFIXES]
+    if acronym_tokens and name_tokens:
+        aff = " ".join(acronym_tokens).strip()
+        auth = " ".join(name_tokens).strip()
+        return ([auth] if auth else []), ([aff] if aff else [])
+
+    # Se não for exclusivamente institucional, é nome de autor
+    return [clean], []
 
 
 def heuristic_parse(text: str) -> Dict[str, Any]:
@@ -206,35 +242,18 @@ def heuristic_parse(text: str) -> Dict[str, Any]:
     title = " ".join(title_parts).strip()
 
     for h_line in head[idx:]:
-        line_no_emails = re.sub(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", " ", h_line).strip()
-        if not line_no_emails:
-            continue
-        line_tokens = [_norm(w) for w in line_no_emails.split()]
-        is_affil = any(k in line_tokens for k in _AFFIL_KEYWORDS)
-        has_author_match = any(t in email_tokens for t in line_tokens)
+        auths, affs = _classify_header_line(h_line)
+        authors_list.extend(auths)
+        affiliations_list.extend(affs)
 
-        if is_affil and not has_author_match:
-            affiliations_list.append(line_no_emails)
-        elif has_author_match:
-            subparts = line_no_emails.split()
-            auth_sub = []
-            aff_sub = []
-            for sp in subparts:
-                if _norm(sp) in _AFFIL_KEYWORDS:
-                    aff_sub.append(sp)
-                else:
-                    auth_sub.append(sp)
-            if auth_sub:
-                authors_list.append(" ".join(auth_sub))
-            if aff_sub:
-                affiliations_list.append(" ".join(aff_sub))
-        else:
-            if not authors_list:
-                authors_list.append(line_no_emails)
-            else:
-                affiliations_list.append(line_no_emails)
+    unique_authors: List[str] = []
+    for a in authors_list:
+        for sub_a in re.split(r",|\s+e\s+|\s+and\s+", a):
+            sub_a = sub_a.strip()
+            if sub_a and sub_a not in unique_authors:
+                unique_authors.append(sub_a)
 
-    authors = ", ".join(dict.fromkeys([a.strip() for a in authors_list if a.strip()]))
+    authors = ", ".join(unique_authors)
     affiliations = "\n".join(dict.fromkeys([af.strip() for af in affiliations_list if af.strip()]))
 
     limits = {"abstract": 1400, "references": 2500, "acknowledgments": 400}
