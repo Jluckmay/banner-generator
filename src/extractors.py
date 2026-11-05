@@ -108,10 +108,11 @@ def clean_hyphens(text: str) -> str:
 
 
 def _format_references(raw: str) -> str:
-    """Formata referências bibliográficas uma por linha, separando marcadores [1], [2], etc."""
+    """Formata referências bibliográficas uma por linha, suportando formatos numéricos [1], 1. e autor-ano (APA/SBC/Harvard)."""
     text = clean_hyphens(raw)
     text = re.sub(r"\s*(\[\d{1,3}\])\s*", r"\n\1 ", text)
-    text = re.sub(r"(?<=[.\s])(\d{1,2}\.\s+[A-Z])", r"\n\1", text)
+    text = re.sub(r"(?<=[.\s])(\d{1,2}\.\s+[A-ZÀ-ÿ])", r"\n\1", text)
+    text = re.sub(r"(?<=[.\n])\s+([A-ZÀ-ÿ][a-zA-ZÀ-ÿ'-]+,\s+[A-ZÀ-ÿ]\.)", r"\n\1", text)
     lines = [re.sub(r"[ \t]+", " ", ln).strip() for ln in text.split("\n")]
     return "\n".join(ln for ln in lines if ln)
 
@@ -125,6 +126,13 @@ def _norm(s: str) -> str:
 _ALIAS_LOOKUP = {_norm(a): sid for sid, al in SECTION_ALIASES.items() for a in al}
 _NUM = re.compile(r"^\s*(?:\d+(?:\.\d+)*\.?|[IVX]+\.)\s+")
 
+_SECTION_KEYWORDS = {
+    "conclusions": {"conclusion", "conclusions", "conclusao", "conclusoes", "remarks", "future work"},
+    "results": {"result", "results", "resultado", "resultados", "findings", "experiments", "experimentos", "performance", "empirical", "benchmark"},
+    "methods": {"method", "methods", "methodology", "metodologia", "metodos", "framework", "approach", "abordagem", "architecture", "arquitetura", "design", "setup", "evaluation", "avaliacao", "system", "model", "modelo", "proposed", "proposta", "implementation", "implementacao"},
+    "introduction": {"introduction", "introducao", "background", "contexto", "motivation"},
+    "abstract": {"abstract", "resumo", "summary"},
+}
 
 _GEO_KEYWORDS = {"brazil", "brasil", "minas", "gerais", "mg", "sp", "rj", "federal", "state"}
 
@@ -149,18 +157,35 @@ def _heading(line: str) -> tuple[str, str] | None:
     raw = line.strip()
     if not raw:
         return None
-    body = _NUM.sub("", raw)
-    # Suporta cabeçalhos inline com ponto, dois pontos ou travessão (ex: "Abstract. Texto...", "Resumo: Texto...")
-    m = re.match(r"^([A-Za-z\u00C0-\u00FF]{3,30})\s*[:.—–-]\s*(.*)$", body)
+    has_num = bool(_NUM.match(raw))
+    body = _NUM.sub("", raw).strip()
+    if not body:
+        return None
+
+    # 1. Cabeçalho inline com delimitador: "Abstract. Texto...", "Resumo: Texto...", "1. Introdução: Texto..."
+    m = re.match(r"^([A-Za-z\u00C0-\u00FF0-9 &/-]{3,40}?)\s*[:.—–-]\s*(.*)$", body)
     if m:
         term = _norm(m.group(1))
         sid = _ALIAS_LOOKUP.get(term)
         if sid:
             return sid, m.group(2).strip()
-    if len(raw) <= 160:
-        sid = _ALIAS_LOOKUP.get(_norm(body.rstrip(":.")))
-        if sid:
-            return sid, ""
+
+    # 2. Cabeçalho direto por alias exato (ex: "Metodologia", "2. Introdução", "4. Results and Analysis")
+    norm_body = _norm(body.rstrip(":."))
+    sid = _ALIAS_LOOKUP.get(norm_body)
+    if sid:
+        return sid, ""
+
+    # 3. Fallback por palavras-chave:
+    # Apenas aceitável se for uma seção numerada curta (ex: "3. AI Measurement Science Framework") OU
+    # se for uma linha muito curta e isolada de título (<= 6 palavras, <= 50 chars, sem ponto final de frase)
+    is_short_title = len(body.split()) <= 6 and len(raw) <= 50 and not raw.endswith((".", ",", ";", ":"))
+    if (has_num and len(body.split()) <= 8 and not raw.endswith((".", ",", ";", ":"))) or is_short_title:
+        words = set(norm_body.split())
+        for target_sid, kw_set in _SECTION_KEYWORDS.items():
+            if words & kw_set:
+                return target_sid, ""
+
     return None
 
 
@@ -227,6 +252,13 @@ def _classify_header_line(line: str) -> tuple[List[str], List[str]]:
 def heuristic_parse(text: str) -> Dict[str, Any]:
     """Extração sem IA: detecta título/autores e seções pelos cabeçalhos usuais."""
     text = clean_hyphens(text)
+    # Garante que cabeçalhos de seção embutidos em linhas de autores/emails iniciem em nova linha
+    text = re.sub(
+        r"(?:,\s*|\.\s+|\s{2,})\b(Abstract|Resumo|Introduction|Introdução|Methods|Metodologia|Results|Resultados|Discussion|Discussão|Conclusions?|Conclus[oõ]es?|References|Referências)\s*[:.—–-]\s*",
+        lambda m: f"\n{m.group(1)}: ",
+        text,
+        flags=re.IGNORECASE,
+    )
     lines = text.split("\n")
     sections: Dict[str, List[str]] = {}
     current: str | None = None
@@ -306,11 +338,20 @@ def heuristic_parse(text: str) -> Dict[str, Any]:
 
     limits = {"abstract": 1400, "references": 2500, "acknowledgments": 400}
     out_sections = []
+    from .i18n import DEFAULT_SECTION_IDS
+
+    for sid in DEFAULT_SECTION_IDS:
+        if sid in sections:
+            buf = sections[sid]
+            content = "\n".join(buf).strip()
+            if content:
+                body = _format_references(content) if sid == "references" else _unwrap(clean_hyphens(content))
+                out_sections.append({"id": sid, "content": _condense(body, limits.get(sid, 1100))})
     for sid, buf in sections.items():
-        content = "\n".join(buf).strip()
-        if content:
-            body = _format_references(content) if sid == "references" else _unwrap(clean_hyphens(content))
-            out_sections.append({"id": sid, "content": _condense(body, limits.get(sid, 1100))})
+        if sid not in DEFAULT_SECTION_IDS:
+            content = "\n".join(buf).strip()
+            if content:
+                out_sections.append({"id": sid, "content": _condense(_unwrap(clean_hyphens(content)), 1100)})
 
     return {
         "title": title[:300].strip(),

@@ -447,16 +447,23 @@ def test_sbc_paper_format_parsing():
     from src.extractors import heuristic_parse
 
     sbc_text = """CONDITIONAL CAPABILITY AND MEASUREMENT VALIDITY IN IOT INTRUSION-DETECTION BENCHMARKS
-João Lucas Mayrinck1, Brendo Gético Eugênio1, Luiz Filipe Menezes Vieira1, 1Department of Computer Science – Federal of Minas Gerais, Belo Horizonte – MG – Brazil, {lucas.mayrinck, brendo.eugenio, lfvieira}@dcc.ufmg.br
+João Lucas Mayrinck1, Brendo Gético Eugênio1, Luiz Filipe Menezes Vieira1, 1Department of Computer Science – Federal of Minas Gerais, Belo Horizonte – MG – Brazil, {lucas.mayrinck, brendo.eugenio, lfvieira}@dcc.ufmg.br, Abstract. Aggregate benchmark scores do not by themselves justify claims about general intrusion-detection capability. We investigate the conditional measurement properties of CICIoT2023.
 University (UFMG)
-
-Abstract. Aggregate benchmark scores do not by themselves justify claims about general intrusion-detection capability. We investigate the conditional measurement properties of CICIoT2023.
 
 1. Introdução
 An intrusion-detection benchmark can rank classifiers without establishing what the resulting differences measure.
 
-Referências
-[1] Author A. 2023. [2] Author B. 2024."""
+3. AI Measurement Science Framework
+We operationalize IoT intrusion-detection capability under Rasch and 2PL models.
+
+4. Results and Analysis
+4.1. Conditional Performance and Capability Agreement (RQ1) Table 1 places conventional predictive performance.
+
+5. Conclusions
+The evaluated IoT benchmarks support reproducible conditional performance contrasts.
+
+References
+Al Nuaimi, T., Al Zaabi, S., Alyilieli, M., AlMaskari, M. (2023). A comparative evaluation. Degen, P.-B. (2025). Revisiting generalizability theory. Ferrag, M. A., Friha, O. (2022). Edge-IIoTset."""
 
     parsed = heuristic_parse(sbc_text)
     assert parsed["title"] == "CONDITIONAL CAPABILITY AND MEASUREMENT VALIDITY IN IOT INTRUSION-DETECTION BENCHMARKS"
@@ -470,3 +477,16 @@ Referências
     abstract_sec = next(s for s in parsed["sections"] if s["id"] == "abstract")
     assert "Aggregate benchmark scores" in abstract_sec["content"]
     assert "Aggregate benchmark scores" not in parsed["authors"]
+
+    # Verify Methods and Results were both extracted
+    methods_sec = next(s for s in parsed["sections"] if s["id"] == "methods")
+    assert "operationalize IoT intrusion-detection" in methods_sec["content"]
+
+    results_sec = next(s for s in parsed["sections"] if s["id"] == "results")
+    assert "Conditional Performance" in results_sec["content"]
+
+    # Verify References are formatted line-by-line
+    ref_sec = next(s for s in parsed["sections"] if s["id"] == "references")
+    ref_lines = [l for l in ref_sec["content"].split("\n") if l.strip()]
+    assert len(ref_lines) == 3
+    assert "Degen, P.-B." in ref_lines[1]
