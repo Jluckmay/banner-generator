@@ -207,6 +207,7 @@ def text_to_latex(text: str) -> str:
 def references_to_latex(text: str, small: bool = True) -> str:
     items = [ln.strip() for ln in text.split("\n") if ln.strip()]
     items = [re.sub(r"^\s*(?:\[\d+\]|\d+[.)]|[-*•])\s*", "", it) for it in items]
+    items = items[:4]
     if not items:
         return ""
     return (
@@ -242,21 +243,52 @@ def _weight(sec: Dict[str, Any]) -> int:
     return 350 + len(sec["content"]) + 900 * len(sec["images"])
 
 
-def split_columns(sections: List[Dict[str, Any]], n: int) -> List[List[Dict[str, Any]]]:
-    """Distribui seções contíguas em n colunas com carga aproximadamente equilibrada."""
+def split_columns(
+    sections: List[Dict[str, Any]],
+    n: int,
+    contact_weight: int = 0,
+) -> List[List[Dict[str, Any]]]:
+    """Distribui seções contíguas em n colunas de forma otimizada e equilibrada."""
     n = max(1, min(n, len(sections) or 1))
-    total = sum(_weight(s) for s in sections)
-    cols: List[List[Dict[str, Any]]] = [[]]
-    acc = 0
-    for s in sections:
-        w = _weight(s)
-        remaining_cols = n - len(cols)
-        target = total * len(cols) / n
-        if cols[-1] and remaining_cols > 0 and acc + w / 2 > target:
+    if n == 1 or not sections:
+        return [sections] if sections else [[]]
+
+    k = len(sections)
+    if k <= n:
+        cols: List[List[Dict[str, Any]]] = [[s] for s in sections]
+        while len(cols) < n:
             cols.append([])
-        cols[-1].append(s)
-        acc += w
-    return cols
+        return cols
+
+    weights = [_weight(s) for s in sections]
+
+    # Busca exaustiva da partição contígua que minimiza a variância dos pesos entre as colunas
+    import itertools
+
+    best_cuts = None
+    best_score = float("inf")
+
+    for cuts in itertools.combinations(range(1, k), n - 1):
+        bounds = [0] + list(cuts) + [k]
+        col_weights = []
+        for i in range(n):
+            cw = sum(weights[bounds[i] : bounds[i + 1]])
+            if i == n - 1:
+                cw += contact_weight
+            col_weights.append(cw)
+        mean_w = sum(col_weights) / n
+        score = sum((w - mean_w) ** 2 for w in col_weights)
+        if score < best_score:
+            best_score = score
+            best_cuts = bounds
+
+    if best_cuts:
+        return [sections[best_cuts[i] : best_cuts[i + 1]] for i in range(n)]
+
+    cols_fallback: List[List[Dict[str, Any]]] = [[] for _ in range(n)]
+    for i, s in enumerate(sections):
+        cols_fallback[min(i * n // k, n - 1)].append(s)
+    return cols_fallback
 
 
 _QR_OK = re.compile(r"^https?://[A-Za-z0-9\-._~:/?=@+]+$")
@@ -332,7 +364,8 @@ def build_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
             "images": [],
         }
 
-    cols = split_columns(sections, poster["columns"])
+    contact_weight = 750 if contact_block else 0
+    cols = split_columns(sections, poster["columns"], contact_weight=contact_weight)
     counter = [0]
     col_tex: List[str] = []
     for ci, col in enumerate(cols):

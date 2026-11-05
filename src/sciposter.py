@@ -125,9 +125,9 @@ def build_sciposter_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
 \\begin{{document}}
 \\maketitle
 
-\\begin{{multicols*}}{{{col_str}}}
+\\begin{{multicols}}{{{col_str}}}
 {chr(10).join(body)}
-\\end{{multicols*}}
+\\end{{multicols}}
 
 \\end{{document}}
 """

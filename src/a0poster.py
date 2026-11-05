@@ -134,9 +134,9 @@ def build_a0poster_tex(poster: Dict[str, Any], images: Dict[str, str]) -> str:
 \\textcolor{{uzhAccent}}{{\\rule{{\\linewidth}}{{4pt}}}}
 \\vspace{{1cm}}
 
-\\begin{{multicols*}}{{{cols}}}
+\\begin{{multicols}}{{{cols}}}
 {chr(10).join(body)}
-\\end{{multicols*}}
+\\end{{multicols}}
 
 \\end{{document}}
 """

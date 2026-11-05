@@ -107,14 +107,37 @@ def clean_hyphens(text: str) -> str:
     return re.sub(r"\b([A-Za-z]{2,})-\s+([a-z]{2,}\b)", _fix_broken, text)
 
 
-def _format_references(raw: str) -> str:
-    """Formata referências bibliográficas uma por linha, suportando formatos numéricos [1], 1. e autor-ano (APA/SBC/Harvard)."""
+def _format_references(raw: str, max_refs: int = 4) -> str:
+    """Formata referências bibliográficas uma por linha, suportando formatos numéricos [1], 1. e autor-ano (APA/SBC/Harvard), limitadas a max_refs."""
     text = clean_hyphens(raw)
     text = re.sub(r"\s*(\[\d{1,3}\])\s*", r"\n\1 ", text)
     text = re.sub(r"(?<=[.\s])(\d{1,2}\.\s+[A-ZÀ-ÿ])", r"\n\1", text)
     text = re.sub(r"(?<=[.\n])\s+([A-ZÀ-ÿ][a-zA-ZÀ-ÿ'-]+,\s+[A-ZÀ-ÿ]\.)", r"\n\1", text)
-    lines = [re.sub(r"[ \t]+", " ", ln).strip() for ln in text.split("\n")]
-    return "\n".join(ln for ln in lines if ln)
+
+    lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
+    if not lines:
+        return ""
+
+    _START = re.compile(
+        r"^(?:\[\d{1,3}\]|\d{1,2}\.\s+[A-ZÀ-ÿ]|[A-ZÀ-ÿ][a-zA-ZÀ-ÿ'-]+,\s+[A-ZÀ-ÿ]\.|\b[A-ZÀ-ÿ][a-zA-ZÀ-ÿ'-]+\s+et\s+al\.)"
+    )
+    entries: List[str] = []
+    for ln in lines:
+        if entries and not _START.match(ln):
+            entries[-1] += " " + ln
+        else:
+            entries.append(ln)
+
+    cleaned: List[str] = []
+    for e in entries[:max_refs]:
+        c = re.sub(r"https?://\S+", "", e)
+        c = re.sub(r"\bdoi:\s*\S+", "", c, flags=re.IGNORECASE)
+        c = re.sub(r"\bURL\b:?", "", c)
+        c = re.sub(r"[ \t]+", " ", c).strip(" ,.-")
+        if c:
+            cleaned.append(c)
+
+    return "\n".join(cleaned)
 
 
 def _norm(s: str) -> str:
@@ -336,7 +359,7 @@ def heuristic_parse(text: str) -> Dict[str, Any]:
     authors = ", ".join(unique_authors)
     affiliations = "\n".join(dict.fromkeys([af.strip() for af in affiliations_list if af.strip()]))
 
-    limits = {"abstract": 1400, "references": 2500, "acknowledgments": 400}
+    limits = {"abstract": 1200, "references": 800, "acknowledgments": 400}
     out_sections = []
     from .i18n import DEFAULT_SECTION_IDS
 
