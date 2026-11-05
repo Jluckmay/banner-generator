@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import sys
 import threading
 from pathlib import Path
 from typing import Any, Dict, Tuple
@@ -20,7 +21,10 @@ from src.llm import LLMError, ai_extract, resolve_key
 from src.poster import normalize_poster
 from src.templates import public_templates
 
-ROOT = Path(__file__).parent.resolve()
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+    ROOT = Path(sys._MEIPASS).resolve()
+else:
+    ROOT = Path(__file__).parent.resolve()
 app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = config.MAX_UPLOAD_BYTES
 _BUILD_SLOTS = threading.BoundedSemaphore(int(os.environ.get("MAX_CONCURRENT_BUILDS", "2")))

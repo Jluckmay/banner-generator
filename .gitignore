@@ -17,6 +17,8 @@ env/
 htmlcov/
 dist/
 build/
+*.spec
+*.zip
 *.egg-info/
 
 # --- Armazenamento Temporário (Zero-Storage) ---

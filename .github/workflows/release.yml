@@ -1,0 +1,48 @@
+name: Release & Build Executable
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows Executable (.exe)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Standalone Executable
+        run: |
+          python scripts/build_exe.py
+
+      - name: Package Executable into ZIP
+        run: |
+          Compress-Archive -Path dist/banner-generator.exe -DestinationPath banner-generator-windows-x64.zip
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        with:
+          files: banner-generator-windows-x64.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true
