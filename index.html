@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; worker-src 'self' blob: data: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' blob: data:; frame-src 'self' blob: data: chrome-extension:; object-src 'self' blob: data:; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://*.onrender.com https://cdnjs.cloudflare.com; base-uri 'none'; form-action 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; worker-src 'self' blob: data: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://use.typekit.net https://p.typekit.net; font-src 'self' https://fonts.gstatic.com https://use.typekit.net https://p.typekit.net data:; img-src 'self' blob: data:; frame-src 'self' blob: data: chrome-extension:; object-src 'self' blob: data:; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://*.onrender.com https://cdnjs.cloudflare.com; base-uri 'none'; form-action 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>banner-generator | Gerador de Pôsteres Acadêmicos</title>
@@ -1407,7 +1407,7 @@ button.sm {
   height: auto !important;
   letter-spacing: 0.05em;
 }
-.color-native-hidden {
+.color-native-hidden { display: none !important;
   position: absolute;
   width: 1px;
   height: 1px;
@@ -2469,6 +2469,18 @@ const DEFAULT_CFG = {
   }
 };
 
+const TPL_TAGS = {
+  classic: { "pt-BR": "Conferência / Clássico", "en-US": "Conference / Classic" },
+  modern: { "pt-BR": "Gradiente / Tech", "en-US": "Gradient / Tech" },
+  minimal: { "pt-BR": "Editorial / Linhas", "en-US": "Editorial / Lines" },
+  bold: { "pt-BR": "Alto Contraste / Envelope", "en-US": "High Contrast / Envelope" },
+  corner: { "pt-BR": "Ondas / Orgânico", "en-US": "Organic Leaf / Waves" },
+  dcc: { "pt-BR": "Artigo / Duas Colunas", "en-US": "Article / Two Columns" },
+  mostra_ic: { "pt-BR": "Simpósio / SciPoster", "en-US": "Symposium / SciPoster" },
+  uzh: { "pt-BR": "Suíço / Pôster A0", "en-US": "Swiss / A0 Banner" },
+  tudelft: { "pt-BR": "Delft / Beamer Banner", "en-US": "Delft / Beamer Banner" }
+};
+
 const $ = s => document.querySelector(s);
 let CFG = DEFAULT_CFG, uiLang = "pt-BR", posterLang = "pt-BR", sections = [], logosH = [], logosF = [], uid = 0, pdfBlob = null, docFile = null;
 let customTexFileObj = null;
@@ -2703,61 +2715,21 @@ function populateProviders() {
   }
 }
 
-/* ---------- Inicialização ---------- */
-(function init() {
-  const beInput = $("#backendUrlInput");
-  if (beInput) {
-    beInput.value = localStorage.getItem("banner_api_base") || "";
-    beInput.oninput = () => {
-      localStorage.setItem("banner_api_base", beInput.value.trim());
-      wakeUpServer();
-    };
-  }
 
-  const nav = (navigator.language || "").toLowerCase().startsWith("en") ? "en-US" : "pt-BR";
-  uiLang = nav;
-  posterLang = "pt-BR";
-  const posterRadio = document.querySelector(`input[name=posterLang][value="${posterLang}"]`);
-  if (posterRadio) posterRadio.checked = true;
-
-  populateProviders();
-
-  // Seções padrão
-  if (sections.length === 0) {
-    ["abstract", "introduction", "objectives", "methods", "results", "conclusions", "references"].forEach(id => {
-      sections.push(newSec(id));
-    });
-  }
-
-  state.template = "classic";
-  applyI18n();
-  setViewMode("draft");
-  updateDraftPreview();
-
-  // Acorda o servidor em segundo plano sem travar a interface
-  wakeUpServer();
-
-  const statusBadge = $("#serverStatusBadge");
-  if (statusBadge) {
-    statusBadge.onclick = () => wakeUpServer();
-  }
-
-  /* ---------- Modo de Entrada (Manual vs Upload) ---------- */
-  function setMode(m) {
-    document.querySelectorAll("input[name=mode]").forEach(r => {
-      r.checked = (r.value === m);
-    });
-    const box = $("#uploadBox");
-    if (box) box.classList.toggle("hidden", m !== "upload");
-  }
+/* ---------- Modo de Entrada (Manual vs Upload) ---------- */
+function setMode(m) {
   document.querySelectorAll("input[name=mode]").forEach(r => {
-    r.onchange = () => setMode(r.value);
+    r.checked = (r.value === m);
   });
-
-  if (window.location.hash === "#upload") {
-    setMode("upload");
-  }
-})();
+  const box = $("#uploadBox");
+  if (box) box.classList.toggle("hidden", m !== "upload");
+}
+document.querySelectorAll("input[name=mode]").forEach(r => {
+  r.onchange = () => setMode(r.value);
+});
+if (window.location.hash === "#upload") {
+  setMode("upload");
+}
 
 /* ---------- Alternância de Idioma e Tema ---------- */
 const uiLangToggleBtn = $("#uiLangToggle");
@@ -2852,17 +2824,6 @@ function fillFromExtract(p) {
 }
 
 /* ---------- Templates e Formato ---------- */
-const TPL_TAGS = {
-  classic: { "pt-BR": "Conferência / Clássico", "en-US": "Conference / Classic" },
-  modern: { "pt-BR": "Gradiente / Tech", "en-US": "Gradient / Tech" },
-  minimal: { "pt-BR": "Editorial / Linhas", "en-US": "Editorial / Lines" },
-  bold: { "pt-BR": "Alto Contraste / Envelope", "en-US": "High Contrast / Envelope" },
-  corner: { "pt-BR": "Ondas / Orgânico", "en-US": "Organic Leaf / Waves" },
-  dcc: { "pt-BR": "Artigo / Duas Colunas", "en-US": "Article / Two Columns" },
-  mostra_ic: { "pt-BR": "Simpósio / SciPoster", "en-US": "Symposium / SciPoster" },
-  uzh: { "pt-BR": "Suíço / Pôster A0", "en-US": "Swiss / A0 Banner" },
-  tudelft: { "pt-BR": "Delft / Beamer Banner", "en-US": "Delft / Beamer Banner" }
-};
 
 function renderTemplates() {
   if (!CFG || !CFG.templates) return;
@@ -4055,6 +4016,47 @@ $("#genBtn").onclick = () => generate("pdf");
 $("#dlPdf").onclick = () => pdfBlob && saveBlob(pdfBlob, "poster.pdf");
 $("#prevDlBtn").onclick = () => pdfBlob && saveBlob(pdfBlob, "poster.pdf");
 $("#dlZip").onclick = () => generate("zip");
+
+/* ---------- Inicialização Geral da Aplicação ---------- */
+function init() {
+  const beInput = $("#backendUrlInput");
+  if (beInput) {
+    beInput.value = localStorage.getItem("banner_api_base") || "";
+    beInput.oninput = () => {
+      localStorage.setItem("banner_api_base", beInput.value.trim());
+      wakeUpServer();
+    };
+  }
+
+  const nav = (navigator.language || "").toLowerCase().startsWith("en") ? "en-US" : "pt-BR";
+  uiLang = nav;
+  posterLang = "pt-BR";
+  const posterRadio = document.querySelector(`input[name=posterLang][value="${posterLang}"]`);
+  if (posterRadio) posterRadio.checked = true;
+
+  populateProviders();
+
+  // Seções padrão
+  if (sections.length === 0) {
+    ["abstract", "introduction", "objectives", "methods", "results", "conclusions", "references"].forEach(id => {
+      sections.push(newSec(id));
+    });
+  }
+
+  state.template = "classic";
+  applyI18n();
+  setViewMode("draft");
+  updateDraftPreview();
+
+  // Acorda o servidor em segundo plano sem travar a interface
+  wakeUpServer();
+
+  const statusBadge = $("#serverStatusBadge");
+  if (statusBadge) {
+    statusBadge.onclick = () => wakeUpServer();
+  }
+}
+init();
 </script>
 </body>
 </html>
