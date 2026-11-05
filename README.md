@@ -136,18 +136,19 @@ cd banner-generator
 pip install -r requirements.txt
 ```
 
-### Opção A: Executar a Versão Local em Streamlit
-Uma interface gráfica rica em Python nativo com suporte a upload, IA e renderização local:
+### Opção A: Executar a Versão Local em Streamlit (`app.py`)
+Executa um **backend próprio e autônomo localmente**, realizando a compilação LaTeX via `pdflatex` da máquina e síntese de IA utilizando a chave de API fornecida diretamente pelo usuário (no formulário interativo ou em arquivo `.env` local):
 ```bash
 streamlit run app.py
 ```
 A aplicação abrirá automaticamente no navegador em `http://localhost:8501`.
 
-### Opção B: Executar o Servidor Web Flask + Interface SPA
+### Opção B: Executar a Interface Web SPA com Servidor Local Flask (`server.py`)
+Inicia o servidor backend local Flask e serve a interface SPA:
 ```bash
 python server.py
 ```
-Acesse a aplicação web em `http://127.0.0.1:5000`.
+Acesse a aplicação web em `http://127.0.0.1:5000`. A página HTML local conecta-se automaticamente ao backend local (`http://127.0.0.1:5000`), sem bloqueios ou dependências externas, com a interface 100% liberada e utilizável imediatamente.
 
 ### Rodar a Suíte de Testes Automatizados
 ```bash
@@ -156,8 +157,8 @@ python -m pytest
 
 ---
 
-## 🔑 Provedores de IA (Opcional)
-As chaves de API podem ser inseridas diretamente na interface do usuário ou carregadas via variáveis de ambiente:
+## 🔑 Provedores de IA
+As chaves de API podem ser inseridas diretamente na interface do usuário (recomendado para uso local ou Streamlit) ou configuradas via variáveis de ambiente:
 ```bash
 export GEMINI_API_KEY="sua-chave"
 export OPENAI_API_KEY="sua-chave"
@@ -168,19 +169,18 @@ export NVIDIA_API_KEY="sua-chave"
 
 ---
 
-## 🌐 Hospedagem e Publicação
+## 🌐 Hospedagem, Arquitetura e Políticas de Segurança
 
-- **Servidor Oficial de Produção**: `https://banner-generator-t5p4.onrender.com`
-  - **Despertar Automático & Persistência a Inatividade**: Ao carregar o frontend, uma rotina em segundo plano dispara imediatamente uma solicitação de wake-up ao servidor Render com badge interativo no cabeçalho (*Render: Conectando/Online*).
-  - **Tolerância a Falhas**: Todas as requisições (`/api/extract`, `/api/generate`) possuem mecanismo de retentativas automáticas e backoff exponencial (`robustFetch`) que mantêm a operação resiliente durante o cold-start de ~30-60s do Render gratuito, além de heartbeat periódico para evitar hibernação durante o uso.
-- **GitHub Pages (Frontend)**:
-  - Configure em **Settings > Pages > Deploy from a branch > main / (root)** ou via **GitHub Actions** (`.github/workflows/deploy-pages.yml`).
-  - O arquivo `.nojekyll` garante o carregamento de todos os assets.
-  - O frontend detecta automaticamente o ambiente (`getApiBase`): conecta-se ao servidor Render padrão quando hospedado no GitHub Pages e utiliza caminhos relativos ao executar localmente.
-- **Render (Backend / Docker)**:
-  - Conecte o repositório ao [Render](https://dashboard.render.com).
-  - O arquivo `render.yaml` provisiona o container Docker com TeX Live e Gunicorn automaticamente.
-  - Endereço de produção provisionado: `https://banner-generator-t5p4.onrender.com`.
+- **Página HTML no GitHub Pages (`https://jluckmay.github.io/banner-generator/`)**:
+  - Frontend SPA estático hospedado no GitHub Pages com deploy contínuo via `.github/workflows/deploy-pages.yml`.
+  - **Restrição Estrita de Conexão (CSP)**: A diretiva `connect-src` autoriza conexões exclusivamente com o backend oficial Render (`https://banner-generator-t5p4.onrender.com`), cdnjs e servidores locais.
+  - **Detecção Automática de Backend (`getApiBase`)**: Quando acessada a partir de `jluckmay.github.io`, a página utiliza automaticamente a conexão com o Render. Quando executada localmente (`localhost`, `127.0.0.1` ou `file:`), conecta-se ao servidor local (`http://127.0.0.1:5000`).
+  - **Usabilidade Contínua (Sem Travamentos)**: A verificação de conexão com o servidor roda em segundo plano. O usuário pode alternar templates, editar dados, configurar paleta de cores e visualizar o rascunho sem nenhum atraso ou travamento enquanto a conexão é estabelecida.
+
+- **Servidor Backend no Render (`https://banner-generator-t5p4.onrender.com`)**:
+  - Container Docker provisionado via `render.yaml` com TeX Live e Gunicorn.
+  - **Restrição Estrita de Origens (CORS)**: O servidor backend no Render permite conexões vindas exclusivamente do domínio `https://jluckmay.github.io` (além de origens locais para desenvolvimento). Requisições com origens não autorizadas são bloqueadas com HTTP 403 Forbidden.
+  - **Tolerância a Inatividade & Cold-Start**: Mecanismo `robustFetch` com retentativas automáticas e heartbeat periódico para manter o servidor ativo durante o uso.
 
 ---
 
@@ -288,10 +288,15 @@ export DEEPSEEK_API_KEY="your-api-key"
 export NVIDIA_API_KEY="your-api-key"
 ```
 
-### Deployment
+### Deployment, Architecture & Security Policies
 
-- **Default Production Server**: `https://banner-generator-t5p4.onrender.com`
-  - **Instant Server Wakeup & Spin-Down Resilience**: When loading the frontend, a non-blocking background wake-up ping triggers immediately, showing real-time connectivity status via a header badge (*Render: Waking up/Online*).
-  - **Cold-Start Fault Tolerance**: All network calls (`/api/extract`, `/api/generate`) utilize automatic retries with backoff (`robustFetch`) to seamlessly endure Render's free-tier ~30-60s cold-start, paired with background keep-alive heartbeats during editing sessions.
-- **GitHub Pages**: Static hosting of `index.html`. Deploy via GitHub Actions (`.github/workflows/deploy-pages.yml`) or directly from `main / (root)` branch. Automatically connects to the default Render server when hosted online, or uses local endpoints during local development.
-- **Render**: Docker deployment configured in `render.yaml`. Builds with TeX Live and Gunicorn for serverless PDF generation. Pre-configured service URL: `https://banner-generator-t5p4.onrender.com`.
+- **GitHub Pages Frontend (`https://jluckmay.github.io/banner-generator/`)**:
+  - Static SPA frontend deployed via GitHub Actions (`.github/workflows/deploy-pages.yml`).
+  - **Strict CSP Connect-Src**: Content Security Policy allows network connections exclusively to the Render production server (`https://banner-generator-t5p4.onrender.com`), CDN libraries, and local development backends.
+  - **Dynamic Backend Resolution**: Automatically targets the Render production server on GitHub Pages, while seamlessly routing to the local server (`http://127.0.0.1:5000`) in local environments.
+  - **Zero Interface Blocking**: Background wake-up pings never block or freeze UI interactivity; template selection, color customizing, and section editing remain 100% active and responsive while the server establishes connection.
+
+- **Render Production Backend (`https://banner-generator-t5p4.onrender.com`)**:
+  - Dockerized TeX Live and Gunicorn backend configured in `render.yaml`.
+  - **Strict Origin Whitelist (CORS)**: In production, the Render backend strictly permits requests coming from `https://jluckmay.github.io` (and local development hosts). Disallowed origins are rejected with HTTP 403 Forbidden.
+  - **Fault Tolerance**: Automatic retries with exponential backoff (`robustFetch`) to endure Render's cold-starts, supported by keep-alive heartbeats during active sessions.

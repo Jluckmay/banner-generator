@@ -26,22 +26,60 @@ app.config["MAX_CONTENT_LENGTH"] = config.MAX_UPLOAD_BYTES
 _BUILD_SLOTS = threading.BoundedSemaphore(int(os.environ.get("MAX_CONCURRENT_BUILDS", "2")))
 
 
+PROD_ALLOWED_ORIGIN = "https://jluckmay.github.io"
+
+
 def _err(msg: str, code: int = 400) -> Tuple[Response, int]:
     return jsonify({"error": msg}), code
 
 
+def _get_allowed_origin() -> str | None:
+    origin = (request.headers.get("Origin") or "").strip()
+    if not origin:
+        return None
+    # Permite estritamente jluckmay.github.io em produção
+    if origin == PROD_ALLOWED_ORIGIN:
+        return PROD_ALLOWED_ORIGIN
+    # Permite origens locais de desenvolvimento
+    if (
+        origin.startswith("http://localhost:")
+        or origin.startswith("http://127.0.0.1:")
+        or origin in ("http://localhost", "http://127.0.0.1")
+    ):
+        return origin
+    return None
+
+
 @app.route("/api/<path:path>", methods=["OPTIONS"])
 def api_options(path: str) -> Response:
+    origin = request.headers.get("Origin")
+    allowed = _get_allowed_origin()
+    if origin and not allowed:
+        return Response("Origem não autorizada", status=403)
     resp = Response(status=204)
-    resp.headers["Access-Control-Allow-Origin"] = "*"
+    if allowed:
+        resp.headers["Access-Control-Allow-Origin"] = allowed
+        resp.headers["Vary"] = "Origin"
     resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     return resp
 
 
+@app.before_request
+def _validate_origin() -> Response | None:
+    if request.path.startswith("/api/"):
+        origin = request.headers.get("Origin")
+        if origin and not _get_allowed_origin():
+            return jsonify({"error": "Origem não permitida para conexões com este backend."}), 403
+    return None
+
+
 @app.after_request
 def _headers(resp: Response) -> Response:
-    resp.headers["Access-Control-Allow-Origin"] = "*"
+    allowed = _get_allowed_origin()
+    if allowed:
+        resp.headers["Access-Control-Allow-Origin"] = allowed
+        resp.headers["Vary"] = "Origin"
     resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     resp.headers["Access-Control-Expose-Headers"] = "X-Poster-Overflow, Content-Disposition"
@@ -59,8 +97,8 @@ def _headers(resp: Response) -> Response:
         "img-src 'self' blob: data:; "
         "frame-src 'self' blob: data: chrome-extension:; "
         "object-src 'self' blob: data:; "
-        "connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://*.onrender.com https://cdnjs.cloudflare.com; "
-        "base-uri 'none'; form-action 'self'; frame-ancestors 'self'"
+        "connect-src 'self' http://127.0.0.1:5000 http://localhost:5000 https://banner-generator-t5p4.onrender.com https://cdnjs.cloudflare.com; "
+        "base-uri 'none'; form-action 'self'; frame-ancestors 'self' https://jluckmay.github.io"
     )
     return resp
 

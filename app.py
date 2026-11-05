@@ -214,7 +214,7 @@ UI_TEXT = {
         "ph_email": "contato@universidade.edu.br",
         "ph_url": "https://github.com/usuario/projeto",
         "ph_model": "Ex: gemini-2.0-flash ou gpt-4o-mini",
-        "ph_api_key": "Cole sua chave aqui ou use a do ambiente",
+        "ph_api_key": "Cole sua chave de API do provedor (ou configure no ambiente local .env)",
         "ph_sec_title": "Título da seção",
         "ph_sec_content": "Texto ou tópicos...",
         "ph_caption": "Legenda da figura",
@@ -278,7 +278,7 @@ UI_TEXT = {
         "ph_email": "contact@university.edu",
         "ph_url": "https://github.com/username/project",
         "ph_model": "e.g. gemini-2.0-flash or gpt-4o-mini",
-        "ph_api_key": "Paste your key here or use environment variable",
+        "ph_api_key": "Paste your provider API key (or configure in local .env)",
         "ph_sec_title": "Section title",
         "ph_sec_content": "Text or bullet points...",
         "ph_caption": "Figure caption",
@@ -412,7 +412,7 @@ with col_form:
                 provider = st.selectbox(
                     t("provider"),
                     options=list(config.PROVIDERS.keys()),
-                    format_func=lambda x: f"{config.PROVIDERS[x][\"name\"]}{' (Servidor Backend) ✓' if config.server_key_for(x) or x == 'nvidia' else ''}",
+                    format_func=lambda x: config.PROVIDERS[x]["name"],
                 )
             with ai_mod_col:
                 model_input = st.text_input(t("model"), placeholder=t("ph_model"))

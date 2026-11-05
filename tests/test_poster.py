@@ -358,3 +358,29 @@ def test_all_templates_adapt_to_selected_paper():
         for p in POSTER_SIZES:
             res = normalize_poster({"template": tid, "paper": p, "sections": []})
             assert res["paper"] == p, f"Template {tid} failed to adapt to paper {p}"
+
+
+def test_cors_allowed_github_pages(client):
+    r = client.get("/api/config", headers={"Origin": "https://jluckmay.github.io"})
+    assert r.status_code == 200
+    assert r.headers.get("Access-Control-Allow-Origin") == "https://jluckmay.github.io"
+
+
+def test_cors_allowed_local(client):
+    r = client.get("/api/config", headers={"Origin": "http://127.0.0.1:5000"})
+    assert r.status_code == 200
+    assert r.headers.get("Access-Control-Allow-Origin") == "http://127.0.0.1:5000"
+
+
+def test_cors_unauthorized_origin_rejected(client):
+    r = client.get("/api/config", headers={"Origin": "https://unauthorized-domain.com"})
+    assert r.status_code == 403
+
+
+def test_cors_options_preflight(client):
+    r_ok = client.options("/api/generate", headers={"Origin": "https://jluckmay.github.io"})
+    assert r_ok.status_code in (200, 204)
+    assert r_ok.headers.get("Access-Control-Allow-Origin") == "https://jluckmay.github.io"
+
+    r_bad = client.options("/api/generate", headers={"Origin": "https://attacker.com"})
+    assert r_bad.status_code == 403
