@@ -126,17 +126,42 @@ _ALIAS_LOOKUP = {_norm(a): sid for sid, al in SECTION_ALIASES.items() for a in a
 _NUM = re.compile(r"^\s*(?:\d+(?:\.\d+)*\.?|[IVX]+\.)\s+")
 
 
+_GEO_KEYWORDS = {"brazil", "brasil", "minas", "gerais", "mg", "sp", "rj", "federal", "state"}
+
+
+def _extract_all_emails(text: str) -> List[str]:
+    """Extrai emails tanto no formato tradicional quanto agrupado {a, b}@dominio."""
+    emails = []
+    for m in re.finditer(r"\{([^}]+)\}\s*@([\w-]+(?:\.[\w-]+)+)", text):
+        users = [u.strip() for u in m.group(1).split(",")]
+        domain = m.group(2)
+        for u in users:
+            if u:
+                emails.append(f"{u}@{domain}")
+    clean_text = re.sub(r"\{[^}]+\}\s*@[\w-]+(?:\.[\w-]+)+", " ", text)
+    for m in re.finditer(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", clean_text):
+        emails.append(m.group(0))
+    return emails
+
+
 def _heading(line: str) -> tuple[str, str] | None:
     """Retorna (id_da_seção, texto_inline) se a linha for um cabeçalho conhecido."""
     raw = line.strip()
-    if not raw or len(raw) > 160:
+    if not raw:
         return None
     body = _NUM.sub("", raw)
-    m = re.match(r"^(.{3,40}?)\s*[:—–-]\s+(.+)$", body)
-    if m and _ALIAS_LOOKUP.get(_norm(m.group(1))):
-        return _ALIAS_LOOKUP[_norm(m.group(1))], m.group(2)
-    sid = _ALIAS_LOOKUP.get(_norm(body.rstrip(":")))
-    return (sid, "") if sid else None
+    # Suporta cabeçalhos inline com ponto, dois pontos ou travessão (ex: "Abstract. Texto...", "Resumo: Texto...")
+    m = re.match(r"^([A-Za-z\u00C0-\u00FF]{3,30})\s*[:.—–-]\s*(.*)$", body)
+    if m:
+        term = _norm(m.group(1))
+        sid = _ALIAS_LOOKUP.get(term)
+        if sid:
+            return sid, m.group(2).strip()
+    if len(raw) <= 160:
+        sid = _ALIAS_LOOKUP.get(_norm(body.rstrip(":.")))
+        if sid:
+            return sid, ""
+    return None
 
 
 def _condense(text: str, limit: int) -> str:
@@ -150,9 +175,32 @@ def _condense(text: str, limit: int) -> str:
 
 def _classify_header_line(line: str) -> tuple[List[str], List[str]]:
     """Separa autores e afiliações de uma linha do cabeçalho do artigo."""
-    clean = re.sub(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", " ", line).strip()
+    clean = re.sub(r"\{[^}]+\}\s*@[\w-]+(?:\.[\w-]+)+", " ", line)
+    clean = re.sub(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", " ", clean).strip()
     if not clean:
         return [], []
+
+    # Se a linha contiver múltiplos blocos separados por vírgula (comum em layouts SBC/ACM)
+    if "," in clean:
+        clauses = [c.strip() for c in clean.split(",") if c.strip()]
+        auth_out = []
+        aff_out = []
+        for c in clauses:
+            c_clean = re.sub(r"^[\d*†‡^]+\s*", "", c).strip()
+            tokens = c_clean.split()
+            norm_tokens = [_norm(t) for t in tokens]
+            if not norm_tokens:
+                continue
+            is_aff = any(t in _INST_PREFIXES or t in _INST_ACRONYMS or t in _GEO_KEYWORDS for t in norm_tokens)
+            if is_aff:
+                aff_out.append(c_clean)
+            else:
+                author_name = re.sub(r"[\d*†‡^]+$", "", c).strip()
+                if author_name:
+                    auth_out.append(author_name)
+        if auth_out or aff_out:
+            return auth_out, aff_out
+
     tokens = clean.split()
     norm_tokens = [_norm(t) for t in tokens]
 
@@ -172,8 +220,8 @@ def _classify_header_line(line: str) -> tuple[List[str], List[str]]:
         auth = " ".join(name_tokens).strip()
         return ([auth] if auth else []), ([aff] if aff else [])
 
-    # Se não for exclusivamente institucional, é nome de autor
-    return [clean], []
+    author_name = re.sub(r"[\d*†‡^]+$", "", clean).strip()
+    return ([author_name] if author_name else []), []
 
 
 def heuristic_parse(text: str) -> Dict[str, Any]:
@@ -199,7 +247,7 @@ def heuristic_parse(text: str) -> Dict[str, Any]:
 
     # Identificar emails e tokens de nome de usuário dos autores
     header_blob = "\n".join(head)
-    emails = re.findall(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", header_blob or text[:3000])
+    emails = _extract_all_emails(header_blob or text[:3000])
     email_tokens = set()
     for e in emails:
         user = e.split("@")[0]
