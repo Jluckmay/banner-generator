@@ -2803,7 +2803,13 @@ $("#themeBtn").onclick = () => {
   const d = document.documentElement;
   d.dataset.theme = d.dataset.theme === "dark" ? "light" : "dark";
 };
-$("#useAI").onchange = e => $("#aiBox").classList.toggle("hidden", !e.target.checked);
+const useAiCheckbox = $("#useAI") || $("#useAi");
+if (useAiCheckbox) {
+  useAiCheckbox.onchange = e => {
+    const box = $("#aiBox");
+    if (box) box.classList.toggle("hidden", !e.target.checked);
+  };
+}
 
 /* ---------- Drag and Drop / Upload do Trabalho ---------- */
 const drop = $("#drop");
@@ -2826,9 +2832,10 @@ $("#extractBtn").onclick = async () => {
   const fd = new FormData();
   fd.append("file", docFile);
   fd.append("language", posterLang);
-  fd.append("mode", $("#useAI").checked ? "ai" : "basic");
-  const selectedProvider = $("#provider").value;
-  let modelVal = $("#model").value.trim();
+  const isAi = Boolean(($("#useAI") || $("#useAi"))?.checked);
+  fd.append("mode", isAi ? "ai" : "basic");
+  const selectedProvider = $("#provider") ? $("#provider").value : "nvidia";
+  let modelVal = $("#model") ? $("#model").value.trim() : "";
   if (!modelVal && selectedProvider === "nvidia") {
     modelVal = "nvidia/nemotron-3.5-super-vl-120b-a12b";
   } else if (!modelVal && CFG.providers && CFG.providers[selectedProvider]) {
@@ -2836,7 +2843,7 @@ $("#extractBtn").onclick = async () => {
   }
   fd.append("provider", selectedProvider);
   fd.append("model", modelVal);
-  fd.append("api_key", $("#apiKey").value);
+  fd.append("api_key", $("#apiKey") ? $("#apiKey").value : "");
 
   $("#extractBtn").disabled = true;
   showMsg(msg, t("working"), "ok");
@@ -2852,7 +2859,7 @@ $("#extractBtn").onclick = async () => {
     }
     if (!r.ok) return showMsg(msg, j.error || "Erro na extração (" + r.status + ")", "err");
     fillFromExtract(j.poster);
-    if (j.warning && $("#useAI").checked) {
+    if (j.warning && isAi) {
       showMsg(msg, "⚠️ A extração com IA falhou (" + j.warning + "). Os campos foram preenchidos pela extração básica (sem IA).", "err");
     } else {
       showMsg(msg, t("extracted") + (j.warning ? " (" + j.warning + ")" : ""), j.warning ? "err" : "ok");
