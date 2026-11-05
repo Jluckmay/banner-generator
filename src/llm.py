@@ -11,7 +11,7 @@ import requests
 from .config import PROVIDERS, server_key_for
 from .i18n import DEFAULT_SECTION_IDS
 
-TIMEOUT_S = 120
+TIMEOUT_S = 45
 
 _LANG_NAME = {"pt-BR": "Brazilian Portuguese", "en-US": "American English"}
 
@@ -125,7 +125,8 @@ def chat(provider: str, api_key: str, model: str | None, system: str, user: str)
                     models_to_try.append(fb)
 
         last_exc: Exception | None = None
-        for m_name in models_to_try:
+        for idx, m_name in enumerate(models_to_try):
+            req_timeout = 35 if idx == 0 else 20
             try:
                 r = requests.post(
                     cfg["url"],
@@ -134,13 +135,18 @@ def chat(provider: str, api_key: str, model: str | None, system: str, user: str)
                         "model": m_name, "temperature": 0.2, "max_tokens": 4096,
                         "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
                     },
-                    timeout=TIMEOUT_S,
+                    timeout=req_timeout,
                 )
                 r.raise_for_status()
                 return r.json()["choices"][0]["message"]["content"]
             except requests.HTTPError as exc:
                 last_exc = exc
                 if exc.response.status_code in (404, 410) and len(models_to_try) > 1:
+                    continue
+                raise
+            except requests.RequestException as exc:
+                last_exc = exc
+                if len(models_to_try) > 1:
                     continue
                 raise
         if last_exc:
@@ -174,7 +180,7 @@ def parse_json_object(raw: str) -> Dict[str, Any]:
 
 def ai_extract(text: str, language: str, provider: str, api_key: str, model: str | None) -> Dict[str, Any]:
     system = SYSTEM_PROMPT.replace("{language}", _LANG_NAME.get(language, "Brazilian Portuguese"))
-    obj = parse_json_object(chat(provider, api_key, model, system, f"<paper>\n{text[:60000]}\n</paper>"))
+    obj = parse_json_object(chat(provider, api_key, model, system, f"<paper>\n{text[:35000]}\n</paper>"))
     secs = obj.get("sections") if isinstance(obj.get("sections"), dict) else {}
     return {
         "title": obj.get("title") or "",

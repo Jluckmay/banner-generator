@@ -160,7 +160,7 @@ def api_extract() -> Tuple[Response, int] | Response:
         try:
             key = resolve_key(provider, user_key)
             result = ai_extract(text, language, provider, key, request.form.get("model") or None)
-        except LLMError as exc:
+        except Exception as exc:
             warning = str(exc)
             # Se a chamada com a chave padrão do servidor falhar (ex: 410 Gone / expirada), tenta provedores alternativos no servidor
             if not user_key:
@@ -171,7 +171,7 @@ def api_extract() -> Tuple[Response, int] | Response:
                             result = ai_extract(text, language, fallback_p, f_key, None)
                             warning = ""
                             break
-                        except LLMError:
+                        except Exception:
                             continue
     if result is None:
         result = heuristic_parse(text)
@@ -267,6 +267,11 @@ def api_generate() -> Tuple[Response, int] | Response:
 @app.errorhandler(413)
 def too_large(_: Exception) -> Tuple[Response, int]:
     return _err("Upload maior que o limite permitido.", 413)
+
+
+@app.errorhandler(500)
+def handle_500(_: Exception) -> Tuple[Response, int]:
+    return _err("Erro interno no servidor. Tente novamente em instantes.", 500)
 
 
 def main() -> None:

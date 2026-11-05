@@ -2844,10 +2844,15 @@ $("#extractBtn").onclick = async () => {
     const r = await robustFetch(getApiBase() + "/api/extract", { method: "POST", body: fd }, {
       onStatusUpdate: (stMsg) => showMsg(msg, stMsg, "ok")
     });
-    const j = await r.json();
-    if (!r.ok) return showMsg(msg, j.error || "Erro na extração", "err");
+    let j = {};
+    try {
+      j = await r.json();
+    } catch {
+      return showMsg(msg, `Erro no servidor (${r.status}). O serviço pode estar reiniciando ou temporariamente indisponível. Tente novamente em instantes.`, "err");
+    }
+    if (!r.ok) return showMsg(msg, j.error || "Erro na extração (" + r.status + ")", "err");
     fillFromExtract(j.poster);
-    if (j.warning && $("#useAi").checked) {
+    if (j.warning && $("#useAI").checked) {
       showMsg(msg, "⚠️ A extração com IA falhou (" + j.warning + "). Os campos foram preenchidos pela extração básica (sem IA).", "err");
     } else {
       showMsg(msg, t("extracted") + (j.warning ? " (" + j.warning + ")" : ""), j.warning ? "err" : "ok");
