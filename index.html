@@ -2847,7 +2847,11 @@ $("#extractBtn").onclick = async () => {
     const j = await r.json();
     if (!r.ok) return showMsg(msg, j.error || "Erro na extração", "err");
     fillFromExtract(j.poster);
-    showMsg(msg, t("extracted") + (j.warning ? " (" + j.warning + ")" : ""), j.warning ? "err" : "ok");
+    if (j.warning && $("#useAi").checked) {
+      showMsg(msg, "⚠️ A extração com IA falhou (" + j.warning + "). Os campos foram preenchidos pela extração básica (sem IA).", "err");
+    } else {
+      showMsg(msg, t("extracted") + (j.warning ? " (" + j.warning + ")" : ""), j.warning ? "err" : "ok");
+    }
   } catch (e) {
     showMsg(msg, String(e), "err");
   } finally {
