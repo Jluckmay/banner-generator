@@ -6,15 +6,11 @@ from typing import Dict, List
 
 # Seções padrão (ordem do pôster).
 DEFAULT_SECTION_IDS: List[str] = [
-    "abstract",
     "introduction",
-    "objectives",
     "methods",
     "results",
-    "discussion",
     "conclusions",
     "references",
-    "acknowledgments",
 ]
 
 LABELS: Dict[str, Dict[str, str]] = {

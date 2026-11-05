@@ -91,6 +91,8 @@ def _inline(text: str) -> str:
     esc = escape_latex(text)
     esc = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", esc)
     esc = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"\\textit{\1}", esc)
+    # Citações numéricas flutuantes como expoente (superscript) para economizar espaço
+    esc = re.sub(r"\[(\d+(?:[,\s–-]+\d+)*)\]", r"\\textsuperscript{[\1]}", esc)
     return re.sub(r"\x00M(\d+)\x00", lambda m: maths[int(m.group(1))], esc)
 
 

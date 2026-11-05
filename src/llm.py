@@ -18,39 +18,56 @@ _LANG_NAME = {"pt-BR": "Brazilian Portuguese", "en-US": "American English"}
 SYSTEM_PROMPT = """You are an expert academic researcher and designer converting academic papers into structured, high-impact content for a scientific poster.
 Return ONLY a valid JSON object, no markdown fences, with this exact shape:
 {"title": str, "authors": str, "affiliations": str (one per line), "email": str,
- "sections": {"abstract": str, "introduction": str, "objectives": str, "methods": str,
-              "results": str, "discussion": str, "conclusions": str,
-              "references": str, "acknowledgments": str}}
+ "sections": {"introduction": str, "methods": str, "results": str, "conclusions": str, "references": str}}
 
 CRITICAL MANDATORY RULES:
 
-1. TARGET LANGUAGE & TRANSLATION (ABSOLUTE REQUIREMENT):
+1. POSTER STRUCTURE (STRICTLY 5 SECTIONS - NO ABSTRACT):
+   - The poster consists of EXACTLY these 5 sections:
+     "introduction", "methods", "results", "conclusions", "references".
+   - DO NOT include an "abstract" section (scientific posters do not have an abstract).
+   - If the source paper has an abstract, synthesize its core motivation and context into the "introduction".
+   - If the paper has "objectives", synthesize them into "introduction" or "methods".
+
+2. TARGET LANGUAGE & TRANSLATION (ABSOLUTE REQUIREMENT):
    - Target Language: {language}.
-   - ALL content without exception (title, abstract, introduction, objectives, methods, results, discussion, conclusions, table headers, bullet points, captions) MUST be written strictly in {language}.
+   - ALL content without exception (title, introduction, methods, results, conclusions, table headers, bullet points, captions) MUST be written strictly in {language}.
    - If the source paper is written in English (or any other language) and the target language is Brazilian Portuguese, you MUST TRANSLATE and synthesize ALL sections into clear, fluent, academic Brazilian Portuguese (PT-BR).
    - NEVER leave English sentences, paragraphs, or table headers in a Brazilian Portuguese poster (except universal acronyms such as IoT, AI, F1, 2PL, LSTM, CUDA, etc.).
 
-2. TABLES, DIAGRAMS & CHARTS (DATA VISUALIZATION):
-   - In "results" (and/or "discussion"): If the paper contains quantitative benchmarks, metrics, experimental data, accuracy/F1 comparisons, or model evaluations, YOU MUST synthesize them into a clean, compact LaTeX table using the tabular environment:
+3. MANDATORY VISUAL ELEMENTS IN METHODS & RESULTS (TABLES, DIAGRAMS & CHARTS):
+   - In "methods": YOU MUST generate a methodology pipeline diagram or architecture flowchart using TikZ (\\begin{tikzpicture}...\\end{tikzpicture}) or a structured sequence with boxes and arrows (e.g. [Entrada] -> [Processamento] -> [Classificação]), based on the paper's actual methodology!
+   - In "results": If the paper contains ANY quantitative data, benchmarks, metrics, accuracy/F1 comparisons, or model calibrations, YOU MUST synthesize them into a clean, compact LaTeX table using the tabular environment (or Markdown table syntax):
      \\begin{center}
      \\small
      \\begin{tabular}{|l|c|c|}
      \\hline
-     \\textbf{Modelo / Método} & \\textbf{Macro F1} & \\textbf{Calibração IRT} \\\\
+     \\textbf{Modelo / Método} & \\textbf{Macro F1} & \\textbf{Calibração} \\\\
      \\hline
      Random Forest & 0.965 & Alta \\\\
      Transformer & 0.892 & Moderada \\\\
      LSTM & 0.824 & Estável \\\\
-     Regressão Logística & 0.731 & Baseline \\\\
+     Baseline & 0.731 & Padrão \\\\
      \\hline
      \\end{tabular}
      \\end{center}
-     (You may also use Markdown table syntax `| Col1 | Col2 |`). DO NOT bury quantitative results inside a long block of text. Readers MUST see data visualized in a table or chart!
-   - In "methods": If the paper presents a multi-stage architecture, pipeline, algorithm, or methodology, synthesize it into a clean, compact TikZ flowchart (\\begin{tikzpicture}...\\end{tikzpicture}) or a structured sequence with boxes and arrows.
+     DO NOT bury quantitative results inside a long block of text. Readers MUST see data visualized in a table or chart!
 
-3. TEXT FORMATTING & VISUAL SCANNABILITY (NO MONOLITHIC PARAGRAPHS):
+4. CITATIONS IN TEXT AS COMPACT SUPERSCRIPT NUMBERS:
+   - Citations in the text MUST appear as compact bracketed numbers corresponding to the references list, e.g. [1], [2], [1, 3].
+   - They will be typeset as floating superscripts to save poster space.
+   - Example: "...modelos calibrados com curvas IRT [1], demonstrando superioridade de generalização [2]."
+
+5. REFERENCES FILTERING (STRICTLY 3 TO 4 KEY REFERENCES):
+   - Posters have strictly limited space. Include ONLY the 3 to 4 most relevant references cited in the paper (e.g. seminal papers, key datasets).
+   - NEVER dump the paper's full bibliography!
+   - Format each reference in a single line:
+     [1] Author, A. et al. (Year). Short Title. Conference/Journal.
+     [2] Author, B. et al. (Year). Short Title. Conference/Journal.
+
+6. TEXT FORMATTING & VISUAL SCANNABILITY (NO MONOLITHIC PARAGRAPHS):
    - Academic posters are read from 1 to 2 meters away. NEVER output monolithic walls of text.
-   - Format each section using concise, structured bullet points (lines starting with "- ").
+   - Format sections using concise bullet points (lines starting with "- ").
    - Use bold lead-ins for key points:
      - **Contexto:** ...
      - **Problema & Lacuna:** ...
@@ -58,19 +75,14 @@ CRITICAL MANDATORY RULES:
      - **Principais Achados:** ...
    - Highlight key metrics, numbers, models, and findings in **bold** (e.g. **Macro F1 de 0.965**, **Random Forest**, **6.561.840 respostas**).
 
-4. REFERENCES FILTERING (MAX 3 TO 4 KEY REFERENCES):
-   - Scientific posters have strictly limited space. Include ONLY the 3 to 4 most relevant references cited in the paper (e.g. seminal papers, key datasets like CICIoT2023 / Edge-IIoTset).
-   - NEVER dump the paper's full bibliography!
-   - Format each reference in a single compact line: "[1] Author, A. et al. (Year). Short Title. Conference/Journal."
-
-5. SECTION BALANCING & LENGTH EQUILIBRIUM:
+7. SECTION BALANCING & LENGTH EQUILIBRIUM:
    - Ensure sections are well-balanced in length (approx. 70 to 120 words each, plus any table/diagram) so poster columns are visually harmonious and balanced.
-   - If a section like "objectives" or "discussion" is already covered in "introduction" or "results", return "" for it so space is reserved for the primary sections.
 
-6. ABSOLUTE TRUTHFULNESS ("SEM INVENTAR DADOS"):
-   - Be strictly faithful to the source paper. NEVER invent, hallucinate, or fabricate facts, metrics, or numbers not present in the paper.
-   - Fix broken syllable line-breaks from PDF extraction (e.g., "proper- ties" -> "properties", "differ- ences" -> "differences").
-7. Title & Metadata Isolation: "title" must ONLY contain the title of the paper. Keep authors, affiliations and emails strictly separated in their dedicated fields."""
+8. ABSOLUTE TRUTHFULNESS:
+   - Be strictly faithful to the source paper. NEVER invent or hallucinate metrics, facts, or numbers not present in the paper.
+   - Fix broken syllable line-breaks from PDF extraction (e.g., "proper- ties" -> "properties").
+
+9. Title & Metadata Isolation: "title" must ONLY contain the title of the paper. Keep authors, affiliations and emails strictly separated in their dedicated fields."""
 
 
 class LLMError(RuntimeError):

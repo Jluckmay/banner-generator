@@ -59,6 +59,12 @@ def test_bold_italic_and_lists():
     assert "\\begin{itemize}" in tex and "\\begin{enumerate}" in tex
 
 
+def test_superscript_citations():
+    tex = text_to_latex("Segundo modelo [1] e estudos anteriores [2, 3].")
+    assert r"\textsuperscript{[1]}" in tex
+    assert r"\textsuperscript{[2, 3]}" in tex
+
+
 
 
 def test_markdown_and_latex_tables_and_diagrams():
@@ -93,7 +99,8 @@ def test_json_object_repairs_latex_escapes():
 def test_heuristic_parse():
     r = heuristic_parse(PAPER)
     ids = {s["id"] for s in r["sections"]}
-    assert {"abstract", "introduction", "methods", "results", "conclusions", "references"} <= ids
+    assert {"introduction", "methods", "results", "conclusions", "references"} <= ids
+    assert "abstract" not in ids
     assert r["title"].startswith("Efeito da luz")
     assert r["email"] == "maria@exemplo.edu"
 
@@ -474,10 +481,11 @@ Al Nuaimi, T., Al Zaabi, S., Alyilieli, M., AlMaskari, M. (2023). A comparative 
     assert "Department of Computer Science" in parsed["affiliations"]
     assert "lucas.mayrinck@dcc.ufmg.br" in parsed["email"] or "lfvieira@dcc.ufmg.br" in parsed["email"]
 
-    # Verify Abstract was parsed into sections, not dumped into authors!
-    abstract_sec = next(s for s in parsed["sections"] if s["id"] == "abstract")
-    assert "Aggregate benchmark scores" in abstract_sec["content"]
+    # Verify Abstract was parsed into introduction, not dumped into authors and not as standalone abstract
+    intro_sec = next(s for s in parsed["sections"] if s["id"] == "introduction")
+    assert "Aggregate benchmark scores" in intro_sec["content"]
     assert "Aggregate benchmark scores" not in parsed["authors"]
+    assert not any(s["id"] == "abstract" for s in parsed["sections"])
 
     # Verify Methods and Results were both extracted
     methods_sec = next(s for s in parsed["sections"] if s["id"] == "methods")

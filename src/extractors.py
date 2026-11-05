@@ -370,7 +370,18 @@ def heuristic_parse(text: str) -> Dict[str, Any]:
     authors = ", ".join(unique_authors)
     affiliations = "\n".join(dict.fromkeys([af.strip() for af in affiliations_list if af.strip()]))
 
-    limits = {"abstract": 1200, "references": 800, "acknowledgments": 400}
+    # Sem sessão de resumo no pôster: se abstract existir, incorpora no início da Introdução
+    if "abstract" in sections:
+        if "introduction" not in sections:
+            sections["introduction"] = sections["abstract"]
+        else:
+            sections["introduction"] = sections["abstract"] + ["\n"] + sections["introduction"]
+    if "objectives" in sections and "introduction" in sections:
+        sections["introduction"].extend(sections["objectives"])
+    if "discussion" in sections and "results" in sections:
+        sections["results"].extend(sections["discussion"])
+
+    limits = {"references": 800, "acknowledgments": 400}
     out_sections = []
     from .i18n import DEFAULT_SECTION_IDS
 
@@ -381,11 +392,6 @@ def heuristic_parse(text: str) -> Dict[str, Any]:
             if content:
                 body = _format_references(content) if sid == "references" else _unwrap(clean_hyphens(content))
                 out_sections.append({"id": sid, "content": _condense(body, limits.get(sid, 1100))})
-    for sid, buf in sections.items():
-        if sid not in DEFAULT_SECTION_IDS:
-            content = "\n".join(buf).strip()
-            if content:
-                out_sections.append({"id": sid, "content": _condense(_unwrap(clean_hyphens(content)), 1100)})
 
     return {
         "title": title[:300].strip(),

@@ -61,7 +61,62 @@
   --amber-dark: #b45309;
   --amber-glow: rgba(217, 119, 6, 0.2);
   --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.08);
-  --viewer-bg: #1c202a;
+  --viewer-bg: #dbe2ec;
+}
+
+:root[data-theme="light"] .draft-poster {
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+:root[data-theme="light"] .pdf-page-wrapper {
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+
+.sec-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.btn-snippet, .btn-snippet-img {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--amber);
+  background: var(--bg-subtle);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--btn-radius);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.btn-snippet:hover, .btn-snippet-img:hover {
+  background: var(--amber-glow);
+  border-color: var(--amber);
+  color: var(--fg-bright);
+  transform: translateY(-1px);
+}
+.draft-cite {
+  font-size: 0.72em;
+  vertical-align: super;
+  color: var(--tpl-accent, #2563eb);
+  font-weight: 700;
+  padding: 0 1px;
+}
+.draft-refs-list {
+  margin: 2px 0 4px 18px;
+  padding: 0;
+  font-size: 0.88em;
+  line-height: 1.35;
+}
+.draft-refs-list li {
+  margin-bottom: 4px;
+  word-break: break-word;
 }
 
 * { box-sizing: border-box; }
@@ -2463,7 +2518,7 @@ const DEFAULT_CFG = {
     "anthropic": { "name": "Anthropic Claude", "default_model": "claude-3-5-haiku-latest", "server_key": false },
     "deepseek": { "name": "DeepSeek", "default_model": "deepseek-chat", "server_key": false }
   },
-  sections: ["abstract", "introduction", "objectives", "methods", "results", "conclusions", "references"],
+  sections: ["introduction", "methods", "results", "conclusions", "references"],
   labels: {
     "pt-BR": {
       "abstract": "Resumo", "introduction": "Introdução", "objectives": "Objetivos",
@@ -2824,6 +2879,11 @@ function setDoc(f) {
   if (!f) return;
   docFile = f;
   $("#docName").textContent = "📄 " + f.name + " (" + (f.size / 1024).toFixed(1) + " KB)";
+  // Dispara extração automática imediatamente após o upload/seleção do trabalho
+  const btn = $("#extractBtn");
+  if (btn) {
+    btn.click();
+  }
 }
 
 $("#extractBtn").onclick = async () => {
@@ -2879,6 +2939,7 @@ function fillFromExtract(p) {
   const byId = Object.fromEntries(sections.map(s => [s.id, s]));
   const out = [];
   (p.sections || []).forEach(s => {
+    if (s.id === "abstract") return;
     const old = byId[s.id];
     const n = old || newSec(s.id);
     n.content = s.content || "";
@@ -3025,13 +3086,16 @@ function renderSections() {
         <button class="sm" type="button" data-act="down" ${i === sections.length - 1 ? "disabled" : ""} title="Mover abaixo">↓</button>
         <button class="sm" type="button" data-act="del" title="${t("remove")}">✕</button>
       </div>
-      <textarea data-f="content" placeholder="${t("sec_text")}">${safeContent}</textarea>
-      <div style="margin-top:6px;">
-        <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;color:var(--amber);font-weight:600;font-family:var(--font-mono);font-size:11px;">
-          [+ 📎 ${t("add_img")}]
+      <div class="sec-toolbar">
+        <button type="button" class="btn-snippet" data-snip="table" title="Inserir modelo de Tabela quantitativa">+ 📊 Tabela</button>
+        <button type="button" class="btn-snippet" data-snip="tikz" title="Inserir modelo de Fluxograma / Diagrama TikZ">+ 🔀 Diagrama TikZ</button>
+        <button type="button" class="btn-snippet" data-snip="bullets" title="Inserir lista de Tópicos destacados">+ 📋 Tópicos</button>
+        <label class="btn-snippet-img" title="Anexar arquivo de Imagem ou Gráfico">
+          + 📎 Anexar Imagem
           <input type="file" accept="image/*" multiple class="hidden" data-f="img">
         </label>
       </div>
+      <textarea data-f="content" placeholder="${t("sec_text")}">${safeContent}</textarea>
       <div class="thumbs">${s.images.map((im, j) => thumbHTML(im, true, "sec" + i, j)).join("")}</div>
     </div>
   `;
@@ -3051,6 +3115,27 @@ function renderSections() {
       addFiles(e.target.files, s.images);
       renderSections();
     };
+    div.querySelectorAll("[data-snip]").forEach(btn => {
+      btn.onclick = () => {
+        const type = btn.dataset.snip;
+        const ta = div.querySelector("textarea[data-f=content]");
+        if (!ta) return;
+        let snippet = "";
+        if (type === "table") {
+          snippet = "\n\n| Parâmetro / Métrica | Baseline | Proposto | Variação |\n| :--- | :---: | :---: | :---: |\n| Acurácia (%) | 84.2 | 96.5 | +12.3% |\n| Macro F1 | 0.81 | 0.94 | +16.0% |\n| Latência (ms) | 48.0 | 19.5 | -59.4% |\n";
+        } else if (type === "tikz") {
+          snippet = "\n\n\\begin{tikzpicture}\n\\node[draw, rounded corners, fill=blue!10] (A) {Entrada / Dados};\n\\node[draw, rounded corners, fill=green!10, right=of A] (B) {Processamento & Extração};\n\\node[draw, rounded corners, fill=red!10, right=of B] (C) {Resultados & Classificação};\n\\draw[->, thick] (A) -- (B);\n\\draw[->, thick] (B) -- (C);\n\\end{tikzpicture}\n";
+        } else if (type === "bullets") {
+          snippet = "\n\n- **Objetivo Central:** Descrição sintética da meta da pesquisa.\n- **Destaque Metodológico:** Abordagem técnica e parâmetros chave.\n- **Impacto Principal:** Resultado quantitativo comprovado [1].\n";
+        }
+        const start = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
+        const end = ta.selectionEnd != null ? ta.selectionEnd : ta.value.length;
+        ta.value = ta.value.substring(0, start) + snippet + ta.value.substring(end);
+        s.content = ta.value;
+        ta.focus();
+        ta.dispatchEvent(new Event("input"));
+      };
+    });
     div.querySelectorAll("[data-act]").forEach(b => {
       b.onclick = () => {
         const a = b.dataset.act;
@@ -3111,21 +3196,17 @@ $("#quickSampleBtn").onclick = () => {
   }
 
   const sampleTexts = isEn ? {
-    abstract: "This study evaluates the effects of distinct light wavelengths on plant development and dry biomass accumulation over 45 controlled days.",
-    introduction: "Electromagnetic spectrum modulation is critical for photosynthetic efficiency and physiological regulation.\n- Blue spectrum enhances chlorophyll synthesis\n- Red spectrum maximizes photon absorption",
-    objectives: "1. Quantify dry matter accumulation under selective LED spectra.\n2. Develop a predictive growth model for controlled indoor agriculture.",
-    methods: "Factorial trial with 80 seedlings distributed across 4 climate chambers automated via IoT sensors.",
-    results: "Biomass increased by 34% under combined spectrum (blue + red) with a 12-day reduction in cycle duration.",
-    conclusions: "Precision lighting demonstrates superior technical and energy efficiency for sustainable indoor vertical farming.",
-    references: "[1] Smith, J. et al. (2024). Photobiology & Plant Physiology.\n[2] Doe, J. & Turing, A. (2023). Precision Agricultural Systems."
+    introduction: "Electromagnetic spectrum modulation is critical for photosynthetic efficiency and physiological regulation [1].\n- **Blue spectrum:** enhances chlorophyll synthesis and stomatal conductance\n- **Red spectrum:** maximizes photon absorption and biomass accumulation [2]",
+    methods: "Factorial trial with 80 seedlings distributed across 4 climate chambers automated via IoT sensors.\n\n\\begin{tikzpicture}\n\\node[draw, rounded corners, fill=blue!10] (A) {Seedling Selection (80)};\n\\node[draw, rounded corners, fill=green!10, right=of A] (B) {IoT Climate Chambers};\n\\node[draw, rounded corners, fill=red!10, right=of B] (C) {Biomass & Growth Analysis};\n\\draw[->, thick] (A) -- (B);\n\\draw[->, thick] (B) -- (C);\n\\end{tikzpicture}\n- Environmental parameters logged at 1 Hz\n- Spectral irradiance calibrated with spectroradiometer [1]",
+    results: "Comparative dry biomass accumulation and growth cycle acceleration:\n\n| Spectrum Wavelength | Dry Biomass (g) | Cycle Reduction | Photon Efficiency |\n| :--- | :---: | :---: | :---: |\n| White Control | 4.2 ± 0.3 | Baseline (0d) | 1.0x |\n| Blue (450nm) | 5.1 ± 0.4 | -4 days | 1.2x |\n| Red (660nm) | 5.8 ± 0.5 | -7 days | 1.4x |\n| Combined (Blue + Red) | **7.3 ± 0.4** | **-12 days** | **1.8x** |\n\n- Biomass increased by 34% under combined spectrum with 12-day cycle reduction [2].",
+    conclusions: "- **Precision lighting** demonstrates superior technical and energy efficiency for sustainable indoor vertical farming.\n- Dual-band illumination optimizes commercial yield while significantly lowering HVAC operational costs.",
+    references: "[1] Smith, J. et al. (2024). Photobiology & Plant Physiology. Nature Plants, 10:142–155.\n[2] Doe, J. & Turing, A. (2023). Precision Agricultural Systems. IEEE Transactions on AgriTech, 18:204–215."
   } : {
-    abstract: "Este estudo avalia os efeitos de diferentes comprimentos de onda luminosa no desenvolvimento e biomassa vegetal ao longo de 45 dias controlados.",
-    introduction: "A modulação do espectro eletromagnético é determinante para a eficiência fotossintética e regulação fisiológica.\n- Espectro azul estimula clorofila\n- Espectro vermelho maximiza absorção",
-    objectives: "1. Quantificar acúmulo de matéria seca sob radiação seletiva.\n2. Propor modelo preditivo de crescimento acelerado em ambientes fechados.",
-    methods: "Ensaio fatorial com 80 mudas divididas em 4 câmaras climatizadas automatizadas via sensores IoT.",
-    results: "A biomassa aumentou em 34% sob espectro combinado (azul + vermelho) com redução do ciclo em 12 dias.",
-    conclusions: "A iluminação de precisão demonstra viabilidade técnica e energética superior para cultivo protegido.",
-    references: "[1] Silva, M. et al. (2024). Fotobiologia Aplicada. Journal of Plant Science.\n[2] Santos, C. (2023). Sistemas Agrícolas de Precisão."
+    introduction: "A modulação do espectro eletromagnético é determinante para a eficiência fotossintética e regulação fisiológica [1].\n- **Espectro azul:** estimula síntese de clorofila e abertura estomática\n- **Espectro vermelho:** maximiza absorção e taxa de fixação de carbono [2]",
+    methods: "Ensaio fatorial com 80 mudas divididas em 4 câmaras climatizadas automatizadas via sensores IoT.\n\n\\begin{tikzpicture}\n\\node[draw, rounded corners, fill=blue!10] (A) {Seleção 80 Mudas};\n\\node[draw, rounded corners, fill=green!10, right=of A] (B) {Câmaras Climatizadas IoT};\n\\node[draw, rounded corners, fill=red!10, right=of B] (C) {Análise de Biomassa};\n\\draw[->, thick] (A) -- (B);\n\\draw[->, thick] (B) -- (C);\n\\end{tikzpicture}\n- Parâmetros ambientais monitorados a 1 Hz\n- Irradiância espectral calibrada por espectrorradiômetro [1]",
+    results: "Comparativo de acúmulo de biomassa seca e aceleração do ciclo produtivo:\n\n| Comprimento de Onda | Biomassa Seca (g) | Redução de Ciclo | Eficiência Fotônica |\n| :--- | :---: | :---: | :---: |\n| Controle Branco | 4.2 ± 0.3 | Baseline (0d) | 1.0x |\n| Azul (450nm) | 5.1 ± 0.4 | -4 dias | 1.2x |\n| Vermelho (660nm) | 5.8 ± 0.5 | -7 dias | 1.4x |\n| Combinado (Azul + Vermelho) | **7.3 ± 0.4** | **-12 dias** | **1.8x** |\n\n- A biomassa aumentou em 34% sob espectro combinado com redução do ciclo em 12 dias [2].",
+    conclusions: "- **Iluminação de precisão** demonstra viabilidade técnica e energética superior para cultivo protegido vertical.\n- Espectro duplo otimiza rendimento comercial com expressiva economia nos custos operacionais.",
+    references: "[1] Silva, M. et al. (2024). Fotobiologia Vegetal Aplicada. Journal of Plant Science, 12:88–99.\n[2] Santos, C. & Rostova, E. (2023). Sistemas Agrícolas de Precisão. Revista Brasileira de Agrocomputação, 15:45–58."
   };
 
   sections.forEach(s => {
@@ -3323,7 +3404,8 @@ function updateDraftPreview() {
     grid.innerHTML = activeSections.map(s => {
       const sTitle = (s.title && s.title.trim()) || secLabel(s.id) || dFb.section;
       const sBody = (s.content && s.content.trim()) || dFb.content;
-      const bodyHtml = renderDraftBody(sBody);
+      const isRef = s.id === "references" || /refer[eê]nc/i.test(sTitle);
+      const bodyHtml = isRef ? renderDraftReferences(sBody) : renderDraftBody(sBody);
       const imgHtml = (s.images && s.images.length > 0)
         ? `<div class="draft-block-imgs">${s.images.slice(0, 2).map(im => `<img class="draft-block-img" src="${escapeHtml(im.url || im.preview || "")}" alt="Figura">`).join("")}</div>`
         : "";
@@ -3348,7 +3430,40 @@ function formatInlineText(str) {
   let esc = escapeHtml(str);
   esc = esc.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
   esc = esc.replace(/(?<!\w)\*([^*]+?)\*(?!\w)/g, "<em>$1</em>");
+  // Citações flutuantes numéricas [1], [2, 3] como expoente (superscript)
+  esc = esc.replace(/\[(\d+(?:[,\s–-]+\d+)*)\]/g, '<sup class="draft-cite">[$1]</sup>');
   return esc;
+}
+
+function renderDraftReferences(text) {
+  if (!text) return "";
+  let clean = text.trim();
+  clean = clean.replace(/\s*(\[\d{1,3}\])\s*/g, "\n$1 ");
+  clean = clean.replace(/(?<=[.\s])(\d{1,2}\.\s+[A-ZÀ-ÿ])/g, "\n$1");
+  clean = clean.replace(/(?<=[.\d\n])\s+([A-ZÀ-ÿ][a-zA-ZÀ-ÿ'-]+,\s+[A-ZÀ-ÿ]\.)/g, "\n$1");
+
+  const lines = clean.split("\n").map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return "";
+
+  const startRx = /^(?:\[\d{1,3}\]|\d{1,2}\.\s+[A-ZÀ-ÿ]|[A-ZÀ-ÿ][a-zA-ZÀ-ÿ'-]+,\s+[A-ZÀ-ÿ]\.|\b[A-ZÀ-ÿ][a-zA-ZÀ-ÿ'-]+\s+et\s+al\.)/;
+  const entries = [];
+  for (const ln of lines) {
+    if (entries.length && !startRx.test(ln)) {
+      entries[entries.length - 1] += " " + ln;
+    } else {
+      entries.push(ln);
+    }
+  }
+
+  const items = entries.slice(0, 5).map(ln => {
+    return ln.replace(/^\s*(?:\[\d+\]|\d+[.)]|[-*•])\s*/, "").trim();
+  }).filter(Boolean);
+
+  if (!items.length) return `<p style="margin:0 0 4px;">${formatInlineText(clean)}</p>`;
+
+  return `<ol class="draft-refs-list">` +
+    items.map(it => `<li>${formatInlineText(it)}</li>`).join("") +
+    `</ol>`;
 }
 
 function renderLatexTabularToHtml(tex) {
@@ -4102,9 +4217,9 @@ function init() {
 
   populateProviders();
 
-  // Seções padrão
+  // Seções padrão (estritamente 5 seções fundamentais)
   if (sections.length === 0) {
-    ["abstract", "introduction", "objectives", "methods", "results", "conclusions", "references"].forEach(id => {
+    (CFG.sections || ["introduction", "methods", "results", "conclusions", "references"]).forEach(id => {
       sections.push(newSec(id));
     });
   }
