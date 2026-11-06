@@ -1,53 +1,303 @@
-# banner-generator — Gerador de Pôsteres & Academic Banner Compiler
+<div align="center">
 
-Gera pôsteres e banners acadêmicos de alta resolução em **LaTeX → PDF** com suporte a múltiplos motores (`tikzposter`, `article`, `sciposter`, `a0poster`, `beamerposter`), com localização completa e consistente em **pt-BR** ("pôster") e **en-US** ("banner").
+# ~/ banner-generator
 
-Oferece duas interfaces completas e integradas:
-1. **Aplicação Web (SPA)**: HTML5 + CSS3 responsivo (mobile a desktop) + JavaScript puro, com visualizador PDF.js integrado e rascunho em tempo real, pronta para GitHub Pages e servidor backend Flask.
-2. **Aplicação Local Streamlit (`app.py`)**: Interface interativa em Python puro com geração direta, upload de arquivos, chamada a modelos de IA, customização de paleta e visualização em alta resolução.
+**Academic Poster & Banner Compiler · LaTeX to High-Resolution PDF**
+
+[![CI & Test Suite](https://github.com/Jluckmay/banner-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/Jluckmay/banner-generator/actions/workflows/ci.yml)
+[![Deploy GitHub Pages](https://github.com/Jluckmay/banner-generator/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/Jluckmay/banner-generator/actions/workflows/deploy-pages.yml)
+[![Release & Executable](https://github.com/Jluckmay/banner-generator/actions/workflows/release.yml/badge.svg)](https://github.com/Jluckmay/banner-generator/actions/workflows/release.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+
+**Language / Idioma:**  
+[English](#english) · [Português](#português)
+
+</div>
 
 ---
 
-## 📁 Estrutura do Projeto / Project Structure
+<a name="english"></a>
+# English
+
+**banner-generator** is an automated academic banner and poster compiler that converts structured content or scientific publications directly into print-ready **LaTeX → PDF** documents. Supporting multiple underlying LaTeX engines (`tikzposter`, `article`, `sciposter`, `a0poster`, `beamerposter`), it provides rigorous, consistent localization in **en-US** ("banner") and **pt-BR** ("pôster").
+
+The project includes three complete and integrated interfaces:
+1. **Web SPA Frontend (`index.html`)**: Responsive HTML5 + CSS3 + vanilla JavaScript application with PDF.js viewer, real-time draft rendering, dark/light theme awareness, and GitHub Pages compatibility.
+2. **Local Streamlit Application (`app.py`)**: Native Python interactive application for local generation, AI extraction, custom palette management, and instant compilation.
+3. **Standalone Desktop Executable (`banner-generator.exe`)**: Self-contained Windows application packaged via PyInstaller that starts a secure local backend and automatically opens the browser at `http://127.0.0.1:5000`.
+
+---
+
+## 📁 Project Structure
+
+```
+banner-generator/
+├── .github/
+│   └── workflows/
+│       ├── ci.yml               # Automated test suite and security checks on GitHub Actions
+│       ├── deploy-pages.yml     # Continuous deployment of static SPA to GitHub Pages
+│       └── release.yml          # Automated Windows .exe build and GitHub Release publisher
+├── assets/                      # Visual identity, logos, and icons
+│   ├── icons/                   # Multi-format favicons (SVG, PNG, ICO)
+│   └── README.md                # Asset design specifications
+├── examples/                    # Sample payloads and API usage files
+│   ├── sample_poster.json       # Portuguese sample poster payload (60x90 cm)
+│   ├── sample_poster_en.json    # English sample banner payload (60x90 cm)
+│   └── README.md                # cURL API testing guide
+├── scripts/                     # Utility scripts and deployment tooling
+│   └── build_exe.py             # PyInstaller standalone desktop compiler script
+├── src/                         # Backend application core
+│   ├── a0poster.py              # UZH / LiRI template renderer (a0poster engine)
+│   ├── article.py               # Academic Red template renderer (article engine)
+│   ├── beamer.py                # TU Delft template renderer (beamerposter engine)
+│   ├── config.py                # Dimensions (POSTER_SIZES), providers, limits, and server keys
+│   ├── extractors.py            # Text extraction from PDF, DOCX, TXT, MD, and TEX
+│   ├── i18n.py                  # Localization dictionaries (pt-BR / en-US) and section aliases
+│   ├── images.py                # Safe image decoding, sanitization, and downscaling
+│   ├── latex.py                 # pdflatex compilation, font fitting, and zip generation
+│   ├── llm.py                   # Multi-provider LLM client (NVIDIA NIM, Gemini, OpenAI, Claude, DeepSeek)
+│   ├── poster.py                # Poster normalization, input sanitization, and validation
+│   ├── sciposter.py             # Mostra IC template renderer (sciposter engine)
+│   └── templates.py             # Registry and palettes for all 9 visual templates
+├── tests/                       # Automated test suite (pytest)
+│   ├── conftest.py              # Test fixtures and Flask test client
+│   └── test_poster.py           # Unit, integration, security, and rendering tests
+├── .dockerignore                # Ignored files for Docker build
+├── .gitignore                   # Ignored files for Git tracking
+├── .nojekyll                    # Disables Jekyll processing on GitHub Pages
+├── app.py                       # Local interactive Streamlit application
+├── desktop.py                   # Desktop launcher for standalone executable
+├── Dockerfile                   # TeX Live + Gunicorn Docker container for Render/Cloud
+├── index.html                   # Web SPA interface (HTML5 + CSS3 + vanilla JS)
+├── LICENSE                      # MIT Open Source License
+├── pyproject.toml               # Python package metadata and configuration
+├── render.yaml                  # Infrastructure-as-Code deployment manifest for Render
+├── requirements.txt             # Project runtime dependencies
+└── server.py                    # Flask web server and REST API endpoints
+```
+
+---
+
+## 🚀 Key Features
+
+### 1. Canonical 5-Section Academic Layout (No Redundant Abstract)
+- Standardized strictly to the **5 canonical scientific poster sections**:
+  - **Introduction** (includes high-level context and problem motivation)
+  - **Methodology**
+  - **Results**
+  - **Conclusions**
+  - **References**
+- Eliminates redundant abstract blocks to maximize high-value space for data, tables, and figures.
+
+### 2. Intelligent Document Extraction & Data Visualization
+- **Automatic Upload Extraction**: Extraction begins immediately upon selecting or dragging any document (`.pdf`, `.docx`, `.txt`, `.md`, `.tex`).
+- **AI-Powered Synthesis** (NVIDIA NIM, Google Gemini, OpenAI, Anthropic Claude, DeepSeek):
+  - **LaTeX Tables in Results**: Automatically synthesizes quantitative benchmarks, metrics, and comparisons into clean LaTeX tabular environments (`tabular` / `booktabs`).
+  - **TikZ Flowcharts in Methodology**: Generates vector pipeline diagrams (`tikzpicture`) illustrating multi-stage architectures, workflows, and experimental setups.
+  - **Strict Truthfulness**: Zero hallucination; pure fidelity to explicit paper findings and data.
+  - **Target Language Enforcement**: Full translation into the selected language (`en-US` or `pt-BR`).
+- **Heuristic Fallback** (Offline / No Key): Robust header-based regex parser that extracts sections, authors, affiliations, and emails without needing AI credentials.
+
+### 3. Visual Resources in Manual Fill Mode
+- Quick-insert snippet toolbars in each section:
+  - `+ 📊 Table`: Inserts clean comparative quantitative table templates (Markdown / LaTeX).
+  - `+ 🔀 TikZ Diagram`: Inserts structured methodology pipeline flowcharts.
+  - `+ 📋 Bullets`: Inserts scannable bullet points with bold lead-ins.
+  - `+ 📎 Attach Image`: Direct upload of high-resolution figures.
+
+### 4. Floating Superscript Citations & Clean References List
+- **Floating Citations**: Numerical in-text citations like `[1]`, `[2, 3]` are automatically formatted as superscripts (`\textsuperscript{[1]}` in LaTeX and `<sup class="draft-cite">[1]</sup>` in HTML draft preview) to conserve space.
+- **Structured References List**: References render as an enumerated list (`<ol class="draft-refs-list">`) with individual breaks, preventing wall-of-text blocks.
+
+### 5. 9 Visual Style Templates
+- **Classic**: Traditional academic conference format (`tikzposter`).
+- **Modern**: Clean vertical gradient and contemporary typography (`tikzposter`).
+- **Minimal**: Editorial, minimalist layout with high contrast (`tikzposter`).
+- **Bold**: High-contrast warm blocks (`tikzposter`).
+- **Emerald Waves**: Curved accents in emerald tones (`tikzposter`).
+- **Academic Red**: Contrasting header/footer accent bars with up to 5 footer logos (`article`).
+- **Mostra IC**: Scientific symposium layout with callout boxes (`sciposter`).
+- **UZH / LiRI**: Swiss academic institutional typography (`a0poster`).
+- **TU Delft**: Modular column layout based on Beamer (`beamerposter`).
+
+### 6. Universal Dimensions & Orientations
+- **Standard Dimensions**: **60 × 90 cm** (Default), **90 × 120 cm**, **A0** (84.1 × 118.9 cm), **A1** (59.4 × 84.1 cm), **A2** (42.0 × 59.4 cm).
+- **Orientations**: **Portrait** (Vertical) and **Landscape** (Horizontal).
+- Dynamic CSS aspect ratio scaling and zero distortion across dimensions.
+
+### 7. Advanced Customization & Theming
+- **Hexadecimal Color Palette & Dark Popover**:
+  - Dedicated control over 6 document colors (`Accent`, `Title`, `Authors`, `Body`, `Caption`, `Background`).
+  - Monospace hex inputs (`#RRGGBB`) with bidirectional synchronization.
+  - Floating dark color picker with 2D saturation/brightness canvas, hue slider, eyedropper tool (*EyeDropper API*), and template preset chips.
+- **Theme-Aware Preview**: Preview container smoothly toggles between Dark Mode and Light Mode backgrounds.
+- **Custom LaTeX Template (`.tex`)**: Upload and direct compilation of external `.tex` templates.
+
+### 8. Full Mobile & Desktop Responsiveness
+- Fluid layout tested from 360px mobile viewports up to 1920px+ desktop monitors.
+- Mobile bottom sheet drawer for live previews and floating action bar.
+
+### 9. Export & Zero-Overflow Compilation
+- **Live Draft Preview**: Instant client-side DOM rendering.
+- **PDF.js Viewer**: High-fidelity page viewer with zoom and fit controls.
+- **Zero-Overflow**: Automatic font scale-down algorithm if content exceeds paper boundaries.
+- **Direct Downloads**: Print-ready PDF or full LaTeX source bundle (`.zip` containing `poster.tex` and figures).
+
+---
+
+## 🔒 Security & Sandboxing
+
+- **LaTeX Isolation**: Strict execution with `pdflatex -no-shell-escape` and hard timeout (`LATEX_TIMEOUT_S = 150`).
+- **Dangerous Command Blacklist**: Blocks `\input`, `\write18`, `\openin`, `\catcode`, `\def`, `\let`, `\directlua`, and TeX macros.
+- **Math Sanitization**: Formula expressions `$...$` whitelisted against safe LaTeX math tokens.
+- **Zero-Storage**: Ephemeral build sandboxes created via `tempfile.mkdtemp` and purged after response delivery.
+- **XML / DOCX Protection**: Word documents sanitized using `defusedxml`.
+- **Image Hygiene**: Re-encoded and verified through Pillow before inclusion.
+- **Strict Web Security**: Content-Security-Policy (CSP) headers, XSS escaping, and explicit memory release with `URL.revokeObjectURL`.
+
+---
+
+## 🛠️ Installation & Execution
+
+### Prerequisites
+- Python ≥ 3.10
+- LaTeX distribution installed (`pdflatex` in PATH): [TeX Live](https://www.tug.org/texlive/) or [MiKTeX](https://miktex.org/).
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Jluckmay/banner-generator.git
+cd banner-generator
+
+# 2. Install dependencies
+pip install -r requirements.txt
+```
+
+### Option A: Standalone Windows Executable (.exe)
+1. Download `banner-generator-windows-x64.zip` from the latest [GitHub Release](https://github.com/Jluckmay/banner-generator/releases).
+2. Extract the ZIP and double-click `banner-generator.exe`.
+3. The app starts a local server and opens `http://127.0.0.1:5000` in your default browser.
+
+To compile the executable yourself:
+```bash
+python scripts/build_exe.py
+```
+Output is created in `dist/banner-generator.exe`.
+
+### Option B: Local Streamlit Application (`app.py`)
+Run the interactive Streamlit interface:
+```bash
+streamlit run app.py
+```
+Opens in your browser at `http://localhost:8501`.
+
+### Option C: Flask REST Server + Web SPA (`server.py`)
+Run the Flask API backend and serve the Web SPA:
+```bash
+python server.py
+```
+Available at `http://127.0.0.1:5000`.
+
+### Running Automated Tests
+```bash
+python -m pytest
+```
+
+---
+
+## 🔑 AI Providers & Credentials
+
+API keys can be supplied directly in the interface (per request, never saved to disk) or via environment variables:
+```bash
+export NVIDIA_API_KEY="your-key"
+export GEMINI_API_KEY="your-key"
+export OPENAI_API_KEY="your-key"
+export ANTHROPIC_API_KEY="your-key"
+export DEEPSEEK_API_KEY="your-key"
+```
+
+---
+
+## 🌐 Hosting & Architecture
+
+- **GitHub Pages Frontend (`https://jluckmay.github.io/banner-generator/`)**:
+  - Static SPA deployed via `.github/workflows/deploy-pages.yml`.
+  - **Dynamic Backend Resolution**: Points to Render production backend on GitHub Pages, and to `http://127.0.0.1:5000` when running locally.
+  - **Non-Blocking Initialization**: Background server wake-up never blocks UI editing or draft preview.
+- **Render Production Backend (`https://poster-generator-nkqh.onrender.com`)**:
+  - Dockerized TeX Live and Gunicorn backend configured in `render.yaml`.
+  - **Strict CORS Policy**: Restricted exclusively to `https://jluckmay.github.io` and local origins.
+  - **Cold-Start Resilience**: Heartbeat pinging and `robustFetch` retry logic.
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+<br><br>
+
+---
+
+<a name="português"></a>
+# Português
+
+O **banner-generator** é um compilador e gerador automatizado de pôsteres e banners acadêmicos que converte dados estruturados ou artigos científicos diretamente em documentos **LaTeX → PDF** prontos para impressão. Com suporte a múltiplos motores LaTeX (`tikzposter`, `article`, `sciposter`, `a0poster`, `beamerposter`), oferece localização completa e consistente em **pt-BR** ("pôster") e **en-US** ("banner").
+
+O projeto conta com três interfaces completas e integradas:
+1. **Aplicação Web SPA (`index.html`)**: Aplicação responsiva em HTML5 + CSS3 + JavaScript puro com visualizador PDF.js integrado, rascunho em tempo real, suporte dinâmico a temas claro/escuro e deploy no GitHub Pages.
+2. **Aplicação Local Streamlit (`app.py`)**: Interface interativa nativa em Python para geração direta, extração por IA, customização de paleta e compilação instantânea.
+3. **Executável Desktop Standalone (`banner-generator.exe`)**: Aplicativo autônomo para Windows gerado via PyInstaller que inicia o servidor local seguro e abre automaticamente o navegador padrão em `http://127.0.0.1:5000`.
+
+---
+
+## 📁 Estrutura do Projeto
 
 ```
 banner-generator/
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml               # Pipeline de testes automatizados e lint no GitHub Actions
-│       └── deploy-pages.yml     # Deploy contínuo do frontend estático no GitHub Pages
+│       ├── deploy-pages.yml     # Deploy contínuo da SPA estática no GitHub Pages
+│       └── release.yml          # Build automatizado de .exe para Windows e publicação em Releases
 ├── assets/                      # Identidade visual, logos e ícones
 │   ├── icons/                   # Favicons em múltiplos formatos (SVG, PNG, ICO)
 │   └── README.md                # Especificações de design dos assets
 ├── examples/                    # Payloads e exemplos de uso via API
 │   ├── sample_poster.json       # Exemplo em Português (padrão 60x90 cm)
 │   ├── sample_poster_en.json    # Exemplo em Inglês (padrão 60x90 cm)
-│   └── README.md                # Guia de teste com cURL
+│   └── README.md                # Guia de teste da API com cURL
+├── scripts/                     # Scripts utilitários e automação
+│   └── build_exe.py             # Script de compilação do executável standalone com PyInstaller
 ├── src/                         # Núcleo da aplicação backend
-│   ├── a0poster.py              # Renderizador do template UZH / LiRI (a0poster)
-│   ├── article.py               # Renderizador do template Academic Red (article)
-│   ├── beamer.py                # Renderizador do template TU Delft (beamerposter)
-│   ├── config.py                # Dimensões (POSTER_SIZES), provedores e limites
+│   ├── a0poster.py              # Renderizador do template UZH / LiRI (motor a0poster)
+│   ├── article.py               # Renderizador do template Academic Red (motor article)
+│   ├── beamer.py                # Renderizador do template TU Delft (motor beamerposter)
+│   ├── config.py                # Dimensões (POSTER_SIZES), provedores, limites e chaves de servidor
 │   ├── extractors.py            # Extração de texto de PDF, DOCX, TXT, MD e TEX
-│   ├── i18n.py                  # Dicionários de localização (pt-BR / en-US)
-│   ├── images.py                # Sanitização e decodificação segura de imagens
-│   ├── latex.py                 # Compilação pdflatex, fit de fonte e geração zip
-│   ├── llm.py                   # Integração com provedores de IA para sumarização
-│   ├── poster.py                # Normalização e validação dos dados do pôster
-│   ├── sciposter.py             # Renderizador do template Mostra IC (sciposter)
+│   ├── i18n.py                  # Dicionários de localização (pt-BR / en-US) e aliases de seções
+│   ├── images.py                # Sanitização, decodificação segura e redimensionamento de imagens
+│   ├── latex.py                 # Compilação pdflatex, ajuste de fonte e geração zip
+│   ├── llm.py                   # Cliente multi-provedor de IA (NVIDIA NIM, Gemini, OpenAI, Claude, DeepSeek)
+│   ├── poster.py                # Normalização, sanitização e validação dos dados do pôster
+│   ├── sciposter.py             # Renderizador do template Mostra IC (motor sciposter)
 │   └── templates.py             # Registro e paletas dos 9 templates disponíveis
 ├── tests/                       # Suíte de testes automatizados (pytest)
 │   ├── conftest.py              # Fixtures e cliente de teste Flask
-│   └── test_poster.py           # Testes de validação, compilação e segurança
+│   └── test_poster.py           # Testes unitários, de integração, segurança e compilação
 ├── .dockerignore                # Arquivos ignorados no build Docker
 ├── .gitignore                   # Arquivos ignorados no versionamento Git
 ├── .nojekyll                    # Desativa processamento Jekyll no GitHub Pages
 ├── app.py                       # Interface local interativa em Streamlit
-├── Dockerfile                   # Configuração de container Docker para Render/Cloud
-├── index.html                   # Interface SPA web (HTML5 + CSS3 responsivo + JS puro)
-├── pyproject.toml               # Metadados do pacote Python
-├── render.yaml                  # Manifesto de deploy Infrastructure-as-Code no Render
-├── requirements.txt             # Dependências do projeto
+├── desktop.py                   # Launcher desktop para executável standalone
+├── Dockerfile                   # Container Docker com TeX Live e Gunicorn para Render/Cloud
+├── index.html                   # Interface Web SPA (HTML5 + CSS3 + JS puro)
+├── LICENSE                      # Licença de Código Aberto MIT
+├── pyproject.toml               # Metadados do pacote Python e configurações de build
+├── render.yaml                  # Manifesto Infrastructure-as-Code para deploy no Render
+├── requirements.txt             # Dependências de execução do projeto
 └── server.py                    # Servidor web Flask e rotas da API REST
 ```
 
@@ -55,69 +305,80 @@ banner-generator/
 
 ## 🚀 Recursos Principais
 
-1. **Dois Modos de Entrada & Síntese Inteligente**:
-   - **Manual**: Preenchimento interativo de seções com pré-visualização em tempo real (Rascunho Interativo).
-   - **Upload de Artigo**: Envio de arquivos acadêmicos (`.pdf`, `.docx`, `.txt`, `.md`, `.tex`).
-     - *Com IA* (Google Gemini, OpenAI, Claude, DeepSeek, NVIDIA NIM): Sumariza e formata o trabalho diretamente nas seções do banner.
-       - **Tabelas e Diagramas em LaTeX**: A IA estrutura automaticamente dados quantitativos em tabelas LaTeX (`tabular` / `booktabs`) na seção de Resultados e fluxogramas em TikZ (`tikzpicture`) na Metodologia, **sem inventar dados** (fidelidade estrita aos dados e etapas do trabalho original).
-     - *Sem IA / Heurística*: Extração estrutural automática baseada em cabeçalhos (Resumo, Introdução, Metodologia, Resultados, etc.).
+### 1. Estrutura Canônica de 5 Seções (Sem Resumo Redundante)
+- Padronização estrita nas **5 seções canônicas de eventos científicos**:
+  - **Introdução** (inclui motivação e contexto do trabalho)
+  - **Metodologia**
+  - **Resultados**
+  - **Conclusões**
+  - **Referências**
+- Eliminação de blocos redundantes de resumo para maximizar espaço útil para dados, tabelas e figuras.
 
-2. **9 Templates de Estilo Visual**:
-   - **Clássico**: Visual tradicional acadêmico para conferências (`tikzposter`).
-   - **Moderno**: Gradiente vertical e visual contemporâneo leve (`tikzposter`).
-   - **Minimalista**: Estilo editorial neutro e limpo (`tikzposter`).
-   - **Ousado**: Blocos envolventes com cores quentes (`tikzposter`).
-   - **Ondas Esmeralda**: Acabamento com curvas e tons esmeralda (`tikzposter`).
-   - **Academic Red**: Barras de contraste superior/inferior, suporte a até 5 logos de rodapé (`article`).
-   - **Mostra IC**: Estilo científico com caixas de destaque (`sciposter`).
-   - **UZH / LiRI**: Layout institucional suíço com tipografia sóbria (`a0poster`).
-   - **TU Delft**: Estrutura modular em colunas com base em Beamer (`beamerposter`).
+### 2. Extração Inteligente de Artigos & Visualização de Dados
+- **Extração Automática no Upload**: O processamento inicia imediatamente ao selecionar ou soltar qualquer documento (`.pdf`, `.docx`, `.txt`, `.md`, `.tex`).
+- **Síntese por Inteligência Artificial** (NVIDIA NIM, Google Gemini, OpenAI, Anthropic Claude, DeepSeek):
+  - **Tabelas LaTeX nos Resultados**: Estrutura dados quantitativos, métricas e benchmarks automaticamente em ambientes tabulares limpos (`tabular` / `booktabs`).
+  - **Fluxogramas TikZ na Metodologia**: Cria diagramas vetoriais (`tikzpicture`) ilustrando etapas metodológicas, pipelines e arquiteturas.
+  - **Fidelidade Estrita**: Zero alucinação; total adesão aos dados e fatos do artigo original.
+  - **Consistência de Idioma**: Tradução acadêmica fluida para o idioma do pôster (`pt-BR` ou `en-US`).
+- **Extração Heurística Offline** (Sem Chave): Parser robusto baseado em expressões regulares que identifica cabeçalhos, autores, filiações e emails sem depender de internet ou IA.
 
-3. **Dimensões e Adaptação Universal**:
-   - Dimensões disponíveis: **60 × 90 cm** (Padrão), **90 × 120 cm**, **A0** (84.1 × 118.9 cm), **A1** (59.4 × 84.1 cm), **A2** (42.0 × 59.4 cm).
-   - Orientações: **Retrato** (Portrait) e **Paisagem** (Landscape).
-   - O template se adapta dinamicamente às dimensões selecionadas sem forçar distorções no design.
+### 3. Recursos Visuais no Preenchimento Manual
+- Barra de snippets rápidos em cada seção:
+  - `+ 📊 Tabela`: Insere modelos de tabelas comparativas formatadas (Markdown / LaTeX).
+  - `+ 🔀 Diagrama TikZ`: Insere modelos de pipelines metodológicos visuais.
+  - `+ 📋 Tópicos`: Insere listas com lead-ins em negrito.
+  - `+ 📎 Anexar Imagem`: Upload direto de figuras de alta resolução.
 
-4. **Customização Avançada**:
-   - **Paleta de Cores Hexadecimal & Seletor Dark Integrado**:
-     - Controle individual das 6 cores do documento (`Destaque`, `Título`, `Autores`, `Texto`, `Legenda`, `Fundo`).
-     - Campos hexadecimais explícitos (`#RRGGBB`) em fonte monospace para digitação e cópia/cola direta.
-     - Seletor flutuante escuro exclusivo (*Dark Hex Popover*) com canvas 2D de saturação/brilho, slider de matiz (*hue*), ferramenta conta-gotas (*EyeDropper*) e chips de presets dos templates.
-     - Suporte nativo ao modo escuro via `<meta name="color-scheme" content="dark">`.
-   - **Template LaTeX Próprio (`.tex`)**: Upload e compilação direta de templates `.tex` personalizados com suporte a todos os parâmetros.
+### 4. Citações Numéricas Flutuantes & Lista de Referências Limpa
+- **Citações Flutuantes**: Notações numéricas no texto (ex: `[1]`, `[2, 3]`) convertidas para expoente sobrescrito (`\textsuperscript{[1]}` no LaTeX e `<sup class="draft-cite">[1]</sup>` no preview), economizando espaço horizontal.
+- **Lista Estruturada de Referências**: Exibição como lista ordenada `<ol class="draft-refs-list">` com separação individual, evitando blocos densos de texto corrido.
 
-5. **Responsividade Total (Mobile a Desktop)**:
-   - Layout fluido testado em viewports de 360px a 1920px+.
-   - No celular/tablet, a pré-visualização conta com drawer deslizante (bottom sheet), visualizador responsivo e barra de ações flutuante.
-   - Prevenção de overflow horizontal e quebras de botões em telas pequenas.
+### 5. 9 Templates de Estilo Visual
+- **Clássico**: Visual tradicional acadêmico para conferências (`tikzposter`).
+- **Moderno**: Gradiente vertical e visual contemporâneo leve (`tikzposter`).
+- **Minimalista**: Estilo editorial neutro e limpo (`tikzposter`).
+- **Ousado**: Blocos envolventes com cores quentes (`tikzposter`).
+- **Ondas Esmeralda**: Acabamento com curvas e tons esmeralda (`tikzposter`).
+- **Academic Red**: Barras de contraste superior/inferior, suporte a até 5 logos de rodapé (`article`).
+- **Mostra IC**: Estilo científico com caixas de destaque (`sciposter`).
+- **UZH / LiRI**: Layout institucional suíço com tipografia sóbria (`a0poster`).
+- **TU Delft**: Estrutura modular em colunas com base em Beamer (`beamerposter`).
 
-6. **Consistência de Nomenclatura e Idiomas**:
-   - **Marca**: Preservada como `~/ banner-generator` em todas as interfaces.
-   - **Português (`pt-BR`)**: Terminologia consistente de "pôster" (*Título do Pôster*, *Idioma do Pôster*, *Visualização do Pôster*, *Gerar Pôster*).
-   - **Inglês (`en-US`)**: Terminologia consistente de "banner" (*Banner Title*, *Banner Language*, *Banner Preview*, *Generate Banner*).
-   - Alternância instantânea de idioma com sincronização de rótulos, botões, placeholders e rascunho ao vivo.
+### 6. Dimensões Universais e Orientações
+- **Dimensões Suportadas**: **60 × 90 cm** (Padrão), **90 × 120 cm**, **A0** (84.1 × 118.9 cm), **A1** (59.4 × 84.1 cm), **A2** (42.0 × 59.4 cm).
+- **Orientações**: **Retrato** (Vertical) e **Paisagem** (Landscape).
+- Adaptação proporcional dinâmica sem distorções no design.
 
-7. **Elementos Acadêmicos Ricos**:
-   - Upload de imagens e gráficos por seção (com legendas de figuras numeradas).
-   - Logotipos em cabeçalho (até 2) e rodapé (até 5).
-   - Geração automática de QR Code para links de artigos e repositórios.
-   - Algoritmo de redução e ajuste de fonte automático para prevenir transbordamento de página (*Zero-Overflow*).
+### 7. Customização Avançada & Temas
+- **Paleta de Cores Hexadecimal & Seletor Dark Integrado**:
+  - Controle individual das 6 cores do documento (`Destaque`, `Título`, `Autores`, `Texto`, `Legenda`, `Fundo`).
+  - Campos hexadecimais explícitos (`#RRGGBB`) com sincronização bidirecional.
+  - Seletor flutuante escuro com canvas 2D de saturação/brilho, slider de matiz, conta-gotas (*EyeDropper API*) e chips de presets dos templates.
+- **Fundo do Preview Dinâmico**: O container de pré-visualização alterna automaticamente entre temas claro e escuro.
+- **Template LaTeX Próprio (`.tex`)**: Upload e compilação direta de templates `.tex` personalizados.
 
-8. **Exportação**:
-   - Visualização dupla no navegador: **Rascunho Interativo** em tempo real e visualizador **PDF.js** com zoom e navegação.
-   - Download do PDF pronto para impressão de alta qualidade.
-   - Download de arquivo `.zip` contendo o código-fonte LaTeX (`poster.tex`) e todas as imagens/figuras incluídas.
+### 8. Responsividade Total (Mobile a Desktop)
+- Layout fluido testado em resoluções de 360px a 1920px+.
+- Drawer deslizante (bottom sheet) em dispositivos móveis e barra de ações flutuante.
+
+### 9. Exportação & Compilação Zero-Overflow
+- **Rascunho em Tempo Real**: Pré-visualização instantânea no cliente via DOM.
+- **Visualizador PDF.js**: Visualização em alta resolução com controles de zoom e ajuste.
+- **Zero-Overflow**: Algoritmo de redução inteligente de tamanho de fonte se o conteúdo exceder a página.
+- **Downloads Diretos**: PDF de alta resolução pronto para impressão ou pacote completo `.zip` contendo código-fonte LaTeX (`poster.tex`) e imagens.
 
 ---
 
-## 🔒 Segurança
+## 🔒 Segurança & Isolamento
 
-- **Isolamento de LaTeX**: Execução estrita com `pdflatex -no-shell-escape` e tempo limite configurado (`LATEX_TIMEOUT_S = 150`).
-- **Sanitização de Fórmulas Matemáticas**: Expressões matemáticas `$...$` validadas contra lista de comandos permitidos.
-- **Zero-Storage**: Todo processamento é efetuado em diretórios efêmeros (`tempfile.mkdtemp`), completamente removidos após a resposta.
-- **Prevenção de Ataques XML**: Documentos DOCX processados através de `defusedxml`.
-- **Higiene de Imagens**: Arquivos enviados são revalidados e decodificados com o Pillow antes de qualquer inclusão no documento.
-- **Segurança Web**: Cabeçalhos Content-Security-Policy (CSP) estritos, escape contra XSS e liberação explícita de memória em `URL.revokeObjectURL`.
+- **Isolamento de LaTeX**: Execução com `pdflatex -no-shell-escape` e tempo limite estrito (`LATEX_TIMEOUT_S = 150`).
+- **Bloqueio de Comandos Perigosos**: Interdição de `\input`, `\write18`, `\openin`, `\catcode`, `\def`, `\let`, `\directlua` e macros TeX de sistema.
+- **Sanitização Matemática**: Expressões `$...$` validadas contra lista de comandos matemáticos seguros.
+- **Zero-Storage**: Processamento em diretórios temporários efêmeros (`tempfile.mkdtemp`), completamente removidos após a resposta.
+- **Prevenção XML / DOCX**: Arquivos Word processados de forma segura através do `defusedxml`.
+- **Higiene de Imagens**: Revalidação e decodificação via Pillow antes da inclusão no documento.
+- **Segurança Web**: Políticas rigorosas de Content-Security-Policy (CSP), escape contra XSS e liberação explícita de memória via `URL.revokeObjectURL`.
 
 ---
 
@@ -136,167 +397,64 @@ cd banner-generator
 pip install -r requirements.txt
 ```
 
-### Opção A: Executar a Versão Local em Streamlit (`app.py`)
-Executa um **backend próprio e autônomo localmente**, realizando a compilação LaTeX via `pdflatex` da máquina e síntese de IA utilizando a chave de API fornecida diretamente pelo usuário (no formulário interativo ou em arquivo `.env` local):
+### Opção A: Executável Windows Standalone (.exe)
+1. Baixe o arquivo `banner-generator-windows-x64.zip` na aba [GitHub Releases](https://github.com/Jluckmay/banner-generator/releases).
+2. Extraia o ZIP e execute `banner-generator.exe`.
+3. A aplicação inicia o servidor local seguro e abre automaticamente `http://127.0.0.1:5000` no seu navegador padrão.
+
+Para compilar o executável na sua própria máquina:
+```bash
+python scripts/build_exe.py
+```
+O arquivo final é salvo em `dist/banner-generator.exe`.
+
+### Opção B: Interface Local em Streamlit (`app.py`)
+Inicia a aplicação Python interativa:
 ```bash
 streamlit run app.py
 ```
-A aplicação abrirá automaticamente no navegador em `http://localhost:8501`.
+Acessível no navegador em `http://localhost:8501`.
 
-### Opção B: Executar a Interface Web SPA com Servidor Local Flask (`server.py`)
-Inicia o servidor backend local Flask e serve a interface SPA:
+### Opção C: Servidor Flask REST + Interface Web SPA (`server.py`)
+Inicia o backend Flask e serve o frontend SPA:
 ```bash
 python server.py
 ```
-Acesse a aplicação web em `http://127.0.0.1:5000`. A página HTML local conecta-se automaticamente ao backend local (`http://127.0.0.1:5000`), sem bloqueios ou dependências externas, com a interface 100% liberada e utilizável imediatamente.
+Acessível em `http://127.0.0.1:5000`.
 
-### Rodar a Suíte de Testes Automatizados
+### Executar a Suíte de Testes Automatizados
 ```bash
 python -m pytest
 ```
 
 ---
 
-## 🔑 Provedores de IA
-As chaves de API podem ser inseridas diretamente na interface do usuário (recomendado para uso local ou Streamlit) ou configuradas via variáveis de ambiente:
+## 🔑 Provedores de IA & Credenciais
+
+As chaves de API podem ser inseridas diretamente na interface do usuário (por chamada, jamais gravadas em disco) ou configuradas como variáveis de ambiente:
 ```bash
+export NVIDIA_API_KEY="sua-chave"
 export GEMINI_API_KEY="sua-chave"
 export OPENAI_API_KEY="sua-chave"
 export ANTHROPIC_API_KEY="sua-chave"
 export DEEPSEEK_API_KEY="sua-chave"
-export NVIDIA_API_KEY="sua-chave"
 ```
 
 ---
 
-## 🌐 Hospedagem, Arquitetura e Políticas de Segurança
+## 🌐 Hospedagem & Arquitetura
 
-- **Página HTML no GitHub Pages (`https://jluckmay.github.io/banner-generator/`)**:
-  - Frontend SPA estático hospedado no GitHub Pages com deploy contínuo via `.github/workflows/deploy-pages.yml`.
-  - **Restrição Estrita de Conexão (CSP)**: A diretiva `connect-src` autoriza conexões exclusivamente com o backend oficial Render (`https://poster-generator-nkqh.onrender.com`), cdnjs e servidores locais.
-  - **Detecção Automática de Backend (`getApiBase`)**: Quando acessada a partir de `jluckmay.github.io`, a página utiliza automaticamente a conexão com o Render. Quando executada localmente (`localhost`, `127.0.0.1` ou `file:`), conecta-se ao servidor local (`http://127.0.0.1:5000`).
-  - **Usabilidade Contínua (Sem Travamentos)**: A verificação de conexão com o servidor roda em segundo plano. O usuário pode alternar templates, editar dados, configurar paleta de cores e visualizar o rascunho sem nenhum atraso ou travamento enquanto a conexão é estabelecida.
-
-- **Servidor Backend no Render (`https://poster-generator-nkqh.onrender.com`)**:
-  - Container Docker provisionado via `render.yaml` com TeX Live e Gunicorn.
-  - **Restrição Estrita de Origens (CORS)**: O servidor backend no Render permite conexões vindas exclusivamente do domínio `https://jluckmay.github.io` (além de origens locais para desenvolvimento). Requisições com origens não autorizadas são bloqueadas com HTTP 403 Forbidden.
-  - **Tolerância a Inatividade & Cold-Start**: Mecanismo `robustFetch` com retentativas automáticas e heartbeat periódico para manter o servidor ativo durante o uso.
+- **Frontend no GitHub Pages (`https://jluckmay.github.io/banner-generator/`)**:
+  - SPA estática hospedada via `.github/workflows/deploy-pages.yml`.
+  - **Resolução Dinâmica de Backend**: Conecta automaticamente ao backend Render no GitHub Pages e ao servidor local (`http://127.0.0.1:5000`) em execuções locais.
+  - **Inicialização Sem Travamento**: Verificações de servidor em background nunca bloqueiam a navegação ou o rascunho em tempo real.
+- **Backend de Produção no Render (`https://poster-generator-nkqh.onrender.com`)**:
+  - Container Docker com TeX Live e Gunicorn configurado em `render.yaml`.
+  - **CORS Estrito**: Restrito exclusivamente a `https://jluckmay.github.io` e ambientes de desenvolvimento local.
+  - **Resiliência a Cold-Start**: Heartbeats e retentativas automáticas (`robustFetch`).
 
 ---
 
-## 🇺🇸 English Documentation
+## 📄 Licença
 
-An automated academic poster and banner generator that converts structured data or scientific papers into print-ready **LaTeX → PDF** documents, supporting multiple underlying engines (`tikzposter`, `article`, `sciposter`, `a0poster`, `beamerposter`) with full localization in **pt-BR** ("pôster") and **en-US** ("banner").
-
-The project provides two complete interfaces:
-1. **Web SPA Frontend (`index.html`)**: Responsive HTML5 + CSS3 + vanilla JavaScript application with PDF.js viewer, real-time draft rendering, and GitHub Pages compatibility.
-2. **Local Desktop Streamlit App (`app.py`)**: Native Python interactive application for local generation, AI extraction, custom palette management, and instant compilation.
-
-### Key Features
-
-1. **Two Input Modes & AI Synthesis**:
-   - **Manual Mode**: Interactive field editing with live draft preview.
-   - **Paper Upload Mode**: Ingest scientific papers in `.pdf`, `.docx`, `.txt`, `.md`, or `.tex` formats.
-     - *AI-Powered* (Google Gemini, OpenAI, Claude, DeepSeek, NVIDIA NIM): Automatically summarizes and structures content into designated banner sections.
-       - **LaTeX Tables and Diagrams**: AI automatically formats numerical data into compact LaTeX tables (`tabular` / `booktabs`) in Results and process pipelines into TikZ flowcharts (`tikzpicture`) in Methodology, **with zero hallucination / strictly without inventing data** (pure fidelity to the explicit text and metrics).
-     - *Heuristic Fallback* (Offline / No Key): Automatically extracts sections using structural academic heading patterns (Abstract, Introduction, Methods, Results, Conclusions, etc.).
-
-2. **9 Visual Style Templates**:
-   - **Classic**: Traditional academic conference format (`tikzposter`).
-   - **Modern**: Clean vertical gradient and contemporary typography (`tikzposter`).
-   - **Minimal**: Editorial, minimalist layout with high contrast (`tikzposter`).
-   - **Bold**: High-contrast warm blocks (`tikzposter`).
-   - **Emerald Waves**: Curved accents in emerald tones (`tikzposter`).
-   - **Academic Red**: Contrasting header/footer accent bars with up to 5 footer logos (`article`).
-   - **Mostra IC**: Scientific symposium layout with callout boxes (`sciposter`).
-   - **UZH / LiRI**: Swiss academic institutional typography (`a0poster`).
-   - **TU Delft**: Modular column layout based on Beamer (`beamerposter`).
-
-3. **Decoupled Universal Dimensions**:
-   - Supported dimensions: **60 × 90 cm** (Default), **90 × 120 cm**, **A0** (84.1 × 118.9 cm), **A1** (59.4 × 84.1 cm), **A2** (42.0 × 59.4 cm).
-   - Orientations: **Portrait** (Vertical) and **Landscape** (Horizontal).
-   - Templates dynamically adjust to the chosen dimensions without forced layout constraints or visual distortion.
-
-4. **Advanced Customization**:
-   - **Hexadecimal Color Palette & Integrated Dark Popover**:
-     - Dedicated control for all 6 document colors (`Accent`, `Title`, `Authors`, `Body`, `Caption`, `Background`).
-     - Monospace hex input fields (`#RRGGBB`) with direct typing, pasting, and bidirectional synchronization.
-     - Custom *Dark Hex Popover* with 2D saturation/brightness canvas, hue slider, eyedropper tool (*EyeDropper API*), and template preset chips.
-     - Full dark theme consistency enforced with `<meta name="color-scheme" content="dark">`.
-   - **Custom LaTeX Template (`.tex`)**: Upload and direct compilation of external `.tex` templates.
-
-5. **Full Mobile & Desktop Responsiveness**:
-   - Fluid responsive layout optimized from 360px mobile viewports up to 1920px+ desktop displays.
-   - Mobile slide-out drawer (bottom sheet), floating action buttons, and touch-friendly controls.
-
-6. **Consistent Naming & Localization**:
-   - **Brand**: Preserved as `~/ banner-generator` across both languages.
-   - **Portuguese (`pt-BR`)**: Strictly uses "pôster" (*Título do Pôster*, *Idioma do Pôster*, *Visualização do Pôster*, *Gerar Pôster*).
-   - **English (`en-US`)**: Strictly uses "banner" (*Banner Title*, *Banner Language*, *Banner Preview*, *Generate Banner*).
-   - Live UI language switcher with synchronized labels, placeholders, and draft fallbacks.
-
-7. **Rich Academic Elements**:
-   - Section image/figure uploads with custom numbered captions.
-   - Header logos (up to 2) and footer logos (up to 5).
-   - Dynamic QR code generation for repository and paper links.
-   - Intelligent *Zero-Overflow* font fitting algorithm that automatically scales down point size if text overflows.
-
-8. **Export & Previews**:
-   - Real-time client-side interactive draft preview and compiled PDF.js viewer with zoom and page controls.
-   - Download high-resolution print-ready PDF.
-   - Download complete LaTeX source bundle (`.zip`) containing `poster.tex` and all referenced figures.
-
-### Installation & Prerequisites
-
-- **Python**: Version 3.10 or higher.
-- **LaTeX Distribution**: `pdflatex` available in `PATH` ([TeX Live](https://www.tug.org/texlive/) or [MiKTeX](https://miktex.org/)).
-
-```bash
-git clone https://github.com/Jluckmay/banner-generator.git
-cd banner-generator
-pip install -r requirements.txt
-```
-
-### Running Locally
-
-#### 1. Local Streamlit Application (`app.py`)
-Run the native Python desktop interface:
-```bash
-streamlit run app.py
-```
-Opens in your default browser at `http://localhost:8501`.
-
-#### 2. Flask REST Server + Web SPA (`server.py`)
-Run the Flask API backend and serve the static SPA:
-```bash
-python server.py
-```
-Available at `http://127.0.0.1:5000`.
-
-#### 3. Automated Test Suite
-```bash
-python -m pytest
-```
-
-### Environment Variables (Optional AI Providers)
-API keys can be supplied directly in the UI or exported as environment variables:
-```bash
-export GEMINI_API_KEY="your-api-key"
-export OPENAI_API_KEY="your-api-key"
-export ANTHROPIC_API_KEY="your-api-key"
-export DEEPSEEK_API_KEY="your-api-key"
-export NVIDIA_API_KEY="your-api-key"
-```
-
-### Deployment, Architecture & Security Policies
-
-- **GitHub Pages Frontend (`https://jluckmay.github.io/banner-generator/`)**:
-  - Static SPA frontend deployed via GitHub Actions (`.github/workflows/deploy-pages.yml`).
-  - **Strict CSP Connect-Src**: Content Security Policy allows network connections exclusively to the Render production server (`https://poster-generator-nkqh.onrender.com`), CDN libraries, and local development backends.
-  - **Dynamic Backend Resolution**: Automatically targets the Render production server on GitHub Pages, while seamlessly routing to the local server (`http://127.0.0.1:5000`) in local environments.
-  - **Zero Interface Blocking**: Background wake-up pings never block or freeze UI interactivity; template selection, color customizing, and section editing remain 100% active and responsive while the server establishes connection.
-
-- **Render Production Backend (`https://poster-generator-nkqh.onrender.com`)**:
-  - Dockerized TeX Live and Gunicorn backend configured in `render.yaml`.
-  - **Strict Origin Whitelist (CORS)**: In production, the Render backend strictly permits requests coming from `https://jluckmay.github.io` (and local development hosts). Disallowed origins are rejected with HTTP 403 Forbidden.
-  - **Fault Tolerance**: Automatic retries with exponential backoff (`robustFetch`) to endure Render's cold-starts, supported by keep-alive heartbeats during active sessions.
+Este projeto é distribuído sob os termos da [Licença MIT](LICENSE).
